@@ -48,8 +48,8 @@ python3 -m http.server 8000
 ├── fire-controls.js     # 컨트롤 패널 로직
 ├── Fire.js              # Fire 클래스
 ├── FireShader.js        # 불 효과 셰이더
-├── Fire.png             # 불 텍스처 이미지
-├── fire_controls.html   # 기존 파일 (참고용)
+├── images/
+│   └── fire.png         # 불 텍스처 이미지
 └── README.md            # 이 파일
 ```
 

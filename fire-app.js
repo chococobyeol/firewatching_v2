@@ -70,7 +70,7 @@ class FireApp {
         const textureLoader = new THREE.TextureLoader();
         
         textureLoader.load(
-            'Fire.png',
+            'images/fire.png',
             (texture) => {
                 this.createFire(texture);
             },
