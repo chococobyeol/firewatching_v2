@@ -8,6 +8,8 @@ class FireApp {
         this.camera = null;
         this.renderer = null;
         this.fire = null;
+        this.logs = null;
+        this.fireGroup = null; // 불과 장작을 묶는 그룹
         this.clock = new THREE.Clock();
         
         this.init();
@@ -69,34 +71,78 @@ class FireApp {
     loadFireTexture() {
         const textureLoader = new THREE.TextureLoader();
         
-        textureLoader.load(
-            'images/fire.png',
-            (texture) => {
-                this.createFire(texture);
-            },
-            (progress) => {
-                console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
-            },
-            (error) => {
-                console.error('Error loading fire texture:', error);
-                // 텍스처 로딩 실패 시 기본 텍스처로 대체
-                this.createFire(null);
-            }
-        );
+        // 불과 장작을 담을 그룹 생성
+        this.fireGroup = new THREE.Group();
+        this.scene.add(this.fireGroup);
+        
+        // 불 텍스처와 장작 텍스처를 모두 로드
+        Promise.all([
+            new Promise((resolve, reject) => {
+                textureLoader.load(
+                    'images/fire.png',
+                    resolve,
+                    undefined,
+                    reject
+                );
+            }),
+            new Promise((resolve, reject) => {
+                textureLoader.load(
+                    'images/logs.png',
+                    resolve,
+                    undefined,
+                    reject
+                );
+            })
+        ]).then(([fireTexture, logsTexture]) => {
+            console.log('Both textures loaded successfully');
+            this.createLogs(logsTexture);
+            this.createFire(fireTexture);
+        }).catch((error) => {
+            console.error('Error loading textures:', error);
+            // 텍스처 로딩 실패 시 기본 텍스처로 대체
+            this.createFire(null);
+        });
+    }
+
+    createLogs(logsTexture) {
+        try {
+            // 장작 geometry와 material 생성 (정사각형, 작은 크기)
+            const logsGeometry = new THREE.PlaneGeometry(2.5, 2.5);
+            const logsMaterial = new THREE.MeshBasicMaterial({
+                map: logsTexture,
+                transparent: true,
+                alphaTest: 0.1
+            });
+
+            // 장작 메쉬 생성
+            this.logs = new THREE.Mesh(logsGeometry, logsMaterial);
+            
+            // 장작 위치 조정 (그룹 내에서의 상대 위치)
+            this.logs.position.set(0, -0.8, -0.3);
+            this.logs.rotation.x = -0.05; // 살짝 뒤로 기울이기
+            
+            // 그룹에 추가
+            this.fireGroup.add(this.logs);
+            console.log('Logs created and added to fire group');
+        } catch (error) {
+            console.error('Error creating logs:', error);
+        }
     }
 
     createFire(texture) {
         try {
             // Fire 객체 생성
             this.fire = new THREE.Fire(texture);
-            this.scene.add(this.fire);
+            
+            // 그룹에 추가
+            this.fireGroup.add(this.fire);
             
             // FireControls에 Fire 객체 전달
             if (window.fireControls) {
                 window.fireControls.setFire(this.fire);
             }
             
-            console.log('Fire object created and added to scene');
+            console.log('Fire object created and added to fire group');
         } catch (error) {
             console.error('Error creating fire object:', error);
         }
@@ -179,6 +225,14 @@ class FireApp {
     // 공개 메서드들
     getFire() {
         return this.fire;
+    }
+
+    getLogs() {
+        return this.logs;
+    }
+
+    getFireGroup() {
+        return this.fireGroup;
     }
 
     getScene() {

@@ -13,7 +13,7 @@ class FireControls {
             magnitude: 1.3,
             lacunarity: 2.0,
             gain: 0.5,
-            baseWidth: 0.5,
+            baseWidth: 0.15,
             noiseScaleX: 1,
             noiseScaleY: 2,
             noiseScaleZ: 1,
@@ -21,7 +21,13 @@ class FireControls {
             colorG: 238,
             colorB: 238,
             fireIntensity: 1.0,
-            animationSpeed: 0.75
+            animationSpeed: 0.75,
+            // 임시 장작 조절 값들
+            logsScale: 0.44,
+            logsX: 0,
+            logsY: -0.4,
+            logsZ: -0.15,
+            logsRotationX: -0.05
         };
         
         // 현재 설정값
@@ -154,6 +160,57 @@ class FireControls {
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">애니메이션 속도</label>
                             <input id="animationSpeed" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.animationSpeed}" class="modern-slider">
                             <span id="animationSpeed-value" class="value-display">${this.currentValues.animationSpeed}</span>
+                        </div>
+                    </div>
+
+                    <!-- 임시 장작 조절 -->
+                    <div class="setting-section">
+                        <h4 style="color:#ffcc00;margin:0 0 12px 0;font-size:14px;border-bottom:1px solid rgba(255,204,0,0.3);padding-bottom:6px;">🔧 임시 장작 조절</h4>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 크기</label>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input id="logsScale" type="range" min="0.2" max="3" step="0.01" value="${this.currentValues.logsScale}" class="modern-slider" style="flex:1;">
+                                <input id="logsScale-input" type="number" min="0.2" max="3" step="0.01" value="${this.currentValues.logsScale}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 X 위치</label>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input id="logsX" type="range" min="-2" max="2" step="0.01" value="${this.currentValues.logsX}" class="modern-slider" style="flex:1;">
+                                <input id="logsX-input" type="number" min="-2" max="2" step="0.01" value="${this.currentValues.logsX}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 Y 위치</label>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input id="logsY" type="range" min="-2" max="1" step="0.01" value="${this.currentValues.logsY}" class="modern-slider" style="flex:1;">
+                                <input id="logsY-input" type="number" min="-2" max="1" step="0.01" value="${this.currentValues.logsY}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 Z 위치 (앞뒤)</label>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input id="logsZ" type="range" min="-1" max="1" step="0.01" value="${this.currentValues.logsZ}" class="modern-slider" style="flex:1;">
+                                <input id="logsZ-input" type="number" min="-1" max="1" step="0.01" value="${this.currentValues.logsZ}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 회전 (X축)</label>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input id="logsRotationX" type="range" min="-0.5" max="0.5" step="0.001" value="${this.currentValues.logsRotationX}" class="modern-slider" style="flex:1;">
+                                <input id="logsRotationX-input" type="number" min="-0.5" max="0.5" step="0.001" value="${this.currentValues.logsRotationX}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top:12px;">
+                            <button id="printLogsValues" style="width:100%;padding:8px;background-color:rgba(255,204,0,0.2);color:rgba(255,204,0,0.9);border:none;border-radius:4px;cursor:pointer;font-size:12px;">
+                                현재 값 콘솔에 출력
+                            </button>
                         </div>
                     </div>
 
@@ -323,7 +380,14 @@ class FireControls {
 
         // 기본 설정 컨트롤
         this.setupSlider('scale', (value) => {
-            this.fire.scale.set(value, value, value);
+            // 카메라 FOV 조절로 확대/축소 효과 (브라우저 줌과 같은 효과)
+            if (window.fireApp && window.fireApp.camera) {
+                const baseFOV = 75; // 기본 FOV
+                const newFOV = baseFOV / value; // scale이 클수록 FOV 작아짐 (확대)
+                window.fireApp.camera.fov = newFOV;
+                window.fireApp.camera.updateProjectionMatrix();
+            }
+            
             this.currentValues.scale = value;
             this.saveSettings();
         });
@@ -333,6 +397,58 @@ class FireControls {
             this.fire.material.uniforms.noiseScale.value.w = value;
             this.currentValues.animationSpeed = value;
             this.saveSettings();
+        });
+
+        // 임시 장작 조절 컨트롤
+        this.setupLogsSlider('logsScale', (value) => {
+            if (window.fireApp && window.fireApp.logs) {
+                window.fireApp.logs.scale.set(value, value, value);
+            }
+            this.currentValues.logsScale = value;
+            this.saveSettings();
+        });
+
+        this.setupLogsSlider('logsX', (value) => {
+            if (window.fireApp && window.fireApp.logs) {
+                window.fireApp.logs.position.x = value;
+            }
+            this.currentValues.logsX = value;
+            this.saveSettings();
+        });
+
+        this.setupLogsSlider('logsY', (value) => {
+            if (window.fireApp && window.fireApp.logs) {
+                window.fireApp.logs.position.y = value;
+            }
+            this.currentValues.logsY = value;
+            this.saveSettings();
+        });
+
+        this.setupLogsSlider('logsZ', (value) => {
+            if (window.fireApp && window.fireApp.logs) {
+                window.fireApp.logs.position.z = value;
+            }
+            this.currentValues.logsZ = value;
+            this.saveSettings();
+        });
+
+        this.setupLogsSlider('logsRotationX', (value) => {
+            if (window.fireApp && window.fireApp.logs) {
+                window.fireApp.logs.rotation.x = value;
+            }
+            this.currentValues.logsRotationX = value;
+            this.saveSettings();
+        });
+
+        // 현재 값 출력 버튼
+        document.getElementById('printLogsValues').addEventListener('click', () => {
+            console.log('=== 현재 장작 설정 값 ===');
+            console.log(`logsScale: ${this.currentValues.logsScale}`);
+            console.log(`logsX: ${this.currentValues.logsX}`);
+            console.log(`logsY: ${this.currentValues.logsY}`);
+            console.log(`logsZ: ${this.currentValues.logsZ}`);
+            console.log(`logsRotationX: ${this.currentValues.logsRotationX}`);
+            console.log('====================');
         });
 
         // 불 모양 조정 컨트롤
@@ -402,6 +518,14 @@ class FireControls {
             this.currentValues.colorB = value;
             updateColor();
         });
+
+        // 카메라 FOV 적용
+        if (window.fireApp && window.fireApp.camera) {
+            const baseFOV = 75;
+            const newFOV = baseFOV / this.currentValues.scale;
+            window.fireApp.camera.fov = newFOV;
+            window.fireApp.camera.updateProjectionMatrix();
+        }
     }
 
     setupSlider(id, callback) {
@@ -417,6 +541,44 @@ class FireControls {
             const value = parseFloat(slider.value);
             valueSpan.textContent = value.toFixed(2);
             callback(value);
+        });
+    }
+
+    setupLogsSlider(id, callback) {
+        const slider = document.getElementById(id);
+        const numberInput = document.getElementById(id + '-input');
+        
+        if (!slider || !numberInput) {
+            console.warn(`Slider or number input not found for id: ${id}`);
+            return;
+        }
+        
+        // 슬라이더 변경 시
+        slider.addEventListener('input', () => {
+            const value = parseFloat(slider.value);
+            numberInput.value = value;
+            callback(value);
+        });
+        
+        // 숫자 입력 변경 시
+        numberInput.addEventListener('input', () => {
+            const value = parseFloat(numberInput.value);
+            if (!isNaN(value)) {
+                slider.value = value;
+                callback(value);
+            }
+        });
+        
+        // Enter 키로 확정
+        numberInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                const value = parseFloat(numberInput.value);
+                if (!isNaN(value)) {
+                    slider.value = value;
+                    callback(value);
+                }
+                numberInput.blur(); // 포커스 제거
+            }
         });
     }
 
@@ -448,12 +610,13 @@ class FireControls {
     applyCurrentValues() {
         if (!this.fire) return;
 
-        // Fire 객체에 현재 값 적용
-        this.fire.scale.set(
-            this.currentValues.scale, 
-            this.currentValues.scale, 
-            this.currentValues.scale
-        );
+        // 카메라 FOV 적용
+        if (window.fireApp && window.fireApp.camera) {
+            const baseFOV = 75;
+            const newFOV = baseFOV / this.currentValues.scale;
+            window.fireApp.camera.fov = newFOV;
+            window.fireApp.camera.updateProjectionMatrix();
+        }
         
         this.fire.material.uniforms.magnitude.value = this.currentValues.magnitude;
         this.fire.material.uniforms.lacunarity.value = this.currentValues.lacunarity;
@@ -472,6 +635,22 @@ class FireControls {
             this.currentValues.colorG / 255,
             this.currentValues.colorB / 255
         );
+
+        // 장작 설정 적용 (그룹 내에서 상대적 위치/크기)
+        if (window.fireApp && window.fireApp.logs) {
+            // 장작 크기는 개별적으로 설정 (그룹 스케일과 별도)
+            window.fireApp.logs.scale.set(
+                this.currentValues.logsScale,
+                this.currentValues.logsScale,
+                this.currentValues.logsScale
+            );
+            window.fireApp.logs.position.set(
+                this.currentValues.logsX,
+                this.currentValues.logsY,
+                this.currentValues.logsZ
+            );
+            window.fireApp.logs.rotation.x = this.currentValues.logsRotationX;
+        }
 
         // UI 업데이트
         this.updateAllDisplayValues();
