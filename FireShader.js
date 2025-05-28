@@ -209,7 +209,7 @@ THREE.FireShader = {
 
             "col.a = col.r;",
 
-            "gl_FragColor = col;",
+            "gl_FragColor = vec4(col.rgb * color, col.a);",
         "}",
 
 	].join("\n")
