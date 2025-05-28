@@ -17,9 +17,7 @@ python3 -m http.server 8000
 ```
 
 ### 2. 브라우저에서 접속
-- **추천**: [http://localhost:8000/fire_controls.html](http://localhost:8000/fire_controls.html) - 모든 파라미터 조정 가능
-- **간단한 버전**: [http://localhost:8000/simple.html](http://localhost:8000/simple.html) - 자동 회전만
-- **기본 버전**: [http://localhost:8000/index.html](http://localhost:8000/index.html) - 기본 기능
+**http://localhost:8000/fire_controls.html**
 
 ## 🎛️ 조정 가능한 파라미터
 
@@ -43,9 +41,7 @@ python3 -m http.server 8000
 ## 📁 파일 구조
 
 ```
-├── fire_controls.html    # 🎯 추천! 모든 파라미터 조정 가능
-├── simple.html          # 간단한 버전 (자동 회전만)
-├── index.html           # 기본 버전
+├── fire_controls.html    # 🎯 메인 애플리케이션
 ├── Fire.js              # 메인 Fire 클래스
 ├── FireShader.js        # 불 효과 셰이더 (모든 파라미터 포함)
 ├── Fire.png             # 불 텍스처 이미지
