@@ -1,11 +1,13 @@
 /**
- * Fire Controls - 불 효과 파라미터 조정을 위한 컨트롤 패널
+ * Fire Controls - 불 효과 파라미터 조정을 위한 모던 사이드바 컨트롤 패널
  */
 
 class FireControls {
     constructor() {
         this.fire = null;
         this.rotationSpeed = 0;
+        
+        // 기본값
         this.defaultValues = {
             scale: 2,
             rotationSpeed: 0,
@@ -19,184 +21,316 @@ class FireControls {
             noiseScaleW: 0.75,
             colorR: 238,
             colorG: 238,
-            colorB: 238
+            colorB: 238,
+            fireIntensity: 1.0,
+            glowStrength: 0.8,
+            animationSpeed: 1.0,
+            autoRotation: false,
+            backgroundDim: 0.2
         };
         
-        this.controlsData = [
-            {
-                groupName: '기본 설정',
-                controls: [
-                    { id: 'scale', label: '크기 (Scale)', min: 0.5, max: 5, step: 0.1, value: 2 },
-                    { id: 'rotation-speed', label: '회전 속도', min: 0, max: 2, step: 0.1, value: 0 }
-                ]
-            },
-            {
-                groupName: '불 모양 조정',
-                controls: [
-                    { id: 'magnitude', label: 'Magnitude', min: 0.1, max: 3, step: 0.1, value: 1.3 },
-                    { id: 'lacunarity', label: 'Lacunarity', min: 1, max: 4, step: 0.1, value: 2.0 },
-                    { id: 'gain', label: 'Gain', min: 0.1, max: 1, step: 0.05, value: 0.5 },
-                    { id: 'base-width', label: '아래쪽 너비', min: 0.1, max: 1, step: 0.05, value: 0.5 }
-                ]
-            },
-            {
-                groupName: '노이즈 스케일',
-                controls: [
-                    { id: 'noise-scale-x', label: 'X 스케일', min: 0.1, max: 3, step: 0.1, value: 1 },
-                    { id: 'noise-scale-y', label: 'Y 스케일', min: 0.1, max: 5, step: 0.1, value: 2 },
-                    { id: 'noise-scale-z', label: 'Z 스케일', min: 0.1, max: 3, step: 0.1, value: 1 },
-                    { id: 'noise-scale-w', label: '속도 (Speed)', min: 0.1, max: 1, step: 0.05, value: 0.75 }
-                ]
-            },
-            {
-                groupName: '색상',
-                controls: [
-                    { id: 'color-r', label: '빨강', min: 0, max: 255, step: 1, value: 238 },
-                    { id: 'color-g', label: '초록', min: 0, max: 255, step: 1, value: 238 },
-                    { id: 'color-b', label: '파랑', min: 0, max: 255, step: 1, value: 238 }
-                ]
-            }
-        ];
+        // 현재 설정값
+        this.currentValues = { ...this.defaultValues };
         
         this.init();
     }
 
     init() {
-        this.createUI();
+        this.loadSettings();
+        this.createModernUI();
         this.setupEventListeners();
     }
 
-    createUI() {
-        // 토글 버튼 생성
-        this.createToggleButton();
-        
-        // 컨트롤 패널 생성
-        this.createControlPanel();
+    // 로컬스토리지에서 설정 불러오기
+    loadSettings() {
+        try {
+            const saved = localStorage.getItem('fireSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                this.currentValues = { ...this.defaultValues, ...settings };
+            }
+        } catch (e) {
+            console.log('설정 불러오기 실패:', e);
+        }
     }
 
-    createToggleButton() {
-        const toggleButton = document.createElement('button');
-        toggleButton.id = 'toggle-controls';
-        toggleButton.textContent = '컨트롤 숨기기/보이기';
-        document.body.appendChild(toggleButton);
+    // 로컬스토리지에 설정 저장
+    saveSettings() {
+        try {
+            localStorage.setItem('fireSettings', JSON.stringify(this.currentValues));
+        } catch (e) {
+            console.log('설정 저장 실패:', e);
+        }
     }
 
-    createControlPanel() {
-        // 메인 컨트롤 패널 컨테이너
-        const controlsDiv = document.createElement('div');
-        controlsDiv.id = 'controls';
+    createModernUI() {
+        // 기존 UI 제거
+        const oldControls = document.getElementById('controls');
+        const oldToggle = document.getElementById('toggle-controls');
+        if (oldControls) oldControls.remove();
+        if (oldToggle) oldToggle.remove();
+
+        // 모던 설정 버튼 생성
+        this.createSettingsButton();
         
-        // 제목 추가
-        const title = document.createElement('h2');
-        title.textContent = '🔥 Fire Controls';
-        title.style.marginTop = '0';
-        title.style.color = '#ff6600';
-        controlsDiv.appendChild(title);
+        // 모던 사이드바 생성
+        this.createSidebar();
+    }
+
+    createSettingsButton() {
+        const settingsBtn = document.createElement('button');
+        settingsBtn.id = 'settingsBtn';
+        settingsBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>';
         
-        // 각 컨트롤 그룹 생성
-        this.controlsData.forEach(group => {
-            const groupDiv = this.createControlGroup(group);
-            controlsDiv.appendChild(groupDiv);
+        Object.assign(settingsBtn.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            width: '44px',
+            height: '44px',
+            padding: '0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            zIndex: '100',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+            transition: 'transform 0.3s ease, background-color 0.3s'
         });
         
-        // 리셋 버튼 그룹 추가
-        const resetGroup = this.createResetButtonGroup();
-        controlsDiv.appendChild(resetGroup);
-        
-        document.body.appendChild(controlsDiv);
-    }
-
-    createControlGroup(groupData) {
-        const groupDiv = document.createElement('div');
-        groupDiv.className = 'control-group';
-        
-        // 그룹 제목
-        const groupTitle = document.createElement('h3');
-        groupTitle.textContent = groupData.groupName;
-        groupDiv.appendChild(groupTitle);
-        
-        // 각 컨트롤 아이템 생성
-        groupData.controls.forEach(control => {
-            const controlItem = this.createControlItem(control);
-            groupDiv.appendChild(controlItem);
+        // 호버 효과
+        settingsBtn.addEventListener('mouseover', () => {
+            settingsBtn.style.backgroundColor = 'rgba(50, 50, 50, 0.8)';
+            settingsBtn.style.transform = 'scale(1.1)';
+        });
+        settingsBtn.addEventListener('mouseout', () => {
+            settingsBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+            settingsBtn.style.transform = 'scale(1)';
         });
         
-        return groupDiv;
+        document.body.appendChild(settingsBtn);
     }
 
-    createControlItem(controlData) {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'control-item';
+    createSidebar() {
+        const sidebar = document.createElement('div');
+        sidebar.id = 'settingsSidebar';
         
-        // 라벨
-        const label = document.createElement('label');
-        label.textContent = controlData.label + ':';
-        itemDiv.appendChild(label);
-        
-        // 슬라이더
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.id = controlData.id;
-        slider.min = controlData.min;
-        slider.max = controlData.max;
-        slider.step = controlData.step;
-        slider.value = controlData.value;
-        itemDiv.appendChild(slider);
-        
-        // 값 표시 스팬
-        const valueSpan = document.createElement('span');
-        valueSpan.id = controlData.id + '-value';
-        valueSpan.textContent = controlData.value.toFixed(2);
-        itemDiv.appendChild(valueSpan);
-        
-        return itemDiv;
-    }
+        Object.assign(sidebar.style, {
+            position: 'fixed',
+            top: '0',
+            right: '-400px',
+            width: '320px',
+            height: '100%',
+            background: 'rgba(20, 20, 20, 0.95)',
+            padding: '20px',
+            boxShadow: '-2px 0 15px rgba(0, 0, 0, 0.5)',
+            transition: 'right 0.3s ease',
+            zIndex: '101',
+            backdropFilter: 'blur(10px)',
+            fontFamily: "'Arial', sans-serif",
+            overflowY: 'auto'
+        });
 
-    createResetButtonGroup() {
-        const groupDiv = document.createElement('div');
-        groupDiv.className = 'control-group';
+        // 사이드바 내용
+        sidebar.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:16px;">
+                <h3 style="color:#fff;margin:0;font-size:18px;font-weight:600;">불멍 설정</h3>
+                <button id="closeSettings" style="background:none;border:none;color:#fff;cursor:pointer;font-size:24px;padding:0;">&times;</button>
+            </div>
+            
+            <div style="max-height:calc(100vh - 160px);overflow-y:auto;padding-right:5px;">
+                <div style="display:flex;flex-direction:column;gap:20px;">
+                    
+                    <!-- 기본 설정 -->
+                    <div class="setting-section">
+                        <h4 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:6px;">기본 설정</h4>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">크기 (Scale)</label>
+                            <input id="scale" type="range" min="0.5" max="5" step="0.1" value="${this.currentValues.scale}" class="modern-slider">
+                            <span id="scale-value" class="value-display">${this.currentValues.scale}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">회전 속도</label>
+                            <input id="rotationSpeed" type="range" min="0" max="2" step="0.1" value="${this.currentValues.rotationSpeed}" class="modern-slider">
+                            <span id="rotationSpeed-value" class="value-display">${this.currentValues.rotationSpeed}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">애니메이션 속도</label>
+                            <input id="animationSpeed" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.animationSpeed}" class="modern-slider">
+                            <span id="animationSpeed-value" class="value-display">${this.currentValues.animationSpeed}</span>
+                        </div>
+                    </div>
+
+                    <!-- 불 모양 조정 -->
+                    <div class="setting-section">
+                        <h4 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:6px;">불 모양 조정</h4>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">불꽃 강도</label>
+                            <input id="magnitude" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.magnitude}" class="modern-slider">
+                            <span id="magnitude-value" class="value-display">${this.currentValues.magnitude}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Lacunarity</label>
+                            <input id="lacunarity" type="range" min="1" max="4" step="0.1" value="${this.currentValues.lacunarity}" class="modern-slider">
+                            <span id="lacunarity-value" class="value-display">${this.currentValues.lacunarity}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Gain</label>
+                            <input id="gain" type="range" min="0.1" max="1" step="0.05" value="${this.currentValues.gain}" class="modern-slider">
+                            <span id="gain-value" class="value-display">${this.currentValues.gain}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">아래쪽 너비</label>
+                            <input id="baseWidth" type="range" min="0.1" max="1" step="0.05" value="${this.currentValues.baseWidth}" class="modern-slider">
+                            <span id="baseWidth-value" class="value-display">${this.currentValues.baseWidth}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">글로우 강도</label>
+                            <input id="glowStrength" type="range" min="0" max="2" step="0.1" value="${this.currentValues.glowStrength}" class="modern-slider">
+                            <span id="glowStrength-value" class="value-display">${this.currentValues.glowStrength}</span>
+                        </div>
+                    </div>
+
+                    <!-- 노이즈 스케일 -->
+                    <div class="setting-section">
+                        <h4 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:6px;">노이즈 스케일</h4>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">X 스케일</label>
+                            <input id="noiseScaleX" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.noiseScaleX}" class="modern-slider">
+                            <span id="noiseScaleX-value" class="value-display">${this.currentValues.noiseScaleX}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Y 스케일</label>
+                            <input id="noiseScaleY" type="range" min="0.1" max="5" step="0.1" value="${this.currentValues.noiseScaleY}" class="modern-slider">
+                            <span id="noiseScaleY-value" class="value-display">${this.currentValues.noiseScaleY}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Z 스케일</label>
+                            <input id="noiseScaleZ" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.noiseScaleZ}" class="modern-slider">
+                            <span id="noiseScaleZ-value" class="value-display">${this.currentValues.noiseScaleZ}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">속도 (Speed)</label>
+                            <input id="noiseScaleW" type="range" min="0.1" max="1" step="0.05" value="${this.currentValues.noiseScaleW}" class="modern-slider">
+                            <span id="noiseScaleW-value" class="value-display">${this.currentValues.noiseScaleW}</span>
+                        </div>
+                    </div>
+
+                    <!-- 색상 -->
+                    <div class="setting-section">
+                        <h4 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:6px;">색상</h4>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빨강 (Red)</label>
+                            <input id="colorR" type="range" min="0" max="255" step="1" value="${this.currentValues.colorR}" class="modern-slider">
+                            <span id="colorR-value" class="value-display">${this.currentValues.colorR}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">초록 (Green)</label>
+                            <input id="colorG" type="range" min="0" max="255" step="1" value="${this.currentValues.colorG}" class="modern-slider">
+                            <span id="colorG-value" class="value-display">${this.currentValues.colorG}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">파랑 (Blue)</label>
+                            <input id="colorB" type="range" min="0" max="255" step="1" value="${this.currentValues.colorB}" class="modern-slider">
+                            <span id="colorB-value" class="value-display">${this.currentValues.colorB}</span>
+                        </div>
+                    </div>
+
+                    <!-- 토글 옵션 -->
+                    <div class="setting-section">
+                        <h4 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:6px;">옵션</h4>
+                        
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                            <label style="color:#fff;font-size:13px;">자동 회전</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoRotationToggle" ${this.currentValues.autoRotation ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <label style="color:#fff;font-size:13px;">배경 어둡게</label>
+                            <input id="backgroundDim" type="range" min="0" max="1" step="0.1" value="${this.currentValues.backgroundDim}" class="modern-slider" style="width:120px;">
+                            <span id="backgroundDim-value" class="value-display">${this.currentValues.backgroundDim}</span>
+                        </div>
+                    </div>
+
+                    <!-- 설정 초기화 -->
+                    <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,0.2);padding-top:16px;">
+                        <button id="resetSettings" style="width:100%;padding:12px;background-color:rgba(255,80,80,0.2);color:rgba(255,80,80,0.9);border:none;border-radius:6px;cursor:pointer;font-weight:500;font-size:14px;transition:all 0.2s;">
+                            설정 초기화
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="position:absolute;bottom:20px;left:20px;right:20px;text-align:center;">
+                <div style="color:rgba(255,255,255,0.5);font-size:12px;">불멍 시뮬레이터 v2.0</div>
+            </div>
+        `;
         
-        const resetButton = document.createElement('button');
-        resetButton.id = 'reset-button';
-        resetButton.className = 'reset-button';
-        resetButton.textContent = '기본값으로 리셋';
-        
-        groupDiv.appendChild(resetButton);
-        return groupDiv;
+        document.body.appendChild(sidebar);
     }
 
     setupEventListeners() {
-        // DOM이 완전히 생성된 후 이벤트 리스너 설정
-        setTimeout(() => {
-            this.setupToggleButton();
-            this.setupResetButton();
-        }, 0);
-    }
+        // 설정 버튼 클릭
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            this.toggleSidebar();
+        });
 
-    setFire(fire) {
-        this.fire = fire;
-        this.setupControls();
-        this.applyDefaultValues();
-    }
+        // 닫기 버튼 클릭
+        document.getElementById('closeSettings').addEventListener('click', () => {
+            this.closeSidebar();
+        });
 
-    setupToggleButton() {
-        const toggleButton = document.getElementById('toggle-controls');
-        const controls = document.getElementById('controls');
-        
-        if (toggleButton && controls) {
-            toggleButton.addEventListener('click', () => {
-                controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
-            });
-        }
-    }
-
-    setupResetButton() {
-        const resetButton = document.getElementById('reset-button');
-        if (resetButton) {
-            resetButton.addEventListener('click', () => {
+        // 키보드 단축키
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'KeyH') {
+                this.toggleSidebar();
+            } else if (event.code === 'KeyR') {
                 this.resetToDefaults();
-            });
-        }
+            }
+        });
+
+        // 모든 슬라이더와 토글에 이벤트 리스너 추가
+        this.setupControls();
+
+        // 초기화 버튼
+        document.getElementById('resetSettings').addEventListener('click', () => {
+            if (confirm('모든 설정을 초기화하시겠습니까?')) {
+                this.resetToDefaults();
+            }
+        });
+
+        // 초기화 버튼 호버 효과
+        const resetBtn = document.getElementById('resetSettings');
+        resetBtn.addEventListener('mouseover', () => {
+            resetBtn.style.backgroundColor = 'rgba(255,80,80,0.3)';
+            resetBtn.style.color = 'rgba(255,100,100,1)';
+        });
+        resetBtn.addEventListener('mouseout', () => {
+            resetBtn.style.backgroundColor = 'rgba(255,80,80,0.2)';
+            resetBtn.style.color = 'rgba(255,80,80,0.9)';
+        });
     }
 
     setupControls() {
@@ -205,57 +339,115 @@ class FireControls {
         // 기본 설정 컨트롤
         this.setupSlider('scale', (value) => {
             this.fire.scale.set(value, value, value);
+            this.currentValues.scale = value;
+            this.saveSettings();
         });
 
-        this.setupSlider('rotation-speed', (value) => {
+        this.setupSlider('rotationSpeed', (value) => {
             this.rotationSpeed = value;
+            this.currentValues.rotationSpeed = value;
+            this.saveSettings();
+        });
+
+        this.setupSlider('animationSpeed', (value) => {
+            // 애니메이션 속도는 추후 적용
+            this.currentValues.animationSpeed = value;
+            this.saveSettings();
         });
 
         // 불 모양 조정 컨트롤
         this.setupSlider('magnitude', (value) => {
             this.fire.material.uniforms.magnitude.value = value;
+            this.currentValues.magnitude = value;
+            this.saveSettings();
         });
 
         this.setupSlider('lacunarity', (value) => {
             this.fire.material.uniforms.lacunarity.value = value;
+            this.currentValues.lacunarity = value;
+            this.saveSettings();
         });
 
         this.setupSlider('gain', (value) => {
             this.fire.material.uniforms.gain.value = value;
+            this.currentValues.gain = value;
+            this.saveSettings();
         });
 
-        this.setupSlider('base-width', (value) => {
+        this.setupSlider('baseWidth', (value) => {
             this.fire.material.uniforms.baseWidth.value = value;
+            this.currentValues.baseWidth = value;
+            this.saveSettings();
+        });
+
+        this.setupSlider('glowStrength', (value) => {
+            // 글로우 강도는 추후 적용
+            this.currentValues.glowStrength = value;
+            this.saveSettings();
         });
 
         // 노이즈 스케일 컨트롤
-        this.setupSlider('noise-scale-x', (value) => {
+        this.setupSlider('noiseScaleX', (value) => {
             this.fire.material.uniforms.noiseScale.value.x = value;
+            this.currentValues.noiseScaleX = value;
+            this.saveSettings();
         });
 
-        this.setupSlider('noise-scale-y', (value) => {
+        this.setupSlider('noiseScaleY', (value) => {
             this.fire.material.uniforms.noiseScale.value.y = value;
+            this.currentValues.noiseScaleY = value;
+            this.saveSettings();
         });
 
-        this.setupSlider('noise-scale-z', (value) => {
+        this.setupSlider('noiseScaleZ', (value) => {
             this.fire.material.uniforms.noiseScale.value.z = value;
+            this.currentValues.noiseScaleZ = value;
+            this.saveSettings();
         });
 
-        this.setupSlider('noise-scale-w', (value) => {
+        this.setupSlider('noiseScaleW', (value) => {
             this.fire.material.uniforms.noiseScale.value.w = value;
+            this.currentValues.noiseScaleW = value;
+            this.saveSettings();
         });
 
         // 색상 컨트롤
         const updateColor = () => {
-            const r = document.getElementById('color-r').value / 255;
-            const g = document.getElementById('color-g').value / 255;
-            const b = document.getElementById('color-b').value / 255;
+            const r = this.currentValues.colorR / 255;
+            const g = this.currentValues.colorG / 255;
+            const b = this.currentValues.colorB / 255;
             this.fire.material.uniforms.color.value.setRGB(r, g, b);
+            this.saveSettings();
         };
 
-        this.setupSlider('color-r', updateColor);
-        this.setupSlider('color-g', updateColor);
-        this.setupSlider('color-b', updateColor);
+        this.setupSlider('colorR', (value) => {
+            this.currentValues.colorR = value;
+            updateColor();
+        });
+
+        this.setupSlider('colorG', (value) => {
+            this.currentValues.colorG = value;
+            updateColor();
+        });
+
+        this.setupSlider('colorB', (value) => {
+            this.currentValues.colorB = value;
+            updateColor();
+        });
+
+        // 배경 어둡게
+        this.setupSlider('backgroundDim', (value) => {
+            document.body.style.filter = `brightness(${1 - value})`;
+            this.currentValues.backgroundDim = value;
+            this.saveSettings();
+        });
+
+        // 자동 회전 토글
+        const autoRotationToggle = document.getElementById('autoRotationToggle');
+        autoRotationToggle.addEventListener('change', () => {
+            this.currentValues.autoRotation = autoRotationToggle.checked;
+            this.saveSettings();
+        });
     }
 
     setupSlider(id, callback) {
@@ -274,74 +466,95 @@ class FireControls {
         });
     }
 
-    applyDefaultValues() {
+    toggleSidebar() {
+        const sidebar = document.getElementById('settingsSidebar');
+        if (sidebar.style.right === '0px') {
+            this.closeSidebar();
+        } else {
+            this.openSidebar();
+        }
+    }
+
+    openSidebar() {
+        const sidebar = document.getElementById('settingsSidebar');
+        sidebar.style.right = '0px';
+    }
+
+    closeSidebar() {
+        const sidebar = document.getElementById('settingsSidebar');
+        sidebar.style.right = '-400px';
+    }
+
+    setFire(fire) {
+        this.fire = fire;
+        this.setupControls();
+        this.applyCurrentValues();
+    }
+
+    applyCurrentValues() {
         if (!this.fire) return;
 
-        // Fire 객체에 기본값 적용
+        // Fire 객체에 현재 값 적용
         this.fire.scale.set(
-            this.defaultValues.scale, 
-            this.defaultValues.scale, 
-            this.defaultValues.scale
+            this.currentValues.scale, 
+            this.currentValues.scale, 
+            this.currentValues.scale
         );
         
-        this.rotationSpeed = this.defaultValues.rotationSpeed;
+        this.rotationSpeed = this.currentValues.rotationSpeed;
         
-        this.fire.material.uniforms.magnitude.value = this.defaultValues.magnitude;
-        this.fire.material.uniforms.lacunarity.value = this.defaultValues.lacunarity;
-        this.fire.material.uniforms.gain.value = this.defaultValues.gain;
-        this.fire.material.uniforms.baseWidth.value = this.defaultValues.baseWidth;
+        this.fire.material.uniforms.magnitude.value = this.currentValues.magnitude;
+        this.fire.material.uniforms.lacunarity.value = this.currentValues.lacunarity;
+        this.fire.material.uniforms.gain.value = this.currentValues.gain;
+        this.fire.material.uniforms.baseWidth.value = this.currentValues.baseWidth;
         
         this.fire.material.uniforms.noiseScale.value.set(
-            this.defaultValues.noiseScaleX,
-            this.defaultValues.noiseScaleY,
-            this.defaultValues.noiseScaleZ,
-            this.defaultValues.noiseScaleW
+            this.currentValues.noiseScaleX,
+            this.currentValues.noiseScaleY,
+            this.currentValues.noiseScaleZ,
+            this.currentValues.noiseScaleW
         );
         
         this.fire.material.uniforms.color.value.setRGB(
-            this.defaultValues.colorR / 255,
-            this.defaultValues.colorG / 255,
-            this.defaultValues.colorB / 255
+            this.currentValues.colorR / 255,
+            this.currentValues.colorG / 255,
+            this.currentValues.colorB / 255
         );
+
+        // 배경 어둡게 적용
+        document.body.style.filter = `brightness(${1 - this.currentValues.backgroundDim})`;
 
         // UI 업데이트
         this.updateAllDisplayValues();
     }
 
     resetToDefaults() {
-        if (!this.fire) return;
-
+        this.currentValues = { ...this.defaultValues };
+        
         // 슬라이더 값들을 기본값으로 리셋
-        document.getElementById('scale').value = this.defaultValues.scale;
-        document.getElementById('rotation-speed').value = this.defaultValues.rotationSpeed;
-        document.getElementById('magnitude').value = this.defaultValues.magnitude;
-        document.getElementById('lacunarity').value = this.defaultValues.lacunarity;
-        document.getElementById('gain').value = this.defaultValues.gain;
-        document.getElementById('base-width').value = this.defaultValues.baseWidth;
-        document.getElementById('noise-scale-x').value = this.defaultValues.noiseScaleX;
-        document.getElementById('noise-scale-y').value = this.defaultValues.noiseScaleY;
-        document.getElementById('noise-scale-z').value = this.defaultValues.noiseScaleZ;
-        document.getElementById('noise-scale-w').value = this.defaultValues.noiseScaleW;
-        document.getElementById('color-r').value = this.defaultValues.colorR;
-        document.getElementById('color-g').value = this.defaultValues.colorG;
-        document.getElementById('color-b').value = this.defaultValues.colorB;
+        Object.keys(this.defaultValues).forEach(key => {
+            const slider = document.getElementById(key);
+            if (slider) {
+                slider.value = this.defaultValues[key];
+            }
+        });
+
+        // 토글 업데이트
+        document.getElementById('autoRotationToggle').checked = this.defaultValues.autoRotation;
 
         // 실제 값들 적용
-        this.applyDefaultValues();
+        this.applyCurrentValues();
+        this.saveSettings();
     }
 
     updateAllDisplayValues() {
-        const sliders = [
-            'scale', 'rotation-speed', 'magnitude', 'lacunarity', 'gain', 'base-width',
-            'noise-scale-x', 'noise-scale-y', 'noise-scale-z', 'noise-scale-w',
-            'color-r', 'color-g', 'color-b'
-        ];
-        
-        sliders.forEach(id => {
-            const slider = document.getElementById(id);
-            const valueSpan = document.getElementById(id + '-value');
-            if (slider && valueSpan) {
-                valueSpan.textContent = parseFloat(slider.value).toFixed(2);
+        Object.keys(this.currentValues).forEach(key => {
+            const valueSpan = document.getElementById(key + '-value');
+            if (valueSpan) {
+                const value = this.currentValues[key];
+                if (typeof value === 'number') {
+                    valueSpan.textContent = value.toFixed(2);
+                }
             }
         });
     }
@@ -350,18 +563,9 @@ class FireControls {
         return this.rotationSpeed;
     }
 
-    // 새로운 컨트롤을 쉽게 추가할 수 있는 메서드
-    addControl(groupIndex, controlData) {
-        this.controlsData[groupIndex].controls.push(controlData);
-        // UI 재생성이 필요한 경우 여기서 처리
-    }
-
-    // 컨트롤 패널 숨기기/보이기
+    // 컨트롤 패널 숨기기/보이기 (하위 호환성)
     toggleControls() {
-        const controls = document.getElementById('controls');
-        if (controls) {
-            controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
-        }
+        this.toggleSidebar();
     }
 }
 

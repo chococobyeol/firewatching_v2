@@ -12,7 +12,7 @@ canvas {
     display: block;
 }
 
-/* 컨트롤 패널 스타일 */
+/* 기존 컨트롤 패널 스타일 (하위 호환성) */
 #controls {
     position: absolute;
     top: 10px;
@@ -30,7 +30,7 @@ canvas {
     border: 1px solid rgba(255, 102, 0, 0.3);
 }
 
-/* 컨트롤 그룹 */
+/* 기존 컨트롤 그룹 */
 .control-group {
     margin-bottom: 15px;
 }
@@ -43,7 +43,7 @@ canvas {
     padding-bottom: 4px;
 }
 
-/* 컨트롤 아이템 */
+/* 기존 컨트롤 아이템 */
 .control-item {
     margin-bottom: 8px;
     display: flex;
@@ -70,7 +70,157 @@ canvas {
     font-weight: bold;
 }
 
-/* 슬라이더 스타일 */
+/* 모던 사이드바 스타일 */
+#settingsSidebar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 102, 0, 0.6) transparent;
+}
+
+#settingsSidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+#settingsSidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+#settingsSidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 102, 0, 0.6);
+    border-radius: 4px;
+}
+
+#settingsSidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 102, 0, 0.8);
+}
+
+/* 모던 설정 섹션 */
+.setting-section {
+    margin-bottom: 16px;
+}
+
+.setting-item {
+    margin-bottom: 14px;
+    position: relative;
+}
+
+.setting-item label {
+    display: block;
+    color: #fff;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* 모던 슬라이더 스타일 */
+.modern-slider {
+    width: 100%;
+    height: 5px;
+    -webkit-appearance: none;
+    background: linear-gradient(to right, #ff6b00, #ffc107);
+    border-radius: 3px;
+    outline: none;
+    margin-bottom: 4px;
+}
+
+.modern-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease;
+}
+
+.modern-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.modern-slider::-moz-range-thumb {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    border: none;
+    transition: transform 0.2s ease;
+}
+
+.modern-slider::-moz-range-thumb:hover {
+    transform: scale(1.1);
+}
+
+/* 값 표시 스타일 - setting-item 내부에서만 적용 */
+.setting-item .value-display {
+    position: absolute;
+    right: 0;
+    top: 25px;
+    background: rgba(255, 102, 0, 0.2);
+    color: #ff6600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 35px;
+    text-align: center;
+    z-index: 1;
+}
+
+/* 토글 스위치 스타일 */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(80, 80, 80, 0.5);
+    transition: .3s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .toggle-slider {
+    background-color: #ff6600;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.toggle-slider:hover {
+    box-shadow: 0 0 8px rgba(255, 102, 0, 0.3);
+}
+
+/* 기존 슬라이더 스타일 (하위 호환성) */
 input[type="range"] {
     width: 100px;
     height: 4px;
@@ -97,7 +247,7 @@ input[type="range"]::-moz-range-thumb {
     border: none;
 }
 
-/* 토글 버튼 */
+/* 기존 토글 버튼 (하위 호환성) */
 #toggle-controls {
     position: absolute;
     top: 10px;
@@ -118,7 +268,7 @@ input[type="range"]::-moz-range-thumb {
     background: rgba(255, 102, 0, 1);
 }
 
-/* 리셋 버튼 */
+/* 기존 리셋 버튼 (하위 호환성) */
 .reset-button {
     background: #ff6600;
     color: white;
@@ -133,6 +283,37 @@ input[type="range"]::-moz-range-thumb {
 
 .reset-button:hover {
     background: #e55a00;
+}
+
+/* 모던 설정 버튼 스타일 */
+#settingsBtn {
+    transition: all 0.3s ease;
+}
+
+#settingsBtn:hover {
+    transform: scale(1.1);
+}
+
+#settingsBtn:active {
+    transform: scale(0.95);
+}
+
+/* 모던 초기화 버튼 스타일 */
+#resetSettings {
+    transition: all 0.2s ease;
+}
+
+#resetSettings:hover {
+    background-color: rgba(255,80,80,0.3) !important;
+    color: rgba(255,100,100,1) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+#resetSettings:active {
+    background-color: rgba(255,80,80,0.4) !important;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* 반응형 디자인 */
@@ -156,23 +337,111 @@ input[type="range"]::-moz-range-thumb {
     .control-item span {
         align-self: flex-end;
     }
+
+    /* 모바일에서 사이드바 크기 조정 */
+    #settingsSidebar {
+        width: 280px !important;
+        right: -320px !important;
+    }
+
+    .setting-item {
+        margin-bottom: 16px;
+    }
+
+    .setting-item .value-display {
+        position: static !important;
+        display: inline-block;
+        margin-top: 4px;
+        float: right;
+        top: auto !important;
+        right: auto !important;
+    }
 }
 
-/* 스크롤바 스타일 */
-#controls::-webkit-scrollbar {
-    width: 6px;
+@media (max-width: 480px) {
+    #settingsSidebar {
+        width: 100% !important;
+        right: -100% !important;
+        padding: 15px;
+    }
+    
+    #settingsBtn {
+        top: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+    }
 }
 
-#controls::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+/* 애니메이션 효과 */
+@keyframes slideIn {
+    from {
+        right: -400px;
+    }
+    to {
+        right: 0px;
+    }
 }
 
-#controls::-webkit-scrollbar-thumb {
-    background: rgba(255, 102, 0, 0.6);
-    border-radius: 3px;
+@keyframes slideOut {
+    from {
+        right: 0px;
+    }
+    to {
+        right: -400px;
+    }
 }
 
-#controls::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 102, 0, 0.8);
+/* 포커스 스타일 */
+.modern-slider:focus {
+    box-shadow: 0 0 8px rgba(255, 102, 0, 0.5);
+}
+
+.toggle-switch input:focus + .toggle-slider {
+    box-shadow: 0 0 8px rgba(255, 102, 0, 0.5);
+}
+
+#resetSettings:focus {
+    outline: 2px solid rgba(255, 102, 0, 0.5);
+    outline-offset: 2px;
+}
+
+/* 어두운 테마 최적화 */
+.setting-section h4 {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.setting-item label {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* 글래스모피즘 효과 */
+#settingsSidebar {
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 접근성 개선 */
+.modern-slider:focus,
+.toggle-switch input:focus + .toggle-slider,
+#resetSettings:focus,
+#settingsBtn:focus {
+    outline: 2px solid #ff6600;
+    outline-offset: 2px;
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+    .modern-slider {
+        background: linear-gradient(to right, #ff4500, #ffff00);
+    }
+    
+    .toggle-slider {
+        border: 1px solid #fff;
+    }
+    
+    input:checked + .toggle-slider {
+        background-color: #ff4500;
+    }
 } 
