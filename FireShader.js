@@ -26,7 +26,7 @@ THREE.FireShader = {
         "invModelMatrix": { type : "m4",    value : null },
         "scale"         : { type : "v3",    value : null },
 
-        "noiseScale"    : { type : "v4",    value : new THREE.Vector4(1, 2, 1, 0.3) },
+        "noiseScale"    : { type : "v4",    value : new THREE.Vector4(1, 2, 1, 0.75) },
         "magnitude"     : { type : "f",     value : 1.3 },
         "lacunarity"    : { type : "f",     value : 2.0 },
         "gain"          : { type : "f",     value : 0.5 },

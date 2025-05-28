@@ -98,8 +98,8 @@
             </div>
             <div class="control-item">
                 <label>회전 속도:</label>
-                <input type="range" id="rotation-speed" min="0" max="2" step="0.1" value="0.5">
-                <span id="rotation-speed-value">0.5</span>
+                <input type="range" id="rotation-speed" min="0" max="2" step="0.1" value="0">
+                <span id="rotation-speed-value">0.0</span>
             </div>
         </div>
         
@@ -146,8 +146,8 @@
             </div>
             <div class="control-item">
                 <label>속도 (Speed):</label>
-                <input type="range" id="noise-scale-w" min="0.1" max="1" step="0.05" value="0.3">
-                <span id="noise-scale-w-value">0.3</span>
+                <input type="range" id="noise-scale-w" min="0.1" max="1" step="0.05" value="0.75">
+                <span id="noise-scale-w-value">0.75</span>
             </div>
         </div>
         
@@ -187,7 +187,7 @@
     <script>
         var scene, camera, renderer, fire;
         var clock = new THREE.Clock();
-        var rotationSpeed = 0.5;
+        var rotationSpeed = 0;
 
         function init() {
             // Scene 생성
@@ -208,7 +208,6 @@
             textureLoader.load('Fire.png', function(texture) {
                 // Fire 객체 생성
                 fire = new THREE.Fire(texture);
-                fire.scale.set(2, 2, 2);
                 scene.add(fire);
                 
                 console.log('Fire object created successfully!');
@@ -233,6 +232,16 @@
 
         function setupControls() {
             if (!fire) return;
+
+            // 기본값들을 명시적으로 설정
+            fire.scale.set(2, 2, 2);
+            rotationSpeed = 0;
+            fire.material.uniforms.magnitude.value = 1.3;
+            fire.material.uniforms.lacunarity.value = 2.0;
+            fire.material.uniforms.gain.value = 0.5;
+            fire.material.uniforms.baseWidth.value = 0.5;
+            fire.material.uniforms.noiseScale.value.set(1, 2, 1, 0.75);
+            fire.material.uniforms.color.value.setRGB(238/255, 238/255, 238/255);
 
             // 스케일 컨트롤
             setupSlider('scale', function(value) {
@@ -307,7 +316,7 @@
 
             // 슬라이더 값들을 기본값으로 리셋
             document.getElementById('scale').value = 2;
-            document.getElementById('rotation-speed').value = 0.5;
+            document.getElementById('rotation-speed').value = 0;
             document.getElementById('magnitude').value = 1.3;
             document.getElementById('lacunarity').value = 2.0;
             document.getElementById('gain').value = 0.5;
@@ -315,19 +324,19 @@
             document.getElementById('noise-scale-x').value = 1;
             document.getElementById('noise-scale-y').value = 2;
             document.getElementById('noise-scale-z').value = 1;
-            document.getElementById('noise-scale-w').value = 0.3;
+            document.getElementById('noise-scale-w').value = 0.75;
             document.getElementById('color-r').value = 238;
             document.getElementById('color-g').value = 238;
             document.getElementById('color-b').value = 238;
 
             // 값들을 실제로 적용
             fire.scale.set(2, 2, 2);
-            rotationSpeed = 0.5;
+            rotationSpeed = 0;
             fire.material.uniforms.magnitude.value = 1.3;
             fire.material.uniforms.lacunarity.value = 2.0;
             fire.material.uniforms.gain.value = 0.5;
             fire.material.uniforms.baseWidth.value = 0.5;
-            fire.material.uniforms.noiseScale.value.set(1, 2, 1, 0.3);
+            fire.material.uniforms.noiseScale.value.set(1, 2, 1, 0.75);
             fire.material.uniforms.color.value.setRGB(238/255, 238/255, 238/255);
 
             // 표시값 업데이트
