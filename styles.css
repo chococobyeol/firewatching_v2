@@ -1,0 +1,178 @@
+/* 기본 스타일 */
+body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* 캔버스 스타일 */
+canvas {
+    display: block;
+}
+
+/* 컨트롤 패널 스타일 */
+#controls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    z-index: 100;
+    font-size: 12px;
+    max-height: 90vh;
+    overflow-y: auto;
+    min-width: 250px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 102, 0, 0.3);
+}
+
+/* 컨트롤 그룹 */
+.control-group {
+    margin-bottom: 15px;
+}
+
+.control-group h3 {
+    margin: 0 0 8px 0;
+    color: #ff6600;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 102, 0, 0.3);
+    padding-bottom: 4px;
+}
+
+/* 컨트롤 아이템 */
+.control-item {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.control-item label {
+    flex: 1;
+    margin-right: 10px;
+    font-size: 11px;
+}
+
+.control-item input[type="range"] {
+    flex: 2;
+    margin-right: 8px;
+}
+
+.control-item span {
+    min-width: 40px;
+    text-align: right;
+    font-size: 11px;
+    color: #ff6600;
+    font-weight: bold;
+}
+
+/* 슬라이더 스타일 */
+input[type="range"] {
+    width: 100px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
+    border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #ff6600;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #ff6600;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+/* 토글 버튼 */
+#toggle-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 102, 0, 0.8);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 101;
+    font-size: 12px;
+    backdrop-filter: blur(5px);
+    transition: background-color 0.3s ease;
+}
+
+#toggle-controls:hover {
+    background: rgba(255, 102, 0, 1);
+}
+
+/* 리셋 버튼 */
+.reset-button {
+    background: #ff6600;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 12px;
+    transition: background-color 0.3s ease;
+}
+
+.reset-button:hover {
+    background: #e55a00;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    #controls {
+        min-width: 200px;
+        font-size: 11px;
+        padding: 10px;
+    }
+    
+    .control-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .control-item input[type="range"] {
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .control-item span {
+        align-self: flex-end;
+    }
+}
+
+/* 스크롤바 스타일 */
+#controls::-webkit-scrollbar {
+    width: 6px;
+}
+
+#controls::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+#controls::-webkit-scrollbar-thumb {
+    background: rgba(255, 102, 0, 0.6);
+    border-radius: 3px;
+}
+
+#controls::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 102, 0, 0.8);
+} 

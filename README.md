@@ -8,6 +8,7 @@ THREE.js 기반의 실시간 절차적 볼륨메트릭 불 효과 시뮬레이�
 - **절차적 생성**: 노이즈 기반의 자연스러운 불꽃 모양
 - **실시간 파라미터 조정**: 모든 불 효과 속성을 실시간으로 조정 가능
 - **반응형 웹 인터페이스**: 브라우저에서 바로 실행 가능
+- **모듈화된 구조**: 유지보수가 쉬운 분리된 파일 구조
 
 ## 🚀 실행 방법
 
@@ -17,7 +18,7 @@ python3 -m http.server 8000
 ```
 
 ### 2. 브라우저에서 접속
-**http://localhost:8000/fire_controls.html**
+**http://localhost:8000/index.html**
 
 ## 🎛️ 조정 가능한 파라미터
 
@@ -41,10 +42,14 @@ python3 -m http.server 8000
 ## 📁 파일 구조
 
 ```
-├── fire_controls.html    # 🎯 메인 애플리케이션
-├── Fire.js              # 메인 Fire 클래스
-├── FireShader.js        # 불 효과 셰이더 (모든 파라미터 포함)
+├── index.html           # 🎯 메인 HTML 파일
+├── styles.css           # 스타일시트
+├── fire-app.js          # 메인 애플리케이션 로직
+├── fire-controls.js     # 컨트롤 패널 로직
+├── Fire.js              # Fire 클래스
+├── FireShader.js        # 불 효과 셰이더
 ├── Fire.png             # 불 텍스처 이미지
+├── fire_controls.html   # 기존 파일 (참고용)
 └── README.md            # 이 파일
 ```
 
@@ -54,11 +59,17 @@ python3 -m http.server 8000
 - **THREE.js r79**: 3D 렌더링 라이브러리
 - **WebGL**: 하드웨어 가속 그래픽
 - **GLSL 셰이더**: 실시간 볼륨메트릭 렌더링
+- **ES6 클래스**: 모듈화된 JavaScript 구조
 
 ### 알고리즘
 - **Simplex Noise**: 자연스러운 불꽃 패턴 생성
 - **Ray Marching**: 볼륨메트릭 렌더링
 - **Turbulence Function**: 복잡한 불꽃 모양 생성
+
+### 아키텍처
+- **FireApp 클래스**: 메인 애플리케이션 로직
+- **FireControls 클래스**: UI 컨트롤 관리
+- **모듈화된 구조**: 각 기능별로 파일 분리
 
 ### 참고 자료
 - [Real-Time procedural volumetric fire](http://dl.acm.org/citation.cfm?id=1230131) - Alfred et al.
@@ -67,11 +78,16 @@ python3 -m http.server 8000
 
 ## 🎮 사용법
 
-1. **fire_controls.html** 접속
+### 기본 조작
+1. **index.html** 접속
 2. 왼쪽 컨트롤 패널에서 슬라이더 조정
 3. 실시간으로 불 효과 변화 관찰
 4. "기본값으로 리셋" 버튼으로 원래 설정 복원
 5. 오른쪽 상단 버튼으로 컨트롤 패널 숨기기/보이기
+
+### 키보드 단축키
+- **H 키**: 컨트롤 패널 숨기기/보이기
+- **R 키**: 기본값으로 리셋
 
 ## 🔥 추천 설정
 
@@ -89,6 +105,23 @@ python3 -m http.server 8000
 - 속도: 0.8
 - Lacunarity: 3.0
 - Y 스케일: 3.0
+
+## 🛠️ 개발자 정보
+
+### 클래스 구조
+```javascript
+// 메인 애플리케이션
+window.fireApp = new FireApp();
+
+// 컨트롤 패널
+window.fireControls = new FireControls();
+
+// Fire 객체 접근
+const fire = window.fireApp.getFire();
+```
+
+### 커스터마이징
+각 클래스는 독립적으로 수정 가능하며, 새로운 기능을 쉽게 추가할 수 있습니다.
 
 ## 📄 라이선스
 
