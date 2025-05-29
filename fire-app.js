@@ -133,7 +133,11 @@ class FireApp {
     createFire(texture) {
         try {
             // Fire 객체 생성
-            this.fire = new THREE.Fire(texture);
+            this.fire = new THREE.Fire(texture, new THREE.Color().setRGB(255/255, 142/255, 211/255));
+            
+            // 디버깅: Fire 객체의 uniform들 확인
+            console.log('Fire object created, available uniforms:', Object.keys(this.fire.material.uniforms));
+            console.log('All uniforms:', this.fire.material.uniforms);
             
             // 그룹에 추가
             this.fireGroup.add(this.fire);

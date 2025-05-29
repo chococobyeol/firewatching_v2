@@ -2,6 +2,7 @@
  * @author mattatz / http://mattatz.github.io
  *
  * Ray tracing based real-time procedural volumetric fire shader.
+ * Updated with cartoon shading support - v2.0
  *
  * Based on 
  * Alfred et al. Real-Time procedural volumetric fire / http://dl.acm.org/citation.cfm?id=1230131
@@ -27,10 +28,13 @@ THREE.FireShader = {
         "scale"         : { type : "v3",    value : null },
 
         "noiseScale"    : { type : "v4",    value : new THREE.Vector4(1, 2, 1, 0.75) },
-        "magnitude"     : { type : "f",     value : 1.3 },
+        "magnitude"     : { type : "f",     value : 1.6 },
         "lacunarity"    : { type : "f",     value : 2.0 },
         "gain"          : { type : "f",     value : 0.5 },
-        "baseWidth"     : { type : "f",     value : 0.5 }
+        "baseWidth"     : { type : "f",     value : 0.1 },
+        "toonSteps"     : { type : "f",     value : 4.0 },
+        "toonBrightness": { type : "f",     value : 1.9 },
+        "opacity"       : { type : "f",     value : 0.7 }
     },
 
     vertexShader: [
@@ -53,6 +57,9 @@ THREE.FireShader = {
         "uniform float lacunarity;",
         "uniform float gain;",
         "uniform float baseWidth;",
+        "uniform float toonSteps;",
+        "uniform float toonBrightness;",
+        "uniform float opacity;",
 
         "uniform sampler2D fireTex;",
 
@@ -190,6 +197,39 @@ THREE.FireShader = {
             "return (invModelMatrix * vec4(p, 1.0)).xyz;",
         "}",
 
+        // 카툰 스타일 단계 함수
+        "float toonStep(float value, float steps) {",
+            "return floor(value * steps) / steps;",
+        "}",
+
+        // 카툰 스타일 색상 처리
+        "vec3 toonShading(vec3 originalColor, float intensity) {",
+            // 강도를 단계별로 나누기 (동적 단계 수)
+            "float toonIntensity = toonStep(intensity, toonSteps);",
+            
+            // 기본 불꽃 색상 팔레트 (카툰 스타일 - 더 차분하게)
+            "vec3 darkRed = vec3(0.3, 0.05, 0.0);",   // 더 어두운 빨강
+            "vec3 red = vec3(0.7, 0.15, 0.05);",      // 덜 밝은 빨강  
+            "vec3 orange = vec3(0.8, 0.35, 0.08);",   // 차분한 주황
+            "vec3 yellow = vec3(0.9, 0.7, 0.2);",     // 덜 밝은 노랑
+            
+            "vec3 finalColor;",
+            
+            // 단계별 색상 할당
+            "if(toonIntensity < 0.25) {",
+                "finalColor = darkRed;",
+            "} else if(toonIntensity < 0.5) {",
+                "finalColor = mix(darkRed, red, (toonIntensity - 0.25) * 4.0);",
+            "} else if(toonIntensity < 0.75) {",
+                "finalColor = mix(red, orange, (toonIntensity - 0.5) * 4.0);",
+            "} else {",
+                "finalColor = mix(orange, yellow, (toonIntensity - 0.75) * 4.0);",
+            "}",
+            
+            // 원본 색상과 블렌딩하고 밝기 강화 적용
+            "return finalColor * originalColor * toonBrightness;",
+        "}",
+
         "void main() {",
             "vec3 rayPos = vWorldPos;",
             "vec3 rayDir = normalize(rayPos - cameraPosition);",
@@ -209,7 +249,13 @@ THREE.FireShader = {
 
             "col.a = col.r;",
 
-            "gl_FragColor = vec4(col.rgb * color, col.a);",
+            // 카툰 스타일 처리
+            "float fireIntensity = col.r;",
+            "vec3 toonColor = toonShading(color, fireIntensity);",
+            
+            // 최종 색상 (투명도 조절 적용)
+            "float finalAlpha = col.a * opacity;",
+            "gl_FragColor = vec4(toonColor, finalAlpha);",
         "}",
 
 	].join("\n")

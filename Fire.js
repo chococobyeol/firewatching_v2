@@ -13,7 +13,8 @@ THREE.Fire = function ( fireTex, color ) {
         fragmentShader  : THREE.FireShader.fragmentShader,
 		transparent     : true,
 		depthWrite      : false,
-        depthTest       : false
+        depthTest       : false,
+        blending        : THREE.AdditiveBlending
 	} );
 
     // initialize uniforms 

@@ -10,19 +10,22 @@ class FireControls {
         // 기본값
         this.defaultValues = {
             scale: 1.5,
-            magnitude: 1.3,
+            magnitude: 1.6,
             lacunarity: 2.0,
             gain: 0.5,
-            baseWidth: 0.15,
+            baseWidth: 0.1,
             noiseScaleX: 1,
             noiseScaleY: 2,
             noiseScaleZ: 1,
-            colorR: 238,
-            colorG: 238,
-            colorB: 238,
+            colorR: 255,
+            colorG: 142,
+            colorB: 211,
             fireIntensity: 1.0,
-            fireScale: 1.0,
-            animationSpeed: 0.75
+            fireScale: 1.1,
+            animationSpeed: 0.75,
+            toonSteps: 4.0,
+            toonBrightness: 1.9,
+            opacity: 0.7
         };
         
         // 현재 설정값
@@ -155,6 +158,24 @@ class FireControls {
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">애니메이션 속도</label>
                             <input id="animationSpeed" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.animationSpeed}" class="modern-slider">
                             <span id="animationSpeed-value" class="value-display">${this.currentValues.animationSpeed}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">🎨 색상 단계 수</label>
+                            <input id="toonSteps" type="range" min="2" max="8" step="1" value="${this.currentValues.toonSteps}" class="modern-slider">
+                            <span id="toonSteps-value" class="value-display">${this.currentValues.toonSteps}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">🎨 밝기 강화</label>
+                            <input id="toonBrightness" type="range" min="0.5" max="2.0" step="0.1" value="${this.currentValues.toonBrightness}" class="modern-slider">
+                            <span id="toonBrightness-value" class="value-display">${this.currentValues.toonBrightness}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">✨ 투명도</label>
+                            <input id="opacity" type="range" min="0.5" max="1.0" step="0.05" value="${this.currentValues.opacity}" class="modern-slider">
+                            <span id="opacity-value" class="value-display">${this.currentValues.opacity}</span>
                         </div>
                     </div>
 
@@ -432,6 +453,43 @@ class FireControls {
             window.fireApp.camera.fov = newFOV;
             window.fireApp.camera.updateProjectionMatrix();
         }
+
+        // 카툰 스타일 컨트롤
+        this.setupSlider('toonSteps', (value) => {
+            console.log('toonSteps changed to:', value);
+            if (this.fire && this.fire.material && this.fire.material.uniforms.toonSteps) {
+                this.fire.material.uniforms.toonSteps.value = value;
+                console.log('toonSteps uniform updated:', this.fire.material.uniforms.toonSteps.value);
+            } else {
+                console.warn('Fire object or toonSteps uniform not found');
+            }
+            this.currentValues.toonSteps = value;
+            this.saveSettings();
+        });
+
+        this.setupSlider('toonBrightness', (value) => {
+            console.log('toonBrightness changed to:', value);
+            if (this.fire && this.fire.material && this.fire.material.uniforms.toonBrightness) {
+                this.fire.material.uniforms.toonBrightness.value = value;
+                console.log('toonBrightness uniform updated:', this.fire.material.uniforms.toonBrightness.value);
+            } else {
+                console.warn('Fire object or toonBrightness uniform not found');
+            }
+            this.currentValues.toonBrightness = value;
+            this.saveSettings();
+        });
+
+        this.setupSlider('opacity', (value) => {
+            console.log('opacity changed to:', value);
+            if (this.fire && this.fire.material && this.fire.material.uniforms.opacity) {
+                this.fire.material.uniforms.opacity.value = value;
+                console.log('opacity uniform updated:', this.fire.material.uniforms.opacity.value);
+            } else {
+                console.warn('Fire object or opacity uniform not found');
+            }
+            this.currentValues.opacity = value;
+            this.saveSettings();
+        });
     }
 
     setupSlider(id, callback) {
@@ -471,6 +529,9 @@ class FireControls {
 
     setFire(fire) {
         this.fire = fire;
+        console.log('Fire object set, available uniforms:', Object.keys(this.fire.material.uniforms));
+        console.log('toonSteps uniform exists:', !!this.fire.material.uniforms.toonSteps);
+        console.log('toonBrightness uniform exists:', !!this.fire.material.uniforms.toonBrightness);
         this.setupControls();
         this.applyCurrentValues();
     }
@@ -510,6 +571,20 @@ class FireControls {
             this.currentValues.colorG / 255,
             this.currentValues.colorB / 255
         );
+
+        // 카툰 스타일 설정 적용
+        if (this.fire.material.uniforms.toonSteps) {
+            this.fire.material.uniforms.toonSteps.value = this.currentValues.toonSteps;
+            console.log('Initial toonSteps applied:', this.currentValues.toonSteps);
+        }
+        if (this.fire.material.uniforms.toonBrightness) {
+            this.fire.material.uniforms.toonBrightness.value = this.currentValues.toonBrightness;
+            console.log('Initial toonBrightness applied:', this.currentValues.toonBrightness);
+        }
+        if (this.fire.material.uniforms.opacity) {
+            this.fire.material.uniforms.opacity.value = this.currentValues.opacity;
+            console.log('Initial opacity applied:', this.currentValues.opacity);
+        }
 
         // UI 업데이트
         this.updateAllDisplayValues();
