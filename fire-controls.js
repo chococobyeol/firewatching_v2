@@ -9,7 +9,7 @@ class FireControls {
         
         // 기본값
         this.defaultValues = {
-            scale: 2,
+            scale: 1.5,
             magnitude: 1.3,
             lacunarity: 2.0,
             gain: 0.5,
@@ -21,13 +21,8 @@ class FireControls {
             colorG: 238,
             colorB: 238,
             fireIntensity: 1.0,
-            animationSpeed: 0.75,
-            // 임시 장작 조절 값들
-            logsScale: 0.44,
-            logsX: 0,
-            logsY: -0.4,
-            logsZ: -0.15,
-            logsRotationX: -0.05
+            fireScale: 1.0,
+            animationSpeed: 0.75
         };
         
         // 현재 설정값
@@ -163,57 +158,6 @@ class FireControls {
                         </div>
                     </div>
 
-                    <!-- 임시 장작 조절 -->
-                    <div class="setting-section">
-                        <h4 style="color:#ffcc00;margin:0 0 12px 0;font-size:14px;border-bottom:1px solid rgba(255,204,0,0.3);padding-bottom:6px;">🔧 임시 장작 조절</h4>
-                        
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 크기</label>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <input id="logsScale" type="range" min="0.2" max="3" step="0.01" value="${this.currentValues.logsScale}" class="modern-slider" style="flex:1;">
-                                <input id="logsScale-input" type="number" min="0.2" max="3" step="0.01" value="${this.currentValues.logsScale}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
-                            </div>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 X 위치</label>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <input id="logsX" type="range" min="-2" max="2" step="0.01" value="${this.currentValues.logsX}" class="modern-slider" style="flex:1;">
-                                <input id="logsX-input" type="number" min="-2" max="2" step="0.01" value="${this.currentValues.logsX}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
-                            </div>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 Y 위치</label>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <input id="logsY" type="range" min="-2" max="1" step="0.01" value="${this.currentValues.logsY}" class="modern-slider" style="flex:1;">
-                                <input id="logsY-input" type="number" min="-2" max="1" step="0.01" value="${this.currentValues.logsY}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
-                            </div>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 Z 위치 (앞뒤)</label>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <input id="logsZ" type="range" min="-1" max="1" step="0.01" value="${this.currentValues.logsZ}" class="modern-slider" style="flex:1;">
-                                <input id="logsZ-input" type="number" min="-1" max="1" step="0.01" value="${this.currentValues.logsZ}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
-                            </div>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">장작 회전 (X축)</label>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <input id="logsRotationX" type="range" min="-0.5" max="0.5" step="0.001" value="${this.currentValues.logsRotationX}" class="modern-slider" style="flex:1;">
-                                <input id="logsRotationX-input" type="number" min="-0.5" max="0.5" step="0.001" value="${this.currentValues.logsRotationX}" style="width:60px;padding:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top:12px;">
-                            <button id="printLogsValues" style="width:100%;padding:8px;background-color:rgba(255,204,0,0.2);color:rgba(255,204,0,0.9);border:none;border-radius:4px;cursor:pointer;font-size:12px;">
-                                현재 값 콘솔에 출력
-                            </button>
-                        </div>
-                    </div>
-
                     <!-- 고급 설정 -->
                     <div class="advanced-settings">
                         <div class="accordion-header" id="advancedToggle" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer;border-bottom:1px solid rgba(255,102,0,0.3);margin-bottom:12px;">
@@ -226,6 +170,12 @@ class FireControls {
                             <!-- 불 모양 조정 -->
                             <div class="setting-subsection">
                                 <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">불 모양 조정</h5>
+                                
+                                <div class="setting-item">
+                                    <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">불꽃 크기</label>
+                                    <input id="fireScale" type="range" min="0.8" max="1.1" step="0.005" value="${this.currentValues.fireScale}" class="modern-slider">
+                                    <span id="fireScale-value" class="value-display">${this.currentValues.fireScale}</span>
+                                </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">불꽃 강도</label>
@@ -399,59 +349,15 @@ class FireControls {
             this.saveSettings();
         });
 
-        // 임시 장작 조절 컨트롤
-        this.setupLogsSlider('logsScale', (value) => {
-            if (window.fireApp && window.fireApp.logs) {
-                window.fireApp.logs.scale.set(value, value, value);
-            }
-            this.currentValues.logsScale = value;
-            this.saveSettings();
-        });
-
-        this.setupLogsSlider('logsX', (value) => {
-            if (window.fireApp && window.fireApp.logs) {
-                window.fireApp.logs.position.x = value;
-            }
-            this.currentValues.logsX = value;
-            this.saveSettings();
-        });
-
-        this.setupLogsSlider('logsY', (value) => {
-            if (window.fireApp && window.fireApp.logs) {
-                window.fireApp.logs.position.y = value;
-            }
-            this.currentValues.logsY = value;
-            this.saveSettings();
-        });
-
-        this.setupLogsSlider('logsZ', (value) => {
-            if (window.fireApp && window.fireApp.logs) {
-                window.fireApp.logs.position.z = value;
-            }
-            this.currentValues.logsZ = value;
-            this.saveSettings();
-        });
-
-        this.setupLogsSlider('logsRotationX', (value) => {
-            if (window.fireApp && window.fireApp.logs) {
-                window.fireApp.logs.rotation.x = value;
-            }
-            this.currentValues.logsRotationX = value;
-            this.saveSettings();
-        });
-
-        // 현재 값 출력 버튼
-        document.getElementById('printLogsValues').addEventListener('click', () => {
-            console.log('=== 현재 장작 설정 값 ===');
-            console.log(`logsScale: ${this.currentValues.logsScale}`);
-            console.log(`logsX: ${this.currentValues.logsX}`);
-            console.log(`logsY: ${this.currentValues.logsY}`);
-            console.log(`logsZ: ${this.currentValues.logsZ}`);
-            console.log(`logsRotationX: ${this.currentValues.logsRotationX}`);
-            console.log('====================');
-        });
-
         // 불 모양 조정 컨트롤
+        this.setupSlider('fireScale', (value) => {
+            if (this.fire) {
+                this.fire.scale.set(value, value, value);
+            }
+            this.currentValues.fireScale = value;
+            this.saveSettings();
+        });
+
         this.setupSlider('magnitude', (value) => {
             this.fire.material.uniforms.magnitude.value = value;
             this.currentValues.magnitude = value;
@@ -544,44 +450,6 @@ class FireControls {
         });
     }
 
-    setupLogsSlider(id, callback) {
-        const slider = document.getElementById(id);
-        const numberInput = document.getElementById(id + '-input');
-        
-        if (!slider || !numberInput) {
-            console.warn(`Slider or number input not found for id: ${id}`);
-            return;
-        }
-        
-        // 슬라이더 변경 시
-        slider.addEventListener('input', () => {
-            const value = parseFloat(slider.value);
-            numberInput.value = value;
-            callback(value);
-        });
-        
-        // 숫자 입력 변경 시
-        numberInput.addEventListener('input', () => {
-            const value = parseFloat(numberInput.value);
-            if (!isNaN(value)) {
-                slider.value = value;
-                callback(value);
-            }
-        });
-        
-        // Enter 키로 확정
-        numberInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                const value = parseFloat(numberInput.value);
-                if (!isNaN(value)) {
-                    slider.value = value;
-                    callback(value);
-                }
-                numberInput.blur(); // 포커스 제거
-            }
-        });
-    }
-
     toggleSidebar() {
         const sidebar = document.getElementById('settingsSidebar');
         if (sidebar.style.right === '0px') {
@@ -618,6 +486,13 @@ class FireControls {
             window.fireApp.camera.updateProjectionMatrix();
         }
         
+        // 불꽃 크기 적용
+        this.fire.scale.set(
+            this.currentValues.fireScale,
+            this.currentValues.fireScale,
+            this.currentValues.fireScale
+        );
+        
         this.fire.material.uniforms.magnitude.value = this.currentValues.magnitude;
         this.fire.material.uniforms.lacunarity.value = this.currentValues.lacunarity;
         this.fire.material.uniforms.gain.value = this.currentValues.gain;
@@ -635,22 +510,6 @@ class FireControls {
             this.currentValues.colorG / 255,
             this.currentValues.colorB / 255
         );
-
-        // 장작 설정 적용 (그룹 내에서 상대적 위치/크기)
-        if (window.fireApp && window.fireApp.logs) {
-            // 장작 크기는 개별적으로 설정 (그룹 스케일과 별도)
-            window.fireApp.logs.scale.set(
-                this.currentValues.logsScale,
-                this.currentValues.logsScale,
-                this.currentValues.logsScale
-            );
-            window.fireApp.logs.position.set(
-                this.currentValues.logsX,
-                this.currentValues.logsY,
-                this.currentValues.logsZ
-            );
-            window.fireApp.logs.rotation.x = this.currentValues.logsRotationX;
-        }
 
         // UI 업데이트
         this.updateAllDisplayValues();

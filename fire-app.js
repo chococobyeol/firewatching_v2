@@ -106,7 +106,7 @@ class FireApp {
 
     createLogs(logsTexture) {
         try {
-            // 장작 geometry와 material 생성 (정사각형, 작은 크기)
+            // 장작 geometry와 material 생성 (최적화된 크기)
             const logsGeometry = new THREE.PlaneGeometry(2.5, 2.5);
             const logsMaterial = new THREE.MeshBasicMaterial({
                 map: logsTexture,
@@ -117,9 +117,10 @@ class FireApp {
             // 장작 메쉬 생성
             this.logs = new THREE.Mesh(logsGeometry, logsMaterial);
             
-            // 장작 위치 조정 (그룹 내에서의 상대 위치)
-            this.logs.position.set(0, -0.8, -0.3);
-            this.logs.rotation.x = -0.05; // 살짝 뒤로 기울이기
+            // 최적화된 장작 위치와 크기 설정
+            this.logs.scale.set(0.44, 0.44, 0.44);
+            this.logs.position.set(0, -0.4, -0.15);
+            this.logs.rotation.x = -0.05;
             
             // 그룹에 추가
             this.fireGroup.add(this.logs);
