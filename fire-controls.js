@@ -22,7 +22,7 @@ class FireControls {
             colorB: 211,
             fireIntensity: 1.0,
             fireScale: 1.1,
-            animationSpeed: 0.75,
+            animationSpeed: 1.0,
             toonSteps: 4.0,
             toonBrightness: 1.9,
             opacity: 0.7
@@ -159,24 +159,6 @@ class FireControls {
                             <input id="animationSpeed" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.animationSpeed}" class="modern-slider">
                             <span id="animationSpeed-value" class="value-display">${this.currentValues.animationSpeed}</span>
                         </div>
-                        
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">🎨 색상 단계 수</label>
-                            <input id="toonSteps" type="range" min="2" max="8" step="1" value="${this.currentValues.toonSteps}" class="modern-slider">
-                            <span id="toonSteps-value" class="value-display">${this.currentValues.toonSteps}</span>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">🎨 밝기 강화</label>
-                            <input id="toonBrightness" type="range" min="0.5" max="2.0" step="0.1" value="${this.currentValues.toonBrightness}" class="modern-slider">
-                            <span id="toonBrightness-value" class="value-display">${this.currentValues.toonBrightness}</span>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">✨ 투명도</label>
-                            <input id="opacity" type="range" min="0.5" max="1.0" step="0.05" value="${this.currentValues.opacity}" class="modern-slider">
-                            <span id="opacity-value" class="value-display">${this.currentValues.opacity}</span>
-                        </div>
                     </div>
 
                     <!-- 고급 설정 -->
@@ -266,6 +248,29 @@ class FireControls {
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">파랑 (Blue)</label>
                                     <input id="colorB" type="range" min="0" max="255" step="1" value="${this.currentValues.colorB}" class="modern-slider">
                                     <span id="colorB-value" class="value-display">${this.currentValues.colorB}</span>
+                                </div>
+                            </div>
+
+                            <!-- 카툰 스타일 -->
+                            <div class="setting-subsection">
+                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">카툰 스타일</h5>
+                                
+                                <div class="setting-item">
+                                    <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">색상 단계 수</label>
+                                    <input id="toonSteps" type="range" min="2" max="8" step="1" value="${this.currentValues.toonSteps}" class="modern-slider">
+                                    <span id="toonSteps-value" class="value-display">${this.currentValues.toonSteps}</span>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">밝기 강화</label>
+                                    <input id="toonBrightness" type="range" min="0.5" max="2.0" step="0.1" value="${this.currentValues.toonBrightness}" class="modern-slider">
+                                    <span id="toonBrightness-value" class="value-display">${this.currentValues.toonBrightness}</span>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">투명도</label>
+                                    <input id="opacity" type="range" min="0.5" max="1.0" step="0.05" value="${this.currentValues.opacity}" class="modern-slider">
+                                    <span id="opacity-value" class="value-display">${this.currentValues.opacity}</span>
                                 </div>
                             </div>
                         </div>
