@@ -263,7 +263,7 @@ class FireControls {
                     <div class="advanced-settings">
                         <div class="accordion-header" id="advancedToggle" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer;border-bottom:1px solid rgba(255,102,0,0.3);margin-bottom:12px;">
                             <h4 style="color:#ff6600;margin:0;font-size:14px;">고급 설정</h4>
-                            <span id="advancedArrow" style="color:#ff6600;font-size:16px;transition:transform 0.3s;">▼</span>
+                            <span id="advancedArrow" style="color:#ff6600;font-size:16px;display:inline-block;width:1em;text-align:center;font-family:monospace;line-height:1;">+</span>
                         </div>
                         
                         <div id="advancedContent" style="display:none;gap:20px;flex-direction:column;">
@@ -479,12 +479,10 @@ class FireControls {
             
             if (content.style.display === 'none') {
                 content.style.display = 'flex';
-                arrow.style.transform = 'rotate(180deg)';
-                arrow.textContent = '▲';
+                arrow.textContent = '-';
             } else {
                 content.style.display = 'none';
-                arrow.style.transform = 'rotate(0deg)';
-                arrow.textContent = '▼';
+                arrow.textContent = '+';
             }
         });
 
