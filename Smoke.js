@@ -8,7 +8,7 @@ class SmokeParticleSystem {
         this.size = options.size || 1.2; // 기본 연기 크기 확대
         this.fadeInDuration = options.fadeInDuration || 1.5;   // 개별 입자 페이드인 시간 (초)
         this.fadeOutDuration = options.fadeOutDuration || 1.5;  // 개별 입자 페이드아웃 시간 (초)
-        this.baseOpacity = options.baseOpacity || 0.3;           // 전체 연기 알파 조정
+        this.baseOpacity = options.baseOpacity || 0.2;           // 전체 연기 알파 조정
         // 수직 페이드 범위를 origin 바로 위 구간으로 설정
         this.verticalFadeStart = options.verticalFadeStart || this.origin.y + 1.0; // 수직 페이드 시작 Y
         this.verticalFadeEnd   = options.verticalFadeEnd   || this.origin.y + 1.5; // 수직 페이드 끝 Y
@@ -74,7 +74,7 @@ class SmokeParticleSystem {
         gradient.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, size, size);
-        ctx.filter = 'blur(4px)'; // 연기에 블러 효과 적용
+        ctx.filter = 'blur(8px)'; // 연기에 블러 효과 적용
         const texture = new THREE.CanvasTexture(canvas);
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;

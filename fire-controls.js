@@ -33,7 +33,8 @@ class FireControls {
             soundVolume: 0.5,
             soundEnabled: true,
             embersEnabled: true,
-            smokeEnabled: true
+            smokeEnabled: true,
+            smokeIntensity: 0.2
         };
         
         // 현재 설정값
@@ -237,6 +238,13 @@ class FireControls {
                                 <input id="smokeEnabled" type="checkbox" ${this.currentValues.smokeEnabled ? 'checked' : ''}>
                                 <span class="toggle-slider"></span>
                             </label>
+                        </div>
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">연기 강도</label>
+                            <div class="slider-container">
+                                <input id="smokeIntensity" type="range" min="0" max="1" step="0.01" value="${this.currentValues.smokeIntensity}" class="modern-slider">
+                                <span id="smokeIntensity-value" class="value-display">${this.currentValues.smokeIntensity}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -662,6 +670,14 @@ class FireControls {
                 }
             }
             this.currentValues.smokeEnabled = enabled;
+            this.saveSettings();
+        });
+
+        this.setupSlider('smokeIntensity', (value) => {
+            if (window.fireApp && window.fireApp.setSmokeIntensity) {
+                window.fireApp.setSmokeIntensity(value);
+            }
+            this.currentValues.smokeIntensity = value;
             this.saveSettings();
         });
     }

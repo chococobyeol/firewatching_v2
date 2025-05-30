@@ -901,7 +901,7 @@ class FireApp {
         let originY = 0;
         if (this.logs && this.logs.geometry && this.logs.scale) {
             const logHeight = (this.logs.geometry.parameters.height || 1) * this.logs.scale.y;
-            originY = this.logs.position.y + logHeight * 0.5;
+            originY = this.logs.position.y + logHeight * 0.5 - 0.4; // 시작 위치를 더 아래로 조정
         }
         const origin = new THREE.Vector3(0, originY, 0);
         // 기존 연기 삭제
@@ -911,10 +911,18 @@ class FireApp {
         // 연기 시스템 생성
         this.smoke = new SmokeParticleSystem(this.fireGroup, {
             origin,
-            count: 30,
+            count: 60, // 더 많은 연기를 위해 개수 증가
             size: 1.5,
-            gravity: new THREE.Vector3(0, 0.1, 0)
+            gravity: new THREE.Vector3(0, 0.1, 0),
+            baseOpacity: (window.fireControls ? window.fireControls.currentValues.smokeIntensity : 0.2)
         });
+    }
+
+    // 연기 강도 설정 메서드
+    setSmokeIntensity(intensity) {
+        if (this.smoke) {
+            this.smoke.baseOpacity = intensity;
+        }
     }
 }
 
