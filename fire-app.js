@@ -41,6 +41,7 @@ class FireApp {
         this.smokeOpacity = 0;            // 연기 페이드인 투명도
         this.smokeStartTime = 0;          // 연기 페이드인 시작 시간
         this.smokeFadeDuration = 2000;    // 연기 페이드인 지속 시간 (ms)
+        this.canvasSizeFactor = 2.0; // 모닥불 캔버스 크기 비율 (예: 1.2)
         
         this.init();
     }
@@ -217,14 +218,21 @@ class FireApp {
             antialias: true,
             alpha: true 
         });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        // 캔버스 크기를 factor만큼 확장 (자동 스타일 업데이트 방지)
+        const canvasWidth = window.innerWidth * this.canvasSizeFactor;
+        const canvasHeight = window.innerHeight * this.canvasSizeFactor;
+        this.renderer.setSize(canvasWidth, canvasHeight, false);
         this.renderer.setClearColor(0x000000, 0); // 투명하게 설정
         this.renderer.setPixelRatio(window.devicePixelRatio);
         
-        // Canvas 스타일 설정 (배경 캔버스 위에 배치)
+        // CSS 크기 및 위치 조정 (중앙 정렬)
+        const offsetX = (canvasWidth - window.innerWidth) / 2;
+        const offsetY = (canvasHeight - window.innerHeight) / 2;
         this.renderer.domElement.style.position = 'fixed';
-        this.renderer.domElement.style.top = '0';
-        this.renderer.domElement.style.left = '0';
+        this.renderer.domElement.style.top = `-${offsetY}px`;
+        this.renderer.domElement.style.left = `-${offsetX}px`;
+        this.renderer.domElement.style.width = `${canvasWidth}px`;
+        this.renderer.domElement.style.height = `${canvasHeight}px`;
         this.renderer.domElement.style.zIndex = '2'; // 배경 이미지 위에 배치
         this.renderer.domElement.style.pointerEvents = 'auto';
         this.renderer.domElement.style.cursor = 'pointer'; // 클릭 가능 표시
@@ -385,8 +393,17 @@ class FireApp {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         
-        // 렌더러 크기 업데이트
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        // 렌더러 크기 업데이트 (factor 적용)
+        const canvasWidth = window.innerWidth * this.canvasSizeFactor;
+        const canvasHeight = window.innerHeight * this.canvasSizeFactor;
+        this.renderer.setSize(canvasWidth, canvasHeight, false);
+        // CSS 크기 및 위치 조정
+        const offsetX = (canvasWidth - window.innerWidth) / 2;
+        const offsetY = (canvasHeight - window.innerHeight) / 2;
+        this.renderer.domElement.style.top = `-${offsetY}px`;
+        this.renderer.domElement.style.left = `-${offsetX}px`;
+        this.renderer.domElement.style.width = `${canvasWidth}px`;
+        this.renderer.domElement.style.height = `${canvasHeight}px`;
         
         // 배경 캔버스 크기 업데이트
         this.generateStars(); // 별 위치 재생성

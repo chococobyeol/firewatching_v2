@@ -9,9 +9,9 @@ class FireControls {
         
         // 기본값
         this.defaultValues = {
-            scale: 1.5,
+            scale: 1.0,
             positionX: 0,
-            positionY: 200,
+            positionY: 110,
             nightSky: true,
             backgroundImage: true,
             magnitude: 1.6,
@@ -51,6 +51,8 @@ class FireControls {
 
     // 로컬스토리지에서 설정 불러오기
     loadSettings() {
+        // 개발 중: 기존 저장 설정 삭제하여 기본값 강제 적용
+        localStorage.removeItem('fireSettings');
         try {
             const saved = localStorage.getItem('fireSettings');
             if (saved) {
