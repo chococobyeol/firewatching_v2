@@ -623,16 +623,9 @@ class FireControls {
 
         // 사운드 켜기/끄기 토글
         this.setupToggle('soundEnabled', (enabled) => {
-            if (window.fireApp) {
-                // 음소거 시 모든 오디오 볼륨을 0으로
-                if (this.currentValues.soundEnabled) {
-                    if (this.ignitionAudio) this.ignitionAudio.volume = 0;
-                    if (this.currentBgAudio) this.currentBgAudio.volume = 0;
-                    if (this.nextBgAudio) this.nextBgAudio.volume = 0;
-                } else {
-                    if (this.ignitionAudio) this.ignitionAudio.volume = this.soundVolume;
-                    if (this.currentBgAudio) this.currentBgAudio.volume = this.soundVolume;
-                }
+            // FireApp의 토글뮤트를 호출하여 음소거 상태 변경
+            if (window.fireApp && typeof window.fireApp.toggleMute === 'function') {
+                window.fireApp.toggleMute();
             }
             this.currentValues.soundEnabled = enabled;
             this.saveSettings();
