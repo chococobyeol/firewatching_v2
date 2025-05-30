@@ -11,9 +11,9 @@ class FireControls {
         this.defaultValues = {
             scale: 1.5,
             positionX: 0,
-            positionY: 0,
-            nightSky: false,
-            backgroundImage: false,
+            positionY: 200,
+            nightSky: true,
+            backgroundImage: true,
             magnitude: 1.6,
             lacunarity: 2.0,
             gain: 0.5,
@@ -78,6 +78,9 @@ class FireControls {
         
         // 모던 사이드바 생성
         this.createSidebar();
+        
+        // 모든 슬라이더를 container로 감싸기
+        setTimeout(() => this.wrapSlidersWithContainers(), 100);
     }
 
     createSettingsButton() {
@@ -156,38 +159,46 @@ class FireControls {
                         
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">크기 (Scale)</label>
-                            <input id="scale" type="range" min="0.5" max="5" step="0.1" value="${this.currentValues.scale}" class="modern-slider">
-                            <span id="scale-value" class="value-display">${this.currentValues.scale}</span>
+                            <div class="slider-container">
+                                <input id="scale" type="range" min="0.5" max="5" step="0.1" value="${this.currentValues.scale}" class="modern-slider">
+                                <span id="scale-value" class="value-display">${this.currentValues.scale}</span>
+                            </div>
                         </div>
                         
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">애니메이션 속도</label>
-                            <input id="animationSpeed" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.animationSpeed}" class="modern-slider">
-                            <span id="animationSpeed-value" class="value-display">${this.currentValues.animationSpeed}</span>
+                            <div class="slider-container">
+                                <input id="animationSpeed" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.animationSpeed}" class="modern-slider">
+                                <span id="animationSpeed-value" class="value-display">${this.currentValues.animationSpeed}</span>
+                            </div>
                         </div>
                         
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">X 위치</label>
-                            <input id="positionX" type="range" min="-800" max="800" step="10" value="${this.currentValues.positionX}" class="modern-slider">
-                            <span id="positionX-value" class="value-display">${this.currentValues.positionX}</span>
+                            <div class="slider-container">
+                                <input id="positionX" type="range" min="-800" max="800" step="5" value="${this.currentValues.positionX}" class="modern-slider">
+                                <span id="positionX-value" class="value-display">${this.currentValues.positionX}</span>
+                            </div>
                         </div>
                         
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Y 위치</label>
-                            <input id="positionY" type="range" min="-600" max="600" step="10" value="${this.currentValues.positionY}" class="modern-slider">
-                            <span id="positionY-value" class="value-display">${this.currentValues.positionY}</span>
+                            <div class="slider-container">
+                                <input id="positionY" type="range" min="-600" max="600" step="5" value="${this.currentValues.positionY}" class="modern-slider">
+                                <span id="positionY-value" class="value-display">${this.currentValues.positionY}</span>
+                            </div>
                         </div>
                         
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">밤하늘 배경</label>
+                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
+                            <label style="color:#fff;font-size:13px;">밤하늘 배경</label>
                             <label class="toggle-switch">
                                 <input id="nightSky" type="checkbox" ${this.currentValues.nightSky ? 'checked' : ''}>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
                         
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">배경 이미지</label>
+                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
+                            <label style="color:#fff;font-size:13px;">배경 이미지</label>
                             <label class="toggle-switch">
                                 <input id="backgroundImage" type="checkbox" ${this.currentValues.backgroundImage ? 'checked' : ''}>
                                 <span class="toggle-slider"></span>
@@ -759,6 +770,28 @@ class FireControls {
         if (sidebar.style.right === '0px') {
             this.closeSidebar();
         }
+    }
+
+    wrapSlidersWithContainers() {
+        const sliders = document.querySelectorAll('#settingsSidebar .modern-slider');
+        sliders.forEach(slider => {
+            const parent = slider.parentElement;
+            const valueDisplay = parent.querySelector('.value-display');
+            
+            // 이미 container로 감싸져 있으면 스킵
+            if (parent.classList.contains('slider-container')) return;
+            
+            // 새 container 생성
+            const container = document.createElement('div');
+            container.className = 'slider-container';
+            
+            // 슬라이더와 값 표시를 container에 이동
+            parent.insertBefore(container, slider);
+            container.appendChild(slider);
+            if (valueDisplay) {
+                container.appendChild(valueDisplay);
+            }
+        });
     }
 }
 
