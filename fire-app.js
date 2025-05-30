@@ -28,6 +28,16 @@ class FireApp {
         this.isFireLit = false;
         this.ignitionAudio = null;
         
+        // 배경 사운드 시스템 (크로스페이드)
+        this.fireNormalSound1 = null;
+        this.fireNormalSound2 = null;
+        this.currentBgAudio = null;
+        this.nextBgAudio = null;
+        this.crossFadeTime = 0.5; // 0.5초 크로스페이드
+        this.nextStarted = false;
+        this.soundVolume = 0.5;
+        this.isMuted = false;
+        
         this.init();
     }
 
@@ -317,6 +327,22 @@ class FireApp {
                 console.warn('Could not load ignition audio:', e);
             }
             
+            // 배경 사운드 시스템 초기화
+            try {
+                this.fireNormalSound1 = new Audio('sounds/fire_normal.wav');
+                this.fireNormalSound2 = new Audio('sounds/fire_normal.wav');
+                this.currentBgAudio = this.fireNormalSound1;
+                this.nextBgAudio = this.fireNormalSound2;
+                
+                // 초기 볼륨 설정
+                this.fireNormalSound1.volume = this.soundVolume;
+                this.fireNormalSound2.volume = 0;
+                
+                console.log('Background sound system initialized');
+            } catch (e) {
+                console.warn('Could not load background audio:', e);
+            }
+            
             // 그룹에 추가
             this.fireGroup.add(this.fire);
             
@@ -473,6 +499,133 @@ class FireApp {
         return this.isBgImageEnabled;
     }
 
+    // 볼륨 페이드 헬퍼 함수
+    fadeVolume(audio, from, to, duration) {
+        const stepTime = 50;
+        const steps = duration * 1000 / stepTime;
+        let step = 0;
+        const diff = to - from;
+        const interval = setInterval(() => {
+            step++;
+            const newVolume = Math.min(Math.max(from + diff * step / steps, 0), 1);
+            audio.volume = newVolume;
+            if (step >= steps) clearInterval(interval);
+        }, stepTime);
+    }
+
+    // 크로스페이드 루프 모니터링
+    crossFadeLoop() {
+        if (!this.isFireLit || !this.currentBgAudio) return;
+
+        // 다음 오디오 시작을 아직 못했으면 타이밍 체크
+        if (!this.nextStarted && 
+            this.currentBgAudio.currentTime >= this.currentBgAudio.duration - this.crossFadeTime) {
+            
+            this.nextStarted = true;
+            this.nextBgAudio.currentTime = 0;
+            this.nextBgAudio.volume = 0;
+            
+            // 음소거 상태가 아닐 때만 소리 재생
+            if (!this.isMuted) {
+                this.nextBgAudio.play().catch(e => console.log('배경 오디오 재생 실패:', e));
+                // 크로스페이드
+                this.fadeVolume(this.currentBgAudio, this.soundVolume, 0, this.crossFadeTime);
+                this.fadeVolume(this.nextBgAudio, 0, this.soundVolume, this.crossFadeTime);
+            } else {
+                // 음소거 상태라면 소리 없이 재생
+                this.nextBgAudio.volume = 0;
+                this.nextBgAudio.play().catch(e => console.log('배경 오디오 재생 실패:', e));
+            }
+            
+            // 페이드 끝나면 swap
+            setTimeout(() => {
+                this.currentBgAudio.pause();
+                [this.currentBgAudio, this.nextBgAudio] = [this.nextBgAudio, this.currentBgAudio];
+                this.nextStarted = false;
+            }, this.crossFadeTime * 1000);
+        }
+        
+        // 불이 켜져있는 동안 계속 모니터링
+        if (this.isFireLit) {
+            requestAnimationFrame(() => this.crossFadeLoop());
+        }
+    }
+
+    // 배경 사운드 재생 시작
+    startBackgroundSound() {
+        if (!this.currentBgAudio || !this.isFireLit) return;
+        
+        this.currentBgAudio.currentTime = 0;
+        this.currentBgAudio.volume = this.isMuted ? 0 : this.soundVolume;
+        
+        this.currentBgAudio.play().catch(e => console.log('배경 오디오 재생 실패:', e));
+        this.nextStarted = false;
+        
+        // 크로스페이드 루프 시작
+        this.crossFadeLoop();
+    }
+
+    // 배경 사운드 정지
+    stopBackgroundSound() {
+        if (this.currentBgAudio) {
+            this.currentBgAudio.pause();
+        }
+        if (this.nextBgAudio) {
+            this.nextBgAudio.pause();
+        }
+        this.nextStarted = false;
+    }
+
+    // 볼륨 설정
+    setVolume(volume) {
+        this.soundVolume = Math.max(0, Math.min(1, volume));
+        
+        if (this.ignitionAudio) {
+            this.ignitionAudio.volume = this.soundVolume;
+        }
+        
+        if (!this.isMuted) {
+            if (this.currentBgAudio) {
+                this.currentBgAudio.volume = this.soundVolume;
+            }
+            if (this.nextBgAudio && this.nextStarted) {
+                this.nextBgAudio.volume = this.soundVolume;
+            }
+        }
+    }
+
+    // 음소거 토글
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        
+        if (this.isMuted) {
+            // 음소거 시 모든 오디오 볼륨을 0으로
+            if (this.ignitionAudio) this.ignitionAudio.volume = 0;
+            if (this.currentBgAudio) this.currentBgAudio.volume = 0;
+            if (this.nextBgAudio) this.nextBgAudio.volume = 0;
+        } else {
+            // 음소거 해제 시 원래 볼륨으로
+            if (this.ignitionAudio) this.ignitionAudio.volume = this.soundVolume;
+            if (this.currentBgAudio) this.currentBgAudio.volume = this.soundVolume;
+            // nextBgAudio는 페이드인될 때까지 0 유지
+        }
+    }
+
+    // 불 끄기 기능 (추가 기능)
+    extinguishFire() {
+        this.isFireLit = false;
+        
+        // 배경 사운드 정지
+        this.stopBackgroundSound();
+        
+        // 불꽃을 투명하게 만들기
+        if (this.fire && this.fire.material.uniforms.opacity) {
+            this.fire.material.uniforms.opacity.value = 0.0;
+        }
+        
+        console.log('Fire extinguished');
+    }
+
     // 클릭 이벤트 처리
     handleClick(event) {
         // 점화 사운드 재생
@@ -504,6 +657,9 @@ class FireApp {
         if (this.fire.material.uniforms.opacity) {
             this.fire.material.uniforms.opacity.value = targetValues.opacity;
         }
+        
+        // 배경 사운드 시작
+        this.startBackgroundSound();
         
         // magnitude만 애니메이션: (설정치-0.7) → 설정치 (0.3초)
         const animationDuration = 300; // 0.3초

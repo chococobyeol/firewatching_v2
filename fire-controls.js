@@ -29,7 +29,9 @@ class FireControls {
             animationSpeed: 1.0,
             toonSteps: 4.0,
             toonBrightness: 1.9,
-            opacity: 0.7
+            opacity: 0.7,
+            soundVolume: 0.5,
+            soundEnabled: true
         };
         
         // 현재 설정값
@@ -201,6 +203,22 @@ class FireControls {
                             <label style="color:#fff;font-size:13px;">배경 이미지</label>
                             <label class="toggle-switch">
                                 <input id="backgroundImage" type="checkbox" ${this.currentValues.backgroundImage ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">사운드 볼륨</label>
+                            <div class="slider-container">
+                                <input id="soundVolume" type="range" min="0" max="1" step="0.05" value="${this.currentValues.soundVolume}" class="modern-slider">
+                                <span id="soundVolume-value" class="value-display">${this.currentValues.soundVolume}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
+                            <label style="color:#fff;font-size:13px;">사운드</label>
+                            <label class="toggle-switch">
+                                <input id="soundEnabled" type="checkbox" ${this.currentValues.soundEnabled ? 'checked' : ''}>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -584,6 +602,48 @@ class FireControls {
             this.currentValues.opacity = value;
             this.saveSettings();
         });
+
+        // 사운드 볼륨 컨트롤
+        this.setupSlider('soundVolume', (value) => {
+            // FireApp의 볼륨 설정 적용
+            if (window.fireApp && window.fireApp.setVolume) {
+                window.fireApp.setVolume(value);
+            }
+            this.currentValues.soundVolume = value;
+            this.saveSettings();
+        });
+
+        // 사운드 켜기/끄기 토글
+        this.setupToggle('soundEnabled', (enabled) => {
+            // FireApp의 음소거 설정을 직접 적용
+            if (window.fireApp) {
+                window.fireApp.isMuted = !enabled;
+                
+                // 볼륨을 즉시 적용
+                if (enabled) {
+                    // 소리 켜기: 원래 볼륨으로 설정
+                    if (window.fireApp.ignitionAudio) {
+                        window.fireApp.ignitionAudio.volume = window.fireApp.soundVolume;
+                    }
+                    if (window.fireApp.currentBgAudio) {
+                        window.fireApp.currentBgAudio.volume = window.fireApp.soundVolume;
+                    }
+                } else {
+                    // 소리 끄기: 모든 볼륨을 0으로 설정
+                    if (window.fireApp.ignitionAudio) {
+                        window.fireApp.ignitionAudio.volume = 0;
+                    }
+                    if (window.fireApp.currentBgAudio) {
+                        window.fireApp.currentBgAudio.volume = 0;
+                    }
+                    if (window.fireApp.nextBgAudio) {
+                        window.fireApp.nextBgAudio.volume = 0;
+                    }
+                }
+            }
+            this.currentValues.soundEnabled = enabled;
+            this.saveSettings();
+        });
     }
 
     setupSlider(id, callback) {
@@ -713,6 +773,14 @@ class FireControls {
         // 배경 이미지 초기 상태 적용
         if (window.fireApp && window.fireApp.toggleBackgroundImage) {
             window.fireApp.toggleBackgroundImage(this.currentValues.backgroundImage);
+        }
+        
+        // 사운드 설정 초기 상태 적용
+        if (window.fireApp) {
+            if (window.fireApp.setVolume) {
+                window.fireApp.setVolume(this.currentValues.soundVolume);
+            }
+            window.fireApp.isMuted = !this.currentValues.soundEnabled;
         }
     }
 
