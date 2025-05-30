@@ -861,7 +861,7 @@ class FireApp {
         this.embers = new EmberParticleSystem(this.fireGroup, {
             origin,
             count: 15,
-            size: 0.08,
+            size: 0.06,
             gravity: new THREE.Vector3(0, -0.2, 0)
         });
     }

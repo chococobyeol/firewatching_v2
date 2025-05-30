@@ -103,7 +103,8 @@ class EmberParticleSystem {
             const t = data.age / data.lifetime;
             // 알파: 서서히 투명해지며 플리커
             let alpha = Math.max(0, 1 - t);
-            alpha *= 0.7 + Math.random() * 0.3;
+            // 더 밝게 표시: 높은 투명도 값 사용
+            alpha *= 0.9 + Math.random() * 0.1;
             sprite.material.opacity = alpha;
             // 크기: 살짝 변화
             const s = this.size * (1 + 0.2 * Math.sin(t * Math.PI));
