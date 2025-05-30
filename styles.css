@@ -10,6 +10,11 @@ body {
 /* 캔버스 스타일 */
 canvas {
     display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
 }
 
 /* 기존 컨트롤 패널 스타일 (하위 호환성) */

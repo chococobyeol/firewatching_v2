@@ -12,6 +12,7 @@ class FireControls {
             scale: 1.5,
             positionX: 0,
             positionY: 0,
+            nightSky: false,
             magnitude: 1.6,
             lacunarity: 2.0,
             gain: 0.5,
@@ -172,6 +173,14 @@ class FireControls {
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Y 위치</label>
                             <input id="positionY" type="range" min="-600" max="600" step="10" value="${this.currentValues.positionY}" class="modern-slider">
                             <span id="positionY-value" class="value-display">${this.currentValues.positionY}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">🌌 밤하늘 배경</label>
+                            <label class="toggle-switch">
+                                <input id="nightSky" type="checkbox" ${this.currentValues.nightSky ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
                     </div>
 
@@ -402,6 +411,15 @@ class FireControls {
             this.saveSettings();
         });
 
+        // 밤하늘 토글 컨트롤
+        this.setupToggle('nightSky', (enabled) => {
+            if (window.fireApp && window.fireApp.toggleNightSky) {
+                window.fireApp.toggleNightSky(enabled);
+            }
+            this.currentValues.nightSky = enabled;
+            this.saveSettings();
+        });
+
         // 불 모양 조정 컨트롤
         this.setupSlider('fireScale', (value) => {
             if (this.fire) {
@@ -540,6 +558,19 @@ class FireControls {
         });
     }
 
+    setupToggle(id, callback) {
+        const toggle = document.getElementById(id);
+        if (!toggle) {
+            console.warn(`Toggle not found for id: ${id}`);
+            return;
+        }
+        
+        toggle.addEventListener('change', () => {
+            const enabled = toggle.checked;
+            callback(enabled);
+        });
+    }
+
     toggleSidebar() {
         const sidebar = document.getElementById('settingsSidebar');
         if (sidebar.style.right === '0px') {
@@ -623,6 +654,11 @@ class FireControls {
 
         // UI 업데이트
         this.updateAllDisplayValues();
+        
+        // 밤하늘 초기 상태 적용
+        if (window.fireApp && window.fireApp.toggleNightSky) {
+            window.fireApp.toggleNightSky(this.currentValues.nightSky);
+        }
     }
 
     resetToDefaults() {
@@ -649,6 +685,12 @@ class FireControls {
                 if (typeof value === 'number') {
                     valueSpan.textContent = value.toFixed(2);
                 }
+            }
+            
+            // 토글 상태 업데이트
+            const toggle = document.getElementById(key);
+            if (toggle && toggle.type === 'checkbox') {
+                toggle.checked = this.currentValues[key];
             }
         });
     }

@@ -12,10 +12,17 @@ class FireApp {
         this.fireGroup = null; // 불과 장작을 묶는 그룹
         this.clock = new THREE.Clock();
         
+        // 밤하늘 관련 변수 추가
+        this.bgCanvas = null;
+        this.bgCtx = null;
+        this.stars = [];
+        this.isSkyEnabled = false;
+        
         this.init();
     }
 
     init() {
+        this.createBackgroundCanvas(); // 배경 캔버스 먼저 생성
         this.createScene();
         this.createCamera();
         this.createRenderer();
@@ -23,6 +30,77 @@ class FireApp {
         this.loadFireTexture();
         this.setupEventListeners();
         this.animate();
+    }
+
+    // 배경 캔버스 생성 (밤하늘용)
+    createBackgroundCanvas() {
+        this.bgCanvas = document.createElement('canvas');
+        this.bgCanvas.id = 'bgCanvas';
+        this.bgCanvas.style.position = 'fixed';
+        this.bgCanvas.style.top = '0';
+        this.bgCanvas.style.left = '0';
+        this.bgCanvas.style.width = '100%';
+        this.bgCanvas.style.height = '100%';
+        this.bgCanvas.style.zIndex = '0';
+        this.bgCanvas.style.pointerEvents = 'none';
+        
+        this.bgCtx = this.bgCanvas.getContext('2d');
+        document.body.appendChild(this.bgCanvas);
+        
+        this.generateStars();
+        this.updateBackgroundCanvas();
+        
+        console.log('Background canvas created');
+    }
+
+    // 별 생성
+    generateStars() {
+        this.stars = [];
+        const numStars = 200;
+        
+        for (let i = 0; i < numStars; i++) {
+            this.stars.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                radius: Math.random() * 1.5 + 0.5,
+                baseAlpha: Math.random() * 0.8 + 0.2,
+                twinkleFreq: Math.random() * 2 + 1,
+                twinklePhase: Math.random() * Math.PI * 2
+            });
+        }
+    }
+
+    // 배경 캔버스 업데이트 (별과 그라디언트 그리기)
+    updateBackgroundCanvas() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        this.bgCanvas.width = width;
+        this.bgCanvas.height = height;
+        
+        // 캔버스 초기화
+        this.bgCtx.clearRect(0, 0, width, height);
+        
+        if (this.isSkyEnabled) {
+            // 밤하늘 그라디언트
+            const skyGradient = this.bgCtx.createLinearGradient(0, 0, 0, height);
+            skyGradient.addColorStop(0, '#0b1a34');
+            skyGradient.addColorStop(1, '#000007');
+            this.bgCtx.fillStyle = skyGradient;
+            this.bgCtx.fillRect(0, 0, width, height);
+            
+            // 별 그리기
+            const time = performance.now() / 1000;
+            this.stars.forEach(star => {
+                const flicker = 0.5 + 0.5 * Math.sin(star.twinkleFreq * time + star.twinklePhase);
+                const alpha = star.baseAlpha * flicker;
+                
+                this.bgCtx.beginPath();
+                this.bgCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                this.bgCtx.fillStyle = `rgba(255,255,255,${alpha})`;
+                this.bgCtx.fill();
+            });
+        }
     }
 
     createScene() {
@@ -47,8 +125,15 @@ class FireApp {
             alpha: true 
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setClearColor(0x000000, 1);
+        this.renderer.setClearColor(0x000000, 0); // 투명하게 설정
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // Canvas 스타일 설정 (배경 캔버스 위에 배치)
+        this.renderer.domElement.style.position = 'fixed';
+        this.renderer.domElement.style.top = '0';
+        this.renderer.domElement.style.left = '0';
+        this.renderer.domElement.style.zIndex = '1';
+        this.renderer.domElement.style.pointerEvents = 'auto';
         
         // Canvas를 body에 추가
         document.body.appendChild(this.renderer.domElement);
@@ -173,6 +258,10 @@ class FireApp {
         // 렌더러 크기 업데이트
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         
+        // 배경 캔버스 크기 업데이트
+        this.generateStars(); // 별 위치 재생성
+        this.updateBackgroundCanvas();
+        
         console.log('Window resized');
     }
 
@@ -214,6 +303,11 @@ class FireApp {
             this.animate();
         });
 
+        // 배경 업데이트 (별 깜빡임 애니메이션)
+        if (this.isSkyEnabled) {
+            this.updateBackgroundCanvas();
+        }
+
         // 카메라 업데이트
         this.updateCamera();
 
@@ -250,6 +344,18 @@ class FireApp {
 
     getRenderer() {
         return this.renderer;
+    }
+
+    // 밤하늘 토글 메서드
+    toggleNightSky(enabled) {
+        this.isSkyEnabled = enabled;
+        this.updateBackgroundCanvas();
+        console.log('Night sky:', enabled ? 'enabled' : 'disabled');
+    }
+
+    // 밤하늘 상태 반환
+    getNightSkyEnabled() {
+        return this.isSkyEnabled;
     }
 }
 
