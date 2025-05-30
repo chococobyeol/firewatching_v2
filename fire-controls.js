@@ -31,7 +31,8 @@ class FireControls {
             toonBrightness: 1.9,
             opacity: 0.7,
             soundVolume: 0.5,
-            soundEnabled: true
+            soundEnabled: true,
+            embersEnabled: true
         };
         
         // 현재 설정값
@@ -219,6 +220,13 @@ class FireControls {
                             <label style="color:#fff;font-size:13px;">사운드</label>
                             <label class="toggle-switch">
                                 <input id="soundEnabled" type="checkbox" ${this.currentValues.soundEnabled ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
+                            <label style="color:#fff;font-size:13px;">불똥</label>
+                            <label class="toggle-switch">
+                                <input id="embersEnabled" type="checkbox" ${this.currentValues.embersEnabled ? 'checked' : ''}>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -615,33 +623,31 @@ class FireControls {
 
         // 사운드 켜기/끄기 토글
         this.setupToggle('soundEnabled', (enabled) => {
-            // FireApp의 음소거 설정을 직접 적용
             if (window.fireApp) {
-                window.fireApp.isMuted = !enabled;
-                
-                // 볼륨을 즉시 적용
-                if (enabled) {
-                    // 소리 켜기: 원래 볼륨으로 설정
-                    if (window.fireApp.ignitionAudio) {
-                        window.fireApp.ignitionAudio.volume = window.fireApp.soundVolume;
-                    }
-                    if (window.fireApp.currentBgAudio) {
-                        window.fireApp.currentBgAudio.volume = window.fireApp.soundVolume;
-                    }
+                // 음소거 시 모든 오디오 볼륨을 0으로
+                if (this.currentValues.soundEnabled) {
+                    if (this.ignitionAudio) this.ignitionAudio.volume = 0;
+                    if (this.currentBgAudio) this.currentBgAudio.volume = 0;
+                    if (this.nextBgAudio) this.nextBgAudio.volume = 0;
                 } else {
-                    // 소리 끄기: 모든 볼륨을 0으로 설정
-                    if (window.fireApp.ignitionAudio) {
-                        window.fireApp.ignitionAudio.volume = 0;
-                    }
-                    if (window.fireApp.currentBgAudio) {
-                        window.fireApp.currentBgAudio.volume = 0;
-                    }
-                    if (window.fireApp.nextBgAudio) {
-                        window.fireApp.nextBgAudio.volume = 0;
-                    }
+                    if (this.ignitionAudio) this.ignitionAudio.volume = this.soundVolume;
+                    if (this.currentBgAudio) this.currentBgAudio.volume = this.soundVolume;
                 }
             }
             this.currentValues.soundEnabled = enabled;
+            this.saveSettings();
+        });
+
+        this.setupToggle('embersEnabled', (enabled) => {
+            if (window.fireApp) {
+                if (enabled && window.fireApp.isFireLit) {
+                    window.fireApp.createEmbers();
+                } else if (!enabled && window.fireApp.embers) {
+                    window.fireApp.embers.sprites.forEach(sprite => window.fireApp.fireGroup.remove(sprite));
+                    window.fireApp.embers = null;
+                }
+            }
+            this.currentValues.embersEnabled = enabled;
             this.saveSettings();
         });
     }
@@ -781,6 +787,15 @@ class FireControls {
                 window.fireApp.setVolume(this.currentValues.soundVolume);
             }
             window.fireApp.isMuted = !this.currentValues.soundEnabled;
+        }
+        // 불똥 초기 상태 적용 (불이 켜져 있을 때만 생성)
+        if (window.fireApp) {
+            if (this.currentValues.embersEnabled && window.fireApp.isFireLit) {
+                window.fireApp.createEmbers();
+            } else if (window.fireApp.embers) {
+                window.fireApp.embers.sprites.forEach(sprite => window.fireApp.fireGroup.remove(sprite));
+                window.fireApp.embers = null;
+            }
         }
     }
 

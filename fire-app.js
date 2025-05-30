@@ -432,6 +432,8 @@ class FireApp {
             this.animate();
         });
 
+        const delta = this.clock.getDelta();
+
         // 배경 업데이트 (별 깜빡임 애니메이션)
         if (this.isSkyEnabled) {
             this.updateBackgroundCanvas();
@@ -444,6 +446,11 @@ class FireApp {
         if (this.fire) {
             const time = this.clock.getElapsedTime();
             this.fire.update(time);
+        }
+
+        // Ember 입자 효과 업데이트
+        if (this.embers) {
+            this.embers.update(delta);
         }
 
         // 렌더링
@@ -614,6 +621,11 @@ class FireApp {
     // 불 끄기 기능 (추가 기능)
     extinguishFire() {
         this.isFireLit = false;
+        // 불이 꺼질 때 기존 불똥 제거
+        if (this.embers && this.fireGroup) {
+            this.embers.sprites.forEach(sprite => this.fireGroup.remove(sprite));
+            this.embers = null;
+        }
         
         // 배경 사운드 정지
         this.stopBackgroundSound();
@@ -648,6 +660,10 @@ class FireApp {
     // 불 점화 애니메이션
     igniteFireAnimation() {
         this.isFireLit = true;
+        // 불 점화 시 불똥 효과 생성 (토글된 경우에만)
+        if (window.fireControls && window.fireControls.currentValues.embersEnabled) {
+            this.createEmbers();
+        }
         
         if (!this.fire || !window.fireControls) return;
         
@@ -826,6 +842,28 @@ class FireApp {
         };
         
         requestAnimationFrame(animate);
+    }
+
+    // 불똥 입자 효과 생성 메서드
+    createEmbers() {
+        // origin을 logs 위쪽으로 계산
+        let originY = 0;
+        if (this.logs && this.logs.geometry && this.logs.scale) {
+            const logHeight = (this.logs.geometry.parameters.height || 1) * this.logs.scale.y;
+            originY = this.logs.position.y + logHeight * 0.5 - 0.7; // 시작 위치를 더 아래로 조정
+        }
+        const origin = new THREE.Vector3(0, originY, 0);
+        // 이전 불똥 삭제
+        if (this.embers && this.fireGroup) {
+            this.embers.sprites.forEach(sprite => this.fireGroup.remove(sprite));
+        }
+        // fireGroup에 추가: origin, 개수, 크기, 중력 조정
+        this.embers = new EmberParticleSystem(this.fireGroup, {
+            origin,
+            count: 15,
+            size: 0.08,
+            gravity: new THREE.Vector3(0, -0.2, 0)
+        });
     }
 }
 
