@@ -24,6 +24,10 @@ class FireApp {
         this.backgroundImage = null;
         this.isBgImageEnabled = false;
         
+        // 점화 시스템 (최소한만)
+        this.isFireLit = false;
+        this.ignitionAudio = null;
+        
         this.init();
     }
 
@@ -209,6 +213,7 @@ class FireApp {
         this.renderer.domElement.style.left = '0';
         this.renderer.domElement.style.zIndex = '2'; // 배경 이미지 위에 배치
         this.renderer.domElement.style.pointerEvents = 'auto';
+        this.renderer.domElement.style.cursor = 'pointer'; // 클릭 가능 표시
         
         // Canvas를 body에 추가
         document.body.appendChild(this.renderer.domElement);
@@ -299,6 +304,19 @@ class FireApp {
             console.log('Fire object created, available uniforms:', Object.keys(this.fire.material.uniforms));
             console.log('All uniforms:', this.fire.material.uniforms);
             
+            // 초기 상태: 불꽃 꺼진 상태 (투명도만 0으로 설정)
+            if (this.fire.material.uniforms.opacity) {
+                this.fire.material.uniforms.opacity.value = 0.0; // 투명하게
+            }
+            
+            // 점화 오디오 설정
+            try {
+                this.ignitionAudio = new Audio('sounds/fire_ignition.wav');
+                this.ignitionAudio.volume = 0.6;
+            } catch (e) {
+                console.warn('Could not load ignition audio:', e);
+            }
+            
             // 그룹에 추가
             this.fireGroup.add(this.fire);
             
@@ -307,7 +325,7 @@ class FireApp {
                 window.fireControls.setFire(this.fire);
             }
             
-            console.log('Fire object created and added to fire group');
+            console.log('Fire object created in extinguished state');
         } catch (error) {
             console.error('Error creating fire object:', error);
         }
@@ -323,6 +341,13 @@ class FireApp {
         window.addEventListener('keydown', (event) => {
             this.onKeyDown(event);
         }, false);
+        
+        // 클릭 이벤트 (불꽃 점화)
+        if (this.renderer && this.renderer.domElement) {
+            this.renderer.domElement.addEventListener('click', (event) => {
+                this.handleClick(event);
+            }, false);
+        }
     }
 
     onWindowResize() {
@@ -446,6 +471,205 @@ class FireApp {
     // 배경 이미지 상태 반환
     getBackgroundImageEnabled() {
         return this.isBgImageEnabled;
+    }
+
+    // 클릭 이벤트 처리
+    handleClick(event) {
+        // 점화 사운드 재생
+        if (this.ignitionAudio) {
+            this.ignitionAudio.currentTime = 0;
+            this.ignitionAudio.play().catch(e => {
+                console.log('Audio playback failed:', e);
+            });
+        }
+
+        if (!this.isFireLit) {
+            // 불이 꺼져있을 때 클릭
+            this.igniteFireAnimation();
+        } else {
+            // 불이 켜져있을 때 클릭
+            this.flareFireAnimation();
+        }
+    }
+
+    // 불 점화 애니메이션
+    igniteFireAnimation() {
+        this.isFireLit = true;
+        
+        if (!this.fire || !window.fireControls) return;
+        
+        const targetValues = window.fireControls.currentValues;
+        
+        // opacity는 바로 설정치로 변경
+        if (this.fire.material.uniforms.opacity) {
+            this.fire.material.uniforms.opacity.value = targetValues.opacity;
+        }
+        
+        // magnitude만 애니메이션: (설정치-0.7) → 설정치 (0.3초)
+        const animationDuration = 300; // 0.3초
+        
+        const startTime = performance.now();
+        const targetMagnitude = targetValues.magnitude;
+        const tempMagnitude = Math.max(0.1, targetMagnitude - 0.7);
+        
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / animationDuration, 1.0);
+            
+            // 부드러운 이징 적용
+            const easeProgress = progress < 0.5 
+                ? 2 * progress * progress 
+                : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            
+            // magnitude: (설정치-0.7) → 설정치
+            const currentMagnitude = tempMagnitude + (targetMagnitude - tempMagnitude) * easeProgress;
+            if (this.fire.material.uniforms.magnitude) {
+                this.fire.material.uniforms.magnitude.value = currentMagnitude;
+            }
+            
+            if (progress < 1.0) {
+                requestAnimationFrame(animate);
+            } else {
+                // 완료: 설정치 적용
+                if (window.fireControls) {
+                    window.fireControls.applyCurrentValues();
+                }
+            }
+        };
+        
+        // 애니메이션 속도: 0.05초만에 설정치+1로 갔다가 0.05초만에 복귀
+        this.animateSpeed(targetValues.animationSpeed);
+        
+        // 밝기 강화: 0.1초만에 설정치+1로 갔다가 0.2초동안 복귀
+        this.animateBrightness(targetValues.toonBrightness);
+        
+        requestAnimationFrame(animate);
+    }
+
+    // 불꽃 플레어 애니메이션
+    flareFireAnimation() {
+        if (!this.fire || !window.fireControls) return;
+        
+        const targetValues = window.fireControls.currentValues;
+        
+        // magnitude만 살짝 변화 (설정치 → 설정치-0.7 → 설정치) (0.3초)
+        const animationDuration = 300; // 0.3초
+        
+        const startTime = performance.now();
+        const currentMagnitude = targetValues.magnitude;
+        const tempMagnitude = Math.max(0.1, currentMagnitude - 0.7);
+        
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / animationDuration, 1.0);
+            
+            // 사인파 형태의 플레어 (내려갔다 올라옴)
+            const flareProgress = Math.sin(progress * Math.PI);
+            const magnitude = currentMagnitude + (tempMagnitude - currentMagnitude) * flareProgress;
+            
+            if (this.fire.material.uniforms.magnitude) {
+                this.fire.material.uniforms.magnitude.value = magnitude;
+            }
+            
+            if (progress < 1.0) {
+                requestAnimationFrame(animate);
+            } else {
+                // 완료: 설정치로 복원
+                if (this.fire.material.uniforms.magnitude) {
+                    this.fire.material.uniforms.magnitude.value = currentMagnitude;
+                }
+            }
+        };
+        
+        // 애니메이션 속도: 0.05초만에 설정치+1로 갔다가 0.05초만에 복귀
+        this.animateSpeed(targetValues.animationSpeed);
+        
+        // 밝기 강화: 0.1초만에 설정치+1로 갔다가 0.2초동안 복귀
+        this.animateBrightness(targetValues.toonBrightness);
+        
+        requestAnimationFrame(animate);
+    }
+
+    // 애니메이션 속도 효과
+    animateSpeed(targetSpeed) {
+        if (!this.fire) return;
+        
+        const tempSpeed = targetSpeed + 1;
+        const startTime = performance.now();
+        
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            
+            if (elapsed < 50) {
+                // 0.05초동안 +1로 증가
+                const progress = elapsed / 50;
+                const speed = targetSpeed + (tempSpeed - targetSpeed) * progress;
+                
+                if (this.fire.material.uniforms.noiseScale) {
+                    this.fire.material.uniforms.noiseScale.value.w = speed;
+                }
+                
+                requestAnimationFrame(animate);
+            } else if (elapsed < 100) {
+                // 0.05초동안 원래대로 복귀
+                const progress = (elapsed - 50) / 50;
+                const speed = tempSpeed + (targetSpeed - tempSpeed) * progress;
+                
+                if (this.fire.material.uniforms.noiseScale) {
+                    this.fire.material.uniforms.noiseScale.value.w = speed;
+                }
+                
+                requestAnimationFrame(animate);
+            } else {
+                // 완료
+                if (this.fire.material.uniforms.noiseScale) {
+                    this.fire.material.uniforms.noiseScale.value.w = targetSpeed;
+                }
+            }
+        };
+        
+        requestAnimationFrame(animate);
+    }
+
+    // 밝기 강화 효과
+    animateBrightness(targetBrightness) {
+        if (!this.fire) return;
+        
+        const tempBrightness = targetBrightness + 1;
+        const startTime = performance.now();
+        
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            
+            if (elapsed < 100) {
+                // 0.1초동안 +1로 증가
+                const progress = elapsed / 100;
+                const brightness = targetBrightness + (tempBrightness - targetBrightness) * progress;
+                
+                if (this.fire.material.uniforms.toonBrightness) {
+                    this.fire.material.uniforms.toonBrightness.value = brightness;
+                }
+                
+                requestAnimationFrame(animate);
+            } else if (elapsed < 300) {
+                // 0.2초동안 원래대로 복귀
+                const progress = (elapsed - 100) / 200;
+                const brightness = tempBrightness + (targetBrightness - tempBrightness) * progress;
+                
+                if (this.fire.material.uniforms.toonBrightness) {
+                    this.fire.material.uniforms.toonBrightness.value = brightness;
+                }
+                
+                requestAnimationFrame(animate);
+            } else {
+                // 완료
+                if (this.fire.material.uniforms.toonBrightness) {
+                    this.fire.material.uniforms.toonBrightness.value = targetBrightness;
+                }
+            }
+        };
+        
+        requestAnimationFrame(animate);
     }
 }
 

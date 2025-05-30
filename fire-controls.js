@@ -692,8 +692,14 @@ class FireControls {
             console.log('Initial toonBrightness applied:', this.currentValues.toonBrightness);
         }
         if (this.fire.material.uniforms.opacity) {
-            this.fire.material.uniforms.opacity.value = this.currentValues.opacity;
-            console.log('Initial opacity applied:', this.currentValues.opacity);
+            // 불이 꺼져있으면 opacity를 0으로 유지
+            if (window.fireApp && !window.fireApp.isFireLit) {
+                this.fire.material.uniforms.opacity.value = 0.0;
+                console.log('Fire is off, opacity kept at 0');
+            } else {
+                this.fire.material.uniforms.opacity.value = this.currentValues.opacity;
+                console.log('Initial opacity applied:', this.currentValues.opacity);
+            }
         }
 
         // UI 업데이트
