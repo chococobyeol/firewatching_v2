@@ -125,17 +125,19 @@ class FireControls {
         Object.assign(sidebar.style, {
             position: 'fixed',
             top: '0',
-            right: '-400px',
-            width: '320px',
+            right: '-350px',
+            width: '300px',
             height: '100%',
-            background: 'rgba(20, 20, 20, 0.95)',
+            background: 'rgba(20, 20, 20, 0.9)',
             padding: '20px',
             boxShadow: '-2px 0 15px rgba(0, 0, 0, 0.5)',
             transition: 'right 0.3s ease',
             zIndex: '101',
             backdropFilter: 'blur(10px)',
             fontFamily: "'Arial', sans-serif",
-            overflowY: 'auto'
+            overflowY: 'auto',
+            visibility: 'visible',
+            display: 'block'
         });
 
         // 사이드바 내용
@@ -323,6 +325,14 @@ class FireControls {
         `;
         
         document.body.appendChild(sidebar);
+        
+        // 디버깅: 사이드바 상태 확인
+        console.log('사이드바 생성됨:', {
+            id: sidebar.id,
+            right: sidebar.style.right,
+            width: sidebar.style.width,
+            position: sidebar.style.position
+        });
     }
 
     setupEventListeners() {
@@ -359,6 +369,11 @@ class FireControls {
             } else if (event.code === 'KeyR') {
                 this.resetToDefaults();
             }
+        });
+
+        // 윈도우 리사이즈 이벤트 - 반응형 사이드바 크기 조정
+        window.addEventListener('resize', () => {
+            this.handleResize();
         });
 
         // 모든 슬라이더와 토글에 이벤트 리스너 추가
@@ -605,7 +620,7 @@ class FireControls {
 
     closeSidebar() {
         const sidebar = document.getElementById('settingsSidebar');
-        sidebar.style.right = '-400px';
+        sidebar.style.right = '-350px';
     }
 
     setFire(fire) {
@@ -733,6 +748,16 @@ class FireControls {
             const canvas = window.fireApp.renderer.domElement;
             const transformString = `translate(${this.currentValues.positionX}px, ${this.currentValues.positionY}px)`;
             canvas.style.transform = transformString;
+        }
+    }
+
+    handleResize() {
+        const sidebar = document.getElementById('settingsSidebar');
+        if (!sidebar) return;
+        
+        // 사이드바가 열려있으면 닫기
+        if (sidebar.style.right === '0px') {
+            this.closeSidebar();
         }
     }
 }
