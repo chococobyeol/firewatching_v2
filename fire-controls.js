@@ -9,9 +9,9 @@ class FireControls {
         
         // 기본값
         this.defaultValues = {
-            scale: 1.0,
+            scale: 0.9,
             positionX: 0,
-            positionY: 110,
+            positionY: 190,
             nightSky: true,
             backgroundImage: true,
             magnitude: 1.6,
@@ -27,8 +27,8 @@ class FireControls {
             fireIntensity: 1.0,
             fireScale: 1.1,
             animationSpeed: 1.0,
-            toonSteps: 4.0,
-            toonBrightness: 1.9,
+            toonSteps: 2.0,
+            toonBrightness: 0.9,
             opacity: 0.7,
             soundVolume: 0.5,
             soundEnabled: true,
@@ -167,7 +167,7 @@ class FireControls {
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">크기 (Scale)</label>
                             <div class="slider-container">
-                                <input id="scale" type="range" min="0.5" max="5" step="0.1" value="${this.currentValues.scale}" class="modern-slider">
+                                <input id="scale" type="range" min="0.5" max="5" step="0.05" value="${this.currentValues.scale}" class="modern-slider">
                                 <span id="scale-value" class="value-display">${this.currentValues.scale}</span>
                             </div>
                         </div>
@@ -358,7 +358,7 @@ class FireControls {
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">투명도</label>
-                                    <input id="opacity" type="range" min="0.5" max="1.0" step="0.05" value="${this.currentValues.opacity}" class="modern-slider">
+                                    <input id="opacity" type="range" min="0.0" max="1.0" step="0.05" value="${this.currentValues.opacity}" class="modern-slider">
                                     <span id="opacity-value" class="value-display">${this.currentValues.opacity}</span>
                                 </div>
                             </div>
