@@ -19,12 +19,12 @@ class EmberParticleSystem {
                 this.origin.z + (Math.random() - 0.5) * 0.6
             );
             const vel = new THREE.Vector3(
-                (Math.random() - 0.5) * 0.8,
-                Math.random() * 1.0 + 0.8,
-                (Math.random() - 0.5) * 0.8
+                (Math.random() - 0.5) * 1.6,  // 초기 속도 배가
+                Math.random() * 2.0 + 1.6,   // 초기 속도 배가
+                (Math.random() - 0.5) * 1.6   // 초기 속도 배가
             );
-            // 수명 설정 (0.8~1.6초)
-            const lifetime = Math.random() * 0.8 + 0.8;
+            // 수명 설정 (0.6~1.2초)
+            const lifetime = Math.random() * 0.6 + 0.6;
             this.particlesData.push({ pos, vel, lifetime, age: 0 });
             // Sprite 생성
             const mat = new THREE.SpriteMaterial({
@@ -76,11 +76,11 @@ class EmberParticleSystem {
                     this.origin.z + (Math.random() - 0.5) * 0.6
                 );
                 data.vel.set(
-                    (Math.random() - 0.5) * 0.8,
-                    Math.random() * 1.0 + 0.8,
-                    (Math.random() - 0.5) * 0.8
+                    (Math.random() - 0.5) * 1.6,  // 초기 속도 배가
+                    Math.random() * 2.0 + 1.6,   // 초기 속도 배가
+                    (Math.random() - 0.5) * 1.6   // 초기 속도 배가
                 );
-                data.lifetime = Math.random() * 0.8 + 0.8;
+                data.lifetime = Math.random() * 0.5 + 0.1;
             }
             // 중력
             data.vel.add(this.gravity.clone().multiplyScalar(delta));
@@ -93,6 +93,8 @@ class EmberParticleSystem {
             data.vel.x += -theta * data.vel.x * dt + sigma * Math.sqrt(dt) * noise() * (1 / this.size);
             data.vel.y += -theta * data.vel.y * dt + sigma * Math.sqrt(dt) * noise() * (1 / this.size);
             data.vel.z += -theta * data.vel.z * dt + sigma * Math.sqrt(dt) * noise() * (1 / this.size);
+            // 전체 속도 감쇠 적용 (감쇠 대폭 강화)
+            data.vel.multiplyScalar(0.98);
             // 위치 업데이트
             data.pos.addScaledVector(data.vel, dt);
             // Sprite 위치, 크기, 투명도 업데이트
