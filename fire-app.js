@@ -37,6 +37,10 @@ class FireApp {
         this.nextStarted = false;
         this.soundVolume = 0.5;
         this.isMuted = false;
+        this.smoke = null;  // 연기 입자 시스템 참조
+        this.smokeOpacity = 0;            // 연기 페이드인 투명도
+        this.smokeStartTime = 0;          // 연기 페이드인 시작 시간
+        this.smokeFadeDuration = 2000;    // 연기 페이드인 지속 시간 (ms)
         
         this.init();
     }
@@ -453,6 +457,20 @@ class FireApp {
             this.embers.update(delta);
         }
 
+        // Smoke 입자 효과 업데이트 및 페이드인
+        if (this.smoke) {
+            this.smoke.update(delta);
+            // smoke fade-in
+            if (this.smokeOpacity < 1) {
+                const elapsed = performance.now() - this.smokeStartTime;
+                this.smokeOpacity = Math.min(1, elapsed / this.smokeFadeDuration);
+            }
+            // apply global fade
+            this.smoke.sprites.forEach(sprite => {
+                sprite.material.opacity *= this.smokeOpacity;
+            });
+        }
+
         // 렌더링
         this.renderer.render(this.scene, this.camera);
     }
@@ -626,6 +644,11 @@ class FireApp {
             this.embers.sprites.forEach(sprite => this.fireGroup.remove(sprite));
             this.embers = null;
         }
+        // 연기 삭제
+        if (this.smoke && this.fireGroup) {
+            this.smoke.sprites.forEach(sprite => this.fireGroup.remove(sprite));
+            this.smoke = null;
+        }
         
         // 배경 사운드 정지
         this.stopBackgroundSound();
@@ -660,9 +683,12 @@ class FireApp {
     // 불 점화 애니메이션
     igniteFireAnimation() {
         this.isFireLit = true;
-        // 불 점화 시 불똥 효과 생성 (토글된 경우에만)
+        // 불 점화 시 불똥 및 연기 효과 생성 (토글된 경우에만)
         if (window.fireControls && window.fireControls.currentValues.embersEnabled) {
             this.createEmbers();
+        }
+        if (window.fireControls && window.fireControls.currentValues.smokeEnabled) {
+            this.createSmoke();
         }
         
         if (!this.fire || !window.fireControls) return;
@@ -863,6 +889,31 @@ class FireApp {
             count: 15,
             size: 0.06,
             gravity: new THREE.Vector3(0, -0.2, 0)
+        });
+    }
+
+    // 연기 입자 효과 생성 메서드
+    createSmoke() {
+        // 연기 시작 위치 계산 (장작 위)
+        // smoke fade-in 초기화
+        this.smokeOpacity = 0;
+        this.smokeStartTime = performance.now();
+        let originY = 0;
+        if (this.logs && this.logs.geometry && this.logs.scale) {
+            const logHeight = (this.logs.geometry.parameters.height || 1) * this.logs.scale.y;
+            originY = this.logs.position.y + logHeight * 0.5;
+        }
+        const origin = new THREE.Vector3(0, originY, 0);
+        // 기존 연기 삭제
+        if (this.smoke && this.fireGroup) {
+            this.smoke.sprites.forEach(sprite => this.fireGroup.remove(sprite));
+        }
+        // 연기 시스템 생성
+        this.smoke = new SmokeParticleSystem(this.fireGroup, {
+            origin,
+            count: 30,
+            size: 1.5,
+            gravity: new THREE.Vector3(0, 0.1, 0)
         });
     }
 }

@@ -32,7 +32,8 @@ class FireControls {
             opacity: 0.7,
             soundVolume: 0.5,
             soundEnabled: true,
-            embersEnabled: true
+            embersEnabled: true,
+            smokeEnabled: true
         };
         
         // 현재 설정값
@@ -227,6 +228,13 @@ class FireControls {
                             <label style="color:#fff;font-size:13px;">불똥</label>
                             <label class="toggle-switch">
                                 <input id="embersEnabled" type="checkbox" ${this.currentValues.embersEnabled ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
+                            <label style="color:#fff;font-size:13px;">연기</label>
+                            <label class="toggle-switch">
+                                <input id="smokeEnabled" type="checkbox" ${this.currentValues.smokeEnabled ? 'checked' : ''}>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -643,6 +651,19 @@ class FireControls {
             this.currentValues.embersEnabled = enabled;
             this.saveSettings();
         });
+
+        this.setupToggle('smokeEnabled', (enabled) => {
+            if (window.fireApp) {
+                if (enabled && window.fireApp.isFireLit) {
+                    window.fireApp.createSmoke();
+                } else if (!enabled && window.fireApp.smoke) {
+                    window.fireApp.smoke.sprites.forEach(sprite => window.fireApp.fireGroup.remove(sprite));
+                    window.fireApp.smoke = null;
+                }
+            }
+            this.currentValues.smokeEnabled = enabled;
+            this.saveSettings();
+        });
     }
 
     setupSlider(id, callback) {
@@ -780,15 +801,6 @@ class FireControls {
                 window.fireApp.setVolume(this.currentValues.soundVolume);
             }
             window.fireApp.isMuted = !this.currentValues.soundEnabled;
-        }
-        // 불똥 초기 상태 적용 (불이 켜져 있을 때만 생성)
-        if (window.fireApp) {
-            if (this.currentValues.embersEnabled && window.fireApp.isFireLit) {
-                window.fireApp.createEmbers();
-            } else if (window.fireApp.embers) {
-                window.fireApp.embers.sprites.forEach(sprite => window.fireApp.fireGroup.remove(sprite));
-                window.fireApp.embers = null;
-            }
         }
     }
 
