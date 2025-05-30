@@ -165,8 +165,9 @@ class FireControls {
                     
                     <!-- 기본 설정 -->
                     <div class="setting-section">
-                        <h4 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:6px;">기본 설정</h4>
+                        <h4 style="color:#ff6600;margin:0 0 16px 0;font-size:14px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:6px;">기본 설정</h4>
                         
+                        <!-- 크기 -->
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">크기 (Scale)</label>
                             <div class="slider-container">
@@ -175,6 +176,7 @@ class FireControls {
                             </div>
                         </div>
                         
+                        <!-- 애니메이션 속도 -->
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">애니메이션 속도</label>
                             <div class="slider-container">
@@ -183,6 +185,7 @@ class FireControls {
                             </div>
                         </div>
                         
+                        <!-- X 위치 -->
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">X 위치</label>
                             <div class="slider-container">
@@ -191,6 +194,7 @@ class FireControls {
                             </div>
                         </div>
                         
+                        <!-- Y 위치 -->
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Y 위치</label>
                             <div class="slider-container">
@@ -199,79 +203,58 @@ class FireControls {
                             </div>
                         </div>
                         
-                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
-                            <label style="color:#fff;font-size:13px;">밤하늘 배경</label>
-                            <label class="toggle-switch">
-                                <input id="nightSky" type="checkbox" ${this.currentValues.nightSky ? 'checked' : ''}>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
-                            <label style="color:#fff;font-size:13px;">배경 이미지</label>
-                            <label class="toggle-switch">
-                                <input id="backgroundImage" type="checkbox" ${this.currentValues.backgroundImage ? 'checked' : ''}>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        
+                        <!-- 소리 볼륨 (특별한 처리) -->
                         <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">사운드 볼륨</label>
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">소리 볼륨</label>
                             <div class="slider-container">
                                 <input id="soundVolume" type="range" min="0" max="1" step="0.05" value="${this.currentValues.soundVolume}" class="modern-slider">
-                                <span id="soundVolume-value" class="value-display">${this.currentValues.soundVolume}</span>
+                                <span id="soundVolume-value" class="value-display mute-toggle" style="cursor:pointer;user-select:none;" title="클릭하여 음소거 토글">${this.currentValues.soundVolume.toFixed(2)}</span>
                             </div>
                         </div>
                         
-                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
-                            <label style="color:#fff;font-size:13px;">사운드</label>
-                            <label class="toggle-switch">
-                                <input id="soundEnabled" type="checkbox" ${this.currentValues.soundEnabled ? 'checked' : ''}>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
-                            <label style="color:#fff;font-size:13px;">불똥</label>
-                            <label class="toggle-switch">
-                                <input id="embersEnabled" type="checkbox" ${this.currentValues.embersEnabled ? 'checked' : ''}>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
-                            <label style="color:#fff;font-size:13px;">연기</label>
-                            <label class="toggle-switch">
-                                <input id="smokeEnabled" type="checkbox" ${this.currentValues.smokeEnabled ? 'checked' : ''}>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
-                            <label style="color:#fff;font-size:13px;">빛무리</label>
-                            <label class="toggle-switch">
-                                <input id="glowEnabled" type="checkbox" ${this.currentValues.glowEnabled ? 'checked' : ''}>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <!-- 빛무리 범위 조절 -->
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빛무리 범위</label>
-                            <div class="slider-container">
-                                <input id="glowRange" type="range" min="0.1" max="3" step="0.01" value="${this.currentValues.glowRange}" class="modern-slider">
-                                <span id="glowRange-value" class="value-display">${this.currentValues.glowRange}</span>
+                        <!-- 환경 설정 -->
+                        <div style="margin:16px 0;padding:12px 0;border-top:1px solid rgba(255,255,255,0.1);">
+                            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                <label style="color:#fff;font-size:13px;">밤하늘</label>
+                                <label class="toggle-switch">
+                                    <input id="nightSky" type="checkbox" ${this.currentValues.nightSky ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                <label style="color:#fff;font-size:13px;">배경 이미지</label>
+                                <label class="toggle-switch">
+                                    <input id="backgroundImage" type="checkbox" ${this.currentValues.backgroundImage ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
                             </div>
                         </div>
-                        <!-- 빛무리 밝기 조절 -->
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빛무리 밝기</label>
-                            <div class="slider-container">
-                                <input id="glowAlpha" type="range" min="0" max="1" step="0.01" value="${this.currentValues.glowAlpha}" class="modern-slider">
-                                <span id="glowAlpha-value" class="value-display">${this.currentValues.glowAlpha}</span>
+                        
+                        <!-- 효과 설정 -->
+                        <div style="margin:16px 0;padding:12px 0;border-top:1px solid rgba(255,255,255,0.1);">
+                            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                <label style="color:#fff;font-size:13px;">불똥</label>
+                                <label class="toggle-switch">
+                                    <input id="embersEnabled" type="checkbox" ${this.currentValues.embersEnabled ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
                             </div>
-                        </div>
-                        <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">연기 강도</label>
-                            <div class="slider-container">
-                                <input id="smokeIntensity" type="range" min="0" max="1" step="0.01" value="${this.currentValues.smokeIntensity}" class="modern-slider">
-                                <span id="smokeIntensity-value" class="value-display">${this.currentValues.smokeIntensity}</span>
+                            
+                            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                <label style="color:#fff;font-size:13px;">연기</label>
+                                <label class="toggle-switch">
+                                    <input id="smokeEnabled" type="checkbox" ${this.currentValues.smokeEnabled ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
+                                <label style="color:#fff;font-size:13px;">빛무리</label>
+                                <label class="toggle-switch">
+                                    <input id="glowEnabled" type="checkbox" ${this.currentValues.glowEnabled ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -285,38 +268,48 @@ class FireControls {
                         
                         <div id="advancedContent" style="display:none;gap:20px;flex-direction:column;">
                             
-                            <!-- 불 모양 조정 -->
+                            <!-- 불꽃 세부 조정 -->
                             <div class="setting-subsection">
-                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">불 모양 조정</h5>
+                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">불꽃 세부 조정</h5>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">불꽃 크기</label>
-                                    <input id="fireScale" type="range" min="0.8" max="1.1" step="0.005" value="${this.currentValues.fireScale}" class="modern-slider">
-                                    <span id="fireScale-value" class="value-display">${this.currentValues.fireScale}</span>
+                                    <div class="slider-container">
+                                        <input id="fireScale" type="range" min="0.8" max="1.1" step="0.005" value="${this.currentValues.fireScale}" class="modern-slider">
+                                        <span id="fireScale-value" class="value-display">${this.currentValues.fireScale}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">불꽃 강도</label>
-                                    <input id="magnitude" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.magnitude}" class="modern-slider">
-                                    <span id="magnitude-value" class="value-display">${this.currentValues.magnitude}</span>
+                                    <div class="slider-container">
+                                        <input id="magnitude" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.magnitude}" class="modern-slider">
+                                        <span id="magnitude-value" class="value-display">${this.currentValues.magnitude}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Lacunarity</label>
-                                    <input id="lacunarity" type="range" min="1" max="4" step="0.1" value="${this.currentValues.lacunarity}" class="modern-slider">
-                                    <span id="lacunarity-value" class="value-display">${this.currentValues.lacunarity}</span>
+                                    <div class="slider-container">
+                                        <input id="lacunarity" type="range" min="1" max="4" step="0.1" value="${this.currentValues.lacunarity}" class="modern-slider">
+                                        <span id="lacunarity-value" class="value-display">${this.currentValues.lacunarity}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Gain</label>
-                                    <input id="gain" type="range" min="0.1" max="1" step="0.05" value="${this.currentValues.gain}" class="modern-slider">
-                                    <span id="gain-value" class="value-display">${this.currentValues.gain}</span>
+                                    <div class="slider-container">
+                                        <input id="gain" type="range" min="0.1" max="1" step="0.05" value="${this.currentValues.gain}" class="modern-slider">
+                                        <span id="gain-value" class="value-display">${this.currentValues.gain}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">아래쪽 너비</label>
-                                    <input id="baseWidth" type="range" min="0.1" max="1" step="0.05" value="${this.currentValues.baseWidth}" class="modern-slider">
-                                    <span id="baseWidth-value" class="value-display">${this.currentValues.baseWidth}</span>
+                                    <div class="slider-container">
+                                        <input id="baseWidth" type="range" min="0.1" max="1" step="0.05" value="${this.currentValues.baseWidth}" class="modern-slider">
+                                        <span id="baseWidth-value" class="value-display">${this.currentValues.baseWidth}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -326,43 +319,55 @@ class FireControls {
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">X 스케일</label>
-                                    <input id="noiseScaleX" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.noiseScaleX}" class="modern-slider">
-                                    <span id="noiseScaleX-value" class="value-display">${this.currentValues.noiseScaleX}</span>
+                                    <div class="slider-container">
+                                        <input id="noiseScaleX" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.noiseScaleX}" class="modern-slider">
+                                        <span id="noiseScaleX-value" class="value-display">${this.currentValues.noiseScaleX}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Y 스케일</label>
-                                    <input id="noiseScaleY" type="range" min="0.1" max="5" step="0.1" value="${this.currentValues.noiseScaleY}" class="modern-slider">
-                                    <span id="noiseScaleY-value" class="value-display">${this.currentValues.noiseScaleY}</span>
+                                    <div class="slider-container">
+                                        <input id="noiseScaleY" type="range" min="0.1" max="5" step="0.1" value="${this.currentValues.noiseScaleY}" class="modern-slider">
+                                        <span id="noiseScaleY-value" class="value-display">${this.currentValues.noiseScaleY}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Z 스케일</label>
-                                    <input id="noiseScaleZ" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.noiseScaleZ}" class="modern-slider">
-                                    <span id="noiseScaleZ-value" class="value-display">${this.currentValues.noiseScaleZ}</span>
+                                    <div class="slider-container">
+                                        <input id="noiseScaleZ" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.noiseScaleZ}" class="modern-slider">
+                                        <span id="noiseScaleZ-value" class="value-display">${this.currentValues.noiseScaleZ}</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 색상 -->
+                            <!-- 색상 조정 -->
                             <div class="setting-subsection">
-                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">색상</h5>
+                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">색상 조정</h5>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빨강 (Red)</label>
-                                    <input id="colorR" type="range" min="0" max="255" step="1" value="${this.currentValues.colorR}" class="modern-slider">
-                                    <span id="colorR-value" class="value-display">${this.currentValues.colorR}</span>
+                                    <div class="slider-container">
+                                        <input id="colorR" type="range" min="0" max="255" step="1" value="${this.currentValues.colorR}" class="modern-slider">
+                                        <span id="colorR-value" class="value-display">${this.currentValues.colorR}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">초록 (Green)</label>
-                                    <input id="colorG" type="range" min="0" max="255" step="1" value="${this.currentValues.colorG}" class="modern-slider">
-                                    <span id="colorG-value" class="value-display">${this.currentValues.colorG}</span>
+                                    <div class="slider-container">
+                                        <input id="colorG" type="range" min="0" max="255" step="1" value="${this.currentValues.colorG}" class="modern-slider">
+                                        <span id="colorG-value" class="value-display">${this.currentValues.colorG}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">파랑 (Blue)</label>
-                                    <input id="colorB" type="range" min="0" max="255" step="1" value="${this.currentValues.colorB}" class="modern-slider">
-                                    <span id="colorB-value" class="value-display">${this.currentValues.colorB}</span>
+                                    <div class="slider-container">
+                                        <input id="colorB" type="range" min="0" max="255" step="1" value="${this.currentValues.colorB}" class="modern-slider">
+                                        <span id="colorB-value" class="value-display">${this.currentValues.colorB}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -372,20 +377,60 @@ class FireControls {
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">색상 단계 수</label>
-                                    <input id="toonSteps" type="range" min="2" max="8" step="1" value="${this.currentValues.toonSteps}" class="modern-slider">
-                                    <span id="toonSteps-value" class="value-display">${this.currentValues.toonSteps}</span>
+                                    <div class="slider-container">
+                                        <input id="toonSteps" type="range" min="2" max="8" step="1" value="${this.currentValues.toonSteps}" class="modern-slider">
+                                        <span id="toonSteps-value" class="value-display">${this.currentValues.toonSteps}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">밝기 강화</label>
-                                    <input id="toonBrightness" type="range" min="0.5" max="2.0" step="0.1" value="${this.currentValues.toonBrightness}" class="modern-slider">
-                                    <span id="toonBrightness-value" class="value-display">${this.currentValues.toonBrightness}</span>
+                                    <div class="slider-container">
+                                        <input id="toonBrightness" type="range" min="0.5" max="2.0" step="0.1" value="${this.currentValues.toonBrightness}" class="modern-slider">
+                                        <span id="toonBrightness-value" class="value-display">${this.currentValues.toonBrightness}</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">투명도</label>
-                                    <input id="opacity" type="range" min="0.0" max="1.0" step="0.05" value="${this.currentValues.opacity}" class="modern-slider">
-                                    <span id="opacity-value" class="value-display">${this.currentValues.opacity}</span>
+                                    <div class="slider-container">
+                                        <input id="opacity" type="range" min="0.0" max="1.0" step="0.05" value="${this.currentValues.opacity}" class="modern-slider">
+                                        <span id="opacity-value" class="value-display">${this.currentValues.opacity}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 연기 강도 -->
+                            <div class="setting-subsection">
+                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">연기 효과</h5>
+                                
+                                <div class="setting-item">
+                                    <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">연기 강도</label>
+                                    <div class="slider-container">
+                                        <input id="smokeIntensity" type="range" min="0" max="1" step="0.01" value="${this.currentValues.smokeIntensity}" class="modern-slider">
+                                        <span id="smokeIntensity-value" class="value-display">${this.currentValues.smokeIntensity}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 빛무리 효과 -->
+                            <div class="setting-subsection">
+                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">빛무리 효과</h5>
+                                
+                                <div class="setting-item">
+                                    <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빛무리 범위</label>
+                                    <div class="slider-container">
+                                        <input id="glowRange" type="range" min="0.1" max="3" step="0.01" value="${this.currentValues.glowRange}" class="modern-slider">
+                                        <span id="glowRange-value" class="value-display">${this.currentValues.glowRange}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빛무리 밝기</label>
+                                    <div class="slider-container">
+                                        <input id="glowAlpha" type="range" min="0" max="1" step="0.01" value="${this.currentValues.glowAlpha}" class="modern-slider">
+                                        <span id="glowAlpha-value" class="value-display">${this.currentValues.glowAlpha}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -477,6 +522,43 @@ class FireControls {
             resetBtn.style.backgroundColor = 'rgba(255,80,80,0.2)';
             resetBtn.style.color = 'rgba(255,80,80,0.9)';
         });
+
+        // 음소거 토글 기능 (볼륨 값 표시 클릭)
+        const soundVolumeValue = document.getElementById('soundVolume-value');
+        const soundVolumeSlider = document.getElementById('soundVolume');
+        if (soundVolumeValue) {
+            soundVolumeValue.addEventListener('click', () => {
+                if (window.fireApp && window.fireApp.toggleMute) {
+                    window.fireApp.toggleMute();
+                    
+                    // 시각적 피드백 추가 - 크기 변화 없이 스타일만 변경
+                    const currentVolume = this.currentValues.soundVolume;
+                    const isMuted = window.fireApp.isMuted || false;
+                    
+                    if (isMuted) {
+                        soundVolumeValue.textContent = 'OFF';
+                        soundVolumeValue.style.color = '#ff6666';
+                        soundVolumeValue.style.backgroundColor = 'rgba(255, 102, 102, 0.2)';
+                        soundVolumeValue.style.textDecoration = 'none';
+                        // 슬라이더도 음소거 상태로 표시
+                        if (soundVolumeSlider) {
+                            soundVolumeSlider.style.opacity = '0.5';
+                            soundVolumeSlider.style.filter = 'grayscale(1)';
+                        }
+                    } else {
+                        soundVolumeValue.textContent = currentVolume.toFixed(2);
+                        soundVolumeValue.style.color = '#ff6600';
+                        soundVolumeValue.style.backgroundColor = 'rgba(255, 102, 0, 0.2)';
+                        soundVolumeValue.style.textDecoration = 'none';
+                        // 슬라이더를 정상 상태로 복원
+                        if (soundVolumeSlider) {
+                            soundVolumeSlider.style.opacity = '1';
+                            soundVolumeSlider.style.filter = 'none';
+                        }
+                    }
+                }
+            });
+        }
     }
 
     setupControls() {
