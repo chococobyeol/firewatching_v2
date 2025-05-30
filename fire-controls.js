@@ -34,7 +34,10 @@ class FireControls {
             soundEnabled: true,
             embersEnabled: true,
             smokeEnabled: true,
-            smokeIntensity: 0.2
+            smokeIntensity: 0.2,
+            glowEnabled: true,
+            glowRange: 1.3,
+            glowAlpha: 0.2
         };
         
         // 현재 설정값
@@ -240,6 +243,29 @@ class FireControls {
                                 <input id="smokeEnabled" type="checkbox" ${this.currentValues.smokeEnabled ? 'checked' : ''}>
                                 <span class="toggle-slider"></span>
                             </label>
+                        </div>
+                        <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;">
+                            <label style="color:#fff;font-size:13px;">빛무리</label>
+                            <label class="toggle-switch">
+                                <input id="glowEnabled" type="checkbox" ${this.currentValues.glowEnabled ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <!-- 빛무리 범위 조절 -->
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빛무리 범위</label>
+                            <div class="slider-container">
+                                <input id="glowRange" type="range" min="0.1" max="3" step="0.01" value="${this.currentValues.glowRange}" class="modern-slider">
+                                <span id="glowRange-value" class="value-display">${this.currentValues.glowRange}</span>
+                            </div>
+                        </div>
+                        <!-- 빛무리 밝기 조절 -->
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빛무리 밝기</label>
+                            <div class="slider-container">
+                                <input id="glowAlpha" type="range" min="0" max="1" step="0.01" value="${this.currentValues.glowAlpha}" class="modern-slider">
+                                <span id="glowAlpha-value" class="value-display">${this.currentValues.glowAlpha}</span>
+                            </div>
                         </div>
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">연기 강도</label>
@@ -465,7 +491,6 @@ class FireControls {
                 window.fireApp.camera.fov = newFOV;
                 window.fireApp.camera.updateProjectionMatrix();
             }
-            
             this.currentValues.scale = value;
             this.saveSettings();
         });
@@ -514,6 +539,10 @@ class FireControls {
                 this.fire.scale.set(value, value, value);
             }
             this.currentValues.fireScale = value;
+            // Glow 크기도 모닥불 크기에 맞추어 동기화
+            if (window.fireApp && window.fireApp.setGlowScale) {
+                window.fireApp.setGlowScale(value);
+            }
             this.saveSettings();
         });
 
@@ -675,11 +704,37 @@ class FireControls {
             this.saveSettings();
         });
 
+        this.setupToggle('glowEnabled', (enabled) => {
+            if (window.fireApp && window.fireApp.toggleGlow) {
+                window.fireApp.toggleGlow(enabled);
+            }
+            this.currentValues.glowEnabled = enabled;
+            this.saveSettings();
+        });
+
         this.setupSlider('smokeIntensity', (value) => {
             if (window.fireApp && window.fireApp.setSmokeIntensity) {
                 window.fireApp.setSmokeIntensity(value);
             }
             this.currentValues.smokeIntensity = value;
+            this.saveSettings();
+        });
+
+        // 빛무리 범위 조절
+        this.setupSlider('glowRange', (value) => {
+            this.currentValues.glowRange = value;
+            if (window.fireApp && window.fireApp.setGlowRange) {
+                window.fireApp.setGlowRange(value);
+            }
+            this.saveSettings();
+        });
+
+        // 빛무리 밝기 조절
+        this.setupSlider('glowAlpha', (value) => {
+            this.currentValues.glowAlpha = value;
+            if (window.fireApp && window.fireApp.setGlowAlpha) {
+                window.fireApp.setGlowAlpha(value);
+            }
             this.saveSettings();
         });
     }
@@ -813,6 +868,26 @@ class FireControls {
             window.fireApp.toggleBackgroundImage(this.currentValues.backgroundImage);
         }
         
+        // 빛무리 초기 상태 적용
+        if (window.fireApp && window.fireApp.toggleGlow) {
+            window.fireApp.toggleGlow(this.currentValues.glowEnabled);
+        }
+        
+        // Glow 크기 초기 적용 (모닥불 크기 기준)
+        if (window.fireApp && window.fireApp.setGlowScale) {
+            window.fireApp.setGlowScale(this.currentValues.fireScale);
+        }
+        
+        // Glow 범위 초기 적용
+        if (window.fireApp && window.fireApp.setGlowRange) {
+            window.fireApp.setGlowRange(this.currentValues.glowRange);
+        }
+        
+        // Glow 밝기 초기 적용
+        if (window.fireApp && window.fireApp.setGlowAlpha) {
+            window.fireApp.setGlowAlpha(this.currentValues.glowAlpha);
+        }
+        
         // 사운드 설정 초기 상태 적용
         if (window.fireApp) {
             if (window.fireApp.setVolume) {
@@ -871,6 +946,10 @@ class FireControls {
             const canvas = window.fireApp.renderer.domElement;
             const transformString = `translate(${this.currentValues.positionX}px, ${this.currentValues.positionY}px)`;
             canvas.style.transform = transformString;
+            // Glow 캔버스도 동일하게 이동
+            if (window.fireApp.glowCanvas) {
+                window.fireApp.glowCanvas.style.transform = transformString;
+            }
         }
     }
 

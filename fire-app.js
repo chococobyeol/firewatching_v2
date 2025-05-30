@@ -24,6 +24,14 @@ class FireApp {
         this.backgroundImage = null;
         this.isBgImageEnabled = false;
         
+        // 빛무리(glow) 관련 변수 추가
+        this.glowCanvas = null;
+        this.glowCtx = null;
+        this.isGlowEnabled = false;
+        this.glowScale = 1.0; // glow 크기 비율
+        this.glowAlpha = 1.0; // glow 밝기 (0~1)
+        this.glowRange = 1.0; // glow 범위 배수
+        
         // 점화 시스템 (최소한만)
         this.isFireLit = false;
         this.ignitionAudio = null;
@@ -52,6 +60,7 @@ class FireApp {
         this.createScene();
         this.createCamera();
         this.createRenderer();
+        this.createGlowCanvas(); // glow 캔버스 생성
         this.createLighting();
         this.loadFireTexture();
         this.loadBackgroundImage(); // 배경 이미지 로드
@@ -242,6 +251,27 @@ class FireApp {
         console.log('Renderer created and canvas added to DOM');
     }
 
+    createGlowCanvas() {
+        const canvasWidth = window.innerWidth * this.canvasSizeFactor;
+        const canvasHeight = window.innerHeight * this.canvasSizeFactor;
+        const offsetX = (canvasWidth - window.innerWidth) / 2;
+        const offsetY = (canvasHeight - window.innerHeight) / 2;
+        this.glowCanvas = document.createElement('canvas');
+        this.glowCanvas.id = 'glowCanvas';
+        this.glowCanvas.width = canvasWidth;
+        this.glowCanvas.height = canvasHeight;
+        this.glowCanvas.style.position = 'fixed';
+        this.glowCanvas.style.top = `-${offsetY}px`;
+        this.glowCanvas.style.left = `-${offsetX}px`;
+        this.glowCanvas.style.width = `${canvasWidth}px`;
+        this.glowCanvas.style.height = `${canvasHeight}px`;
+        this.glowCanvas.style.pointerEvents = 'none';
+        this.glowCanvas.style.zIndex = '3'; // 불 위에 배치
+        document.body.appendChild(this.glowCanvas);
+        this.glowCtx = this.glowCanvas.getContext('2d');
+        console.log('Glow canvas created');
+    }
+
     createLighting() {
         // 환경광 추가
         const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
@@ -405,6 +435,16 @@ class FireApp {
         this.renderer.domElement.style.width = `${canvasWidth}px`;
         this.renderer.domElement.style.height = `${canvasHeight}px`;
         
+        // Glow 캔버스 크기 및 위치 동기화
+        if (this.glowCanvas) {
+            this.glowCanvas.width = canvasWidth;
+            this.glowCanvas.height = canvasHeight;
+            this.glowCanvas.style.top = `-${offsetY}px`;
+            this.glowCanvas.style.left = `-${offsetX}px`;
+            this.glowCanvas.style.width = `${canvasWidth}px`;
+            this.glowCanvas.style.height = `${canvasHeight}px`;
+        }
+        
         // 배경 캔버스 크기 업데이트
         this.generateStars(); // 별 위치 재생성
         this.updateBackgroundCanvas();
@@ -490,6 +530,9 @@ class FireApp {
 
         // 렌더링
         this.renderer.render(this.scene, this.camera);
+        
+        // Glow 그리기
+        this.drawGlow();
     }
 
     // 공개 메서드들
@@ -940,6 +983,67 @@ class FireApp {
         if (this.smoke) {
             this.smoke.baseOpacity = intensity;
         }
+    }
+
+    // Glow 효과 토글
+    toggleGlow(enabled) {
+        this.isGlowEnabled = enabled;
+        console.log('Glow effect:', enabled ? 'enabled' : 'disabled');
+        // 비활성화 시 이전 Glow 캔버스 초기화
+        if (!enabled && this.glowCtx) {
+            this.glowCtx.clearRect(0, 0, this.glowCanvas.width, this.glowCanvas.height);
+        }
+    }
+    
+    // Glow 크기 설정
+    setGlowScale(scale) {
+        this.glowScale = scale;
+        console.log('Glow scale set to', scale);
+    }
+    
+    // Glow 밝기 설정
+    setGlowAlpha(alpha) {
+        this.glowAlpha = alpha;
+        console.log('Glow alpha set to', alpha);
+    }
+    
+    // Glow 범위 설정
+    setGlowRange(range) {
+        this.glowRange = range;
+        console.log('Glow range set to', range);
+    }
+    
+    // Glow 캔버스 그리기
+    drawGlow() {
+        if (!this.glowCanvas || !this.isGlowEnabled || !this.isFireLit) return;
+        const ctx = this.glowCtx;
+        const w = this.glowCanvas.width;
+        const h = this.glowCanvas.height;
+        // 이전 프레임 지우기
+        ctx.clearRect(0, 0, w, h);
+        // Fire world position 투영하여 glow 중심 계산
+        const vec = new THREE.Vector3(0, 0, 0).project(this.camera);
+        const cx = (vec.x + 1) / 2 * w;
+        let cy = (-vec.y + 1) / 2 * h;
+        // Glow 중심을 아래로 약간 이동 (baseRadius의 일부로 고정)
+        const baseRadius = Math.min(w, h) * 0.25;
+        // range 및 scale 반영
+        const radius = baseRadius * this.glowScale * this.glowRange;
+        // 중심 이동: baseRadius의 10%만큼 아래 이동
+        const shiftY = baseRadius * 0.05;
+        cy += shiftY;
+        // 반경 설정 (화면 비율 및 scale에 따라)
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+        // brightness 반영
+        grad.addColorStop(0, `rgba(255,230,120,${0.3 * this.glowAlpha})`);
+        grad.addColorStop(0.5, `rgba(255,180,60,${0.15 * this.glowAlpha})`);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
     }
 }
 
