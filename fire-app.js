@@ -18,16 +18,24 @@ class FireApp {
         this.stars = [];
         this.isSkyEnabled = false;
         
+        // 배경 이미지 관련 변수 추가
+        this.bgImageCanvas = null;
+        this.bgImageCtx = null;
+        this.backgroundImage = null;
+        this.isBgImageEnabled = false;
+        
         this.init();
     }
 
     init() {
         this.createBackgroundCanvas(); // 배경 캔버스 먼저 생성
+        this.createBackgroundImageCanvas(); // 배경 이미지 캔버스 생성
         this.createScene();
         this.createCamera();
         this.createRenderer();
         this.createLighting();
         this.loadFireTexture();
+        this.loadBackgroundImage(); // 배경 이미지 로드
         this.setupEventListeners();
         this.animate();
     }
@@ -51,6 +59,73 @@ class FireApp {
         this.updateBackgroundCanvas();
         
         console.log('Background canvas created');
+    }
+
+    // 배경 이미지 캔버스 생성
+    createBackgroundImageCanvas() {
+        this.bgImageCanvas = document.createElement('canvas');
+        this.bgImageCanvas.id = 'bgImageCanvas';
+        this.bgImageCanvas.style.position = 'fixed';
+        this.bgImageCanvas.style.top = '0';
+        this.bgImageCanvas.style.left = '0';
+        this.bgImageCanvas.style.width = '100%';
+        this.bgImageCanvas.style.height = '100%';
+        this.bgImageCanvas.style.zIndex = '1';
+        this.bgImageCanvas.style.pointerEvents = 'none';
+        
+        this.bgImageCtx = this.bgImageCanvas.getContext('2d');
+        document.body.appendChild(this.bgImageCanvas);
+        
+        console.log('Background image canvas created');
+    }
+
+    // 배경 이미지 로드
+    loadBackgroundImage() {
+        this.backgroundImage = new Image();
+        this.backgroundImage.onload = () => {
+            console.log('Background image loaded');
+            this.updateBackgroundImageCanvas();
+        };
+        this.backgroundImage.onerror = () => {
+            console.warn('Background image failed to load');
+        };
+        this.backgroundImage.src = 'images/background.png';
+    }
+
+    // 배경 이미지 캔버스 업데이트
+    updateBackgroundImageCanvas() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        this.bgImageCanvas.width = width;
+        this.bgImageCanvas.height = height;
+        
+        // 캔버스 초기화
+        this.bgImageCtx.clearRect(0, 0, width, height);
+        
+        if (this.isBgImageEnabled && this.backgroundImage && this.backgroundImage.complete) {
+            // 이미지를 화면에 맞게 조정하여 그리기
+            const imgAspect = this.backgroundImage.width / this.backgroundImage.height;
+            const screenAspect = width / height;
+            
+            let drawWidth, drawHeight, drawX, drawY;
+            
+            if (imgAspect > screenAspect) {
+                // 이미지가 더 넓음 - 높이에 맞춤
+                drawHeight = height;
+                drawWidth = height * imgAspect;
+                drawX = (width - drawWidth) / 2;
+                drawY = 0;
+            } else {
+                // 이미지가 더 높음 - 너비에 맞춤
+                drawWidth = width;
+                drawHeight = width / imgAspect;
+                drawX = 0;
+                drawY = (height - drawHeight) / 2;
+            }
+            
+            this.bgImageCtx.drawImage(this.backgroundImage, drawX, drawY, drawWidth, drawHeight);
+        }
     }
 
     // 별 생성
@@ -132,7 +207,7 @@ class FireApp {
         this.renderer.domElement.style.position = 'fixed';
         this.renderer.domElement.style.top = '0';
         this.renderer.domElement.style.left = '0';
-        this.renderer.domElement.style.zIndex = '1';
+        this.renderer.domElement.style.zIndex = '2'; // 배경 이미지 위에 배치
         this.renderer.domElement.style.pointerEvents = 'auto';
         
         // Canvas를 body에 추가
@@ -262,6 +337,9 @@ class FireApp {
         this.generateStars(); // 별 위치 재생성
         this.updateBackgroundCanvas();
         
+        // 배경 이미지 캔버스 크기 업데이트
+        this.updateBackgroundImageCanvas();
+        
         console.log('Window resized');
     }
 
@@ -353,9 +431,21 @@ class FireApp {
         console.log('Night sky:', enabled ? 'enabled' : 'disabled');
     }
 
+    // 배경 이미지 토글 메서드
+    toggleBackgroundImage(enabled) {
+        this.isBgImageEnabled = enabled;
+        this.updateBackgroundImageCanvas();
+        console.log('Background image:', enabled ? 'enabled' : 'disabled');
+    }
+
     // 밤하늘 상태 반환
     getNightSkyEnabled() {
         return this.isSkyEnabled;
+    }
+
+    // 배경 이미지 상태 반환
+    getBackgroundImageEnabled() {
+        return this.isBgImageEnabled;
     }
 }
 

@@ -13,6 +13,7 @@ class FireControls {
             positionX: 0,
             positionY: 0,
             nightSky: false,
+            backgroundImage: false,
             magnitude: 1.6,
             lacunarity: 2.0,
             gain: 0.5,
@@ -176,9 +177,17 @@ class FireControls {
                         </div>
                         
                         <div class="setting-item">
-                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">🌌 밤하늘 배경</label>
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">밤하늘 배경</label>
                             <label class="toggle-switch">
                                 <input id="nightSky" type="checkbox" ${this.currentValues.nightSky ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">배경 이미지</label>
+                            <label class="toggle-switch">
+                                <input id="backgroundImage" type="checkbox" ${this.currentValues.backgroundImage ? 'checked' : ''}>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -420,6 +429,15 @@ class FireControls {
             this.saveSettings();
         });
 
+        // 배경 이미지 토글 컨트롤
+        this.setupToggle('backgroundImage', (enabled) => {
+            if (window.fireApp && window.fireApp.toggleBackgroundImage) {
+                window.fireApp.toggleBackgroundImage(enabled);
+            }
+            this.currentValues.backgroundImage = enabled;
+            this.saveSettings();
+        });
+
         // 불 모양 조정 컨트롤
         this.setupSlider('fireScale', (value) => {
             if (this.fire) {
@@ -658,6 +676,11 @@ class FireControls {
         // 밤하늘 초기 상태 적용
         if (window.fireApp && window.fireApp.toggleNightSky) {
             window.fireApp.toggleNightSky(this.currentValues.nightSky);
+        }
+        
+        // 배경 이미지 초기 상태 적용
+        if (window.fireApp && window.fireApp.toggleBackgroundImage) {
+            window.fireApp.toggleBackgroundImage(this.currentValues.backgroundImage);
         }
     }
 
