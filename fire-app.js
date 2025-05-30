@@ -458,19 +458,28 @@ class FireApp {
     onKeyDown(event) {
         switch (event.code) {
             case 'KeyH':
-                // H 키로 컨트롤 패널 토글
-                const controls = document.getElementById('controls');
-                controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
+                // H 키로 컨트롤 패널 토글 (조합키가 없을 때만)
+                if (!event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
+                    const controls = document.getElementById('controls');
+                    controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
+                }
                 break;
             case 'KeyR':
-                // R 키로 리셋
-                if (window.fireControls) {
-                    window.fireControls.resetToDefaults();
+                // R 키로 리셋 (조합키가 없을 때만 - Cmd+R, Ctrl+R 등 새로고침 방지)
+                if (!event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
+                    console.log('🔄 R 키 단독 입력 - 설정 리셋');
+                    if (window.fireControls) {
+                        window.fireControls.resetToDefaults();
+                    }
+                } else {
+                    console.log('🚫 조합키와 함께 R 키 입력 - 리셋 무시 (새로고침 등)');
                 }
                 break;
             case 'Space':
                 // 스페이스바로 애니메이션 일시정지/재생 (선택사항)
-                event.preventDefault();
+                if (!event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
+                    event.preventDefault();
+                }
                 break;
         }
     }

@@ -47,6 +47,21 @@ class FireControls {
     }
 
     init() {
+        // 로컬스토리지 지원 여부 확인
+        if (typeof(Storage) === "undefined") {
+            console.warn('⚠️ 이 브라우저는 로컬스토리지를 지원하지 않습니다.');
+        } else {
+            console.log('✅ 로컬스토리지 지원됨');
+            // 로컬스토리지 접근 테스트
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                console.log('✅ 로컬스토리지 접근 가능');
+            } catch (e) {
+                console.warn('⚠️ 로컬스토리지 접근 불가:', e);
+            }
+        }
+        
         this.loadSettings();
         this.createModernUI();
         this.setupEventListeners();
@@ -54,25 +69,29 @@ class FireControls {
 
     // 로컬스토리지에서 설정 불러오기
     loadSettings() {
-        // 개발 중: 기존 저장 설정 삭제하여 기본값 강제 적용
-        localStorage.removeItem('fireSettings');
+        console.log('🔄 설정 불러오기...');
         try {
             const saved = localStorage.getItem('fireSettings');
             if (saved) {
                 const settings = JSON.parse(saved);
                 this.currentValues = { ...this.defaultValues, ...settings };
+                console.log('✅ 저장된 설정 복원 완료');
+            } else {
+                console.log('ℹ️ 저장된 설정이 없음, 기본값 사용');
             }
         } catch (e) {
-            console.log('설정 불러오기 실패:', e);
+            console.log('❌ 설정 불러오기 실패:', e);
         }
     }
 
     // 로컬스토리지에 설정 저장
     saveSettings() {
         try {
-            localStorage.setItem('fireSettings', JSON.stringify(this.currentValues));
+            const settingsJson = JSON.stringify(this.currentValues);
+            localStorage.setItem('fireSettings', settingsJson);
+            console.log('💾 설정 저장 완료');
         } catch (e) {
-            console.log('설정 저장 실패:', e);
+            console.log('❌ 설정 저장 실패:', e);
         }
     }
 
@@ -91,6 +110,12 @@ class FireControls {
         
         // 모든 슬라이더를 container로 감싸기
         setTimeout(() => this.wrapSlidersWithContainers(), 100);
+        
+        // UI 값 동기화 (사이드바 생성 후)
+        setTimeout(() => {
+            this.updateAllDisplayValues();
+            console.log('🔄 UI 값 동기화 완료');
+        }, 150);
     }
 
     createSettingsButton() {
@@ -488,10 +513,13 @@ class FireControls {
 
         // 키보드 단축키
         document.addEventListener('keydown', (event) => {
-            if (event.code === 'KeyH') {
+            if (event.code === 'KeyH' && !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
                 this.toggleSidebar();
-            } else if (event.code === 'KeyR') {
+            } else if (event.code === 'KeyR' && !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
+                console.log('🔄 FireControls: R 키 단독 입력 - 설정 리셋');
                 this.resetToDefaults();
+            } else if (event.code === 'KeyR') {
+                console.log('🚫 FireControls: 조합키와 함께 R 키 입력 - 리셋 무시');
             }
         });
 
@@ -584,14 +612,14 @@ class FireControls {
 
         // 위치 조정 컨트롤 (CSS transform으로 캔버스 전체 이동)
         this.setupSlider('positionX', (value) => {
-            this.updateCanvasPosition();
             this.currentValues.positionX = value;
+            this.updateCanvasPosition(value, this.currentValues.positionY);
             this.saveSettings();
         });
 
         this.setupSlider('positionY', (value) => {
-            this.updateCanvasPosition();
             this.currentValues.positionY = value;
+            this.updateCanvasPosition(this.currentValues.positionX, value);
             this.saveSettings();
         });
 
@@ -830,9 +858,27 @@ class FireControls {
         
         slider.addEventListener('input', () => {
             const value = parseFloat(slider.value);
-            valueSpan.textContent = value.toFixed(2);
+            
+            // 표시값 업데이트 (정밀도 고려)
+            if (slider.step && parseFloat(slider.step) >= 1) {
+                // step이 1 이상이면 정수로 표시
+                valueSpan.textContent = value.toFixed(0);
+            } else {
+                // 소수점 2자리로 표시
+                valueSpan.textContent = value.toFixed(2);
+            }
+            
+            // 콜백 실행
             callback(value);
         });
+        
+        // 초기값 설정 확인
+        const initialValue = parseFloat(slider.value);
+        if (slider.step && parseFloat(slider.step) >= 1) {
+            valueSpan.textContent = initialValue.toFixed(0);
+        } else {
+            valueSpan.textContent = initialValue.toFixed(2);
+        }
     }
 
     setupToggle(id, callback) {
@@ -874,6 +920,11 @@ class FireControls {
         console.log('toonBrightness uniform exists:', !!this.fire.material.uniforms.toonBrightness);
         this.setupControls();
         this.applyCurrentValues();
+        
+        // UI 동기화 확실히 하기
+        setTimeout(() => {
+            this.updateAllDisplayValues();
+        }, 100);
     }
 
     applyCurrentValues() {
@@ -995,20 +1046,37 @@ class FireControls {
 
     updateAllDisplayValues() {
         Object.keys(this.currentValues).forEach(key => {
+            const value = this.currentValues[key];
+            
+            // 슬라이더 값 업데이트
+            const slider = document.getElementById(key);
+            if (slider && slider.type === 'range') {
+                slider.value = value;
+            }
+            
+            // 표시값 업데이트
             const valueSpan = document.getElementById(key + '-value');
             if (valueSpan) {
-                const value = this.currentValues[key];
                 if (typeof value === 'number') {
-                    valueSpan.textContent = value.toFixed(2);
+                    // 정수 step인지 확인하여 표시 형식 결정
+                    if (slider && slider.step && parseFloat(slider.step) >= 1) {
+                        valueSpan.textContent = value.toFixed(0);
+                    } else {
+                        valueSpan.textContent = value.toFixed(2);
+                    }
+                } else {
+                    valueSpan.textContent = value;
                 }
             }
             
             // 토글 상태 업데이트
             const toggle = document.getElementById(key);
             if (toggle && toggle.type === 'checkbox') {
-                toggle.checked = this.currentValues[key];
+                toggle.checked = value;
             }
         });
+        
+        console.log('🔄 UI 값 동기화 완료');
     }
 
     getRotationSpeed() {
@@ -1020,12 +1088,17 @@ class FireControls {
         this.toggleSidebar();
     }
 
-    updateCanvasPosition() {
+    updateCanvasPosition(x = null, y = null) {
+        // 파라미터가 주어지면 사용하고, 아니면 currentValues 사용
+        const posX = x !== null ? x : this.currentValues.positionX;
+        const posY = y !== null ? y : this.currentValues.positionY;
+        
         // CSS transform으로 전체 캔버스 이동
         if (window.fireApp && window.fireApp.renderer && window.fireApp.renderer.domElement) {
             const canvas = window.fireApp.renderer.domElement;
-            const transformString = `translate(${this.currentValues.positionX}px, ${this.currentValues.positionY}px)`;
+            const transformString = `translate(${posX}px, ${posY}px)`;
             canvas.style.transform = transformString;
+            
             // Glow 캔버스도 동일하게 이동
             if (window.fireApp.glowCanvas) {
                 window.fireApp.glowCanvas.style.transform = transformString;
@@ -1063,6 +1136,68 @@ class FireControls {
                 container.appendChild(valueDisplay);
             }
         });
+    }
+
+    // 디버깅을 위한 로컬스토리지 상태 확인 메서드
+    debugLocalStorage() {
+        console.log('🔍 === 로컬스토리지 디버깅 ===');
+        console.log('현재 설정 값:', this.currentValues);
+        console.log('기본 설정 값:', this.defaultValues);
+        console.log('저장된 로컬스토리지 데이터:', localStorage.getItem('fireSettings'));
+        
+        try {
+            const saved = localStorage.getItem('fireSettings');
+            if (saved) {
+                console.log('파싱된 저장 데이터:', JSON.parse(saved));
+            }
+        } catch (e) {
+            console.log('파싱 오류:', e);
+        }
+        
+        // 테스트 저장
+        console.log('테스트 저장 실행...');
+        this.saveSettings();
+        
+        console.log('=========================');
+    }
+
+    // 강제로 설정 저장 테스트
+    testSave() {
+        const testSettings = { ...this.currentValues, scale: Math.random() };
+        console.log('테스트 설정 저장:', testSettings);
+        localStorage.setItem('fireSettings', JSON.stringify(testSettings));
+        console.log('저장 후 확인:', localStorage.getItem('fireSettings'));
+    }
+
+    // 강제 UI 동기화 (디버깅용)
+    forceSyncUI() {
+        console.log('🔧 강제 UI 동기화 시작...');
+        this.updateAllDisplayValues();
+        
+        // 각 슬라이더의 실제 값과 currentValues 비교
+        Object.keys(this.currentValues).forEach(key => {
+            const slider = document.getElementById(key);
+            const valueSpan = document.getElementById(key + '-value');
+            const currentValue = this.currentValues[key];
+            
+            if (slider && slider.type === 'range') {
+                const sliderValue = parseFloat(slider.value);
+                if (Math.abs(sliderValue - currentValue) > 0.001) {
+                    console.warn(`⚠️ 불일치 발견: ${key} - 슬라이더: ${sliderValue}, 저장값: ${currentValue}`);
+                    slider.value = currentValue; // 강제 수정
+                }
+            }
+            
+            if (valueSpan && typeof currentValue === 'number') {
+                const displayValue = parseFloat(valueSpan.textContent);
+                if (Math.abs(displayValue - currentValue) > 0.001) {
+                    console.warn(`⚠️ 표시값 불일치: ${key} - 표시: ${displayValue}, 저장값: ${currentValue}`);
+                    valueSpan.textContent = currentValue.toFixed(2); // 강제 수정
+                }
+            }
+        });
+        
+        console.log('✅ 강제 UI 동기화 완료');
     }
 }
 
