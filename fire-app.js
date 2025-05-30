@@ -661,8 +661,8 @@ class FireApp {
         // 배경 사운드 시작
         this.startBackgroundSound();
         
-        // magnitude만 애니메이션: (설정치-0.7) → 설정치 (0.3초)
-        const animationDuration = 300; // 0.3초
+        // magnitude만 애니메이션: (설정치-0.7) → 설정치 (0.6초)
+        const animationDuration = 600; // 0.6초
         
         const startTime = performance.now();
         const targetMagnitude = targetValues.magnitude;
@@ -708,8 +708,8 @@ class FireApp {
         
         const targetValues = window.fireControls.currentValues;
         
-        // magnitude만 살짝 변화 (설정치 → 설정치-0.7 → 설정치) (0.3초)
-        const animationDuration = 300; // 0.3초
+        // magnitude만 살짝 변화 (설정치 → 설정치-0.7 → 설정치) (0.5초)
+        const animationDuration = 500; // 0.5초
         
         const startTime = performance.now();
         const currentMagnitude = targetValues.magnitude;
@@ -740,7 +740,7 @@ class FireApp {
         // 애니메이션 속도: 0.05초만에 설정치+1로 갔다가 0.05초만에 복귀
         this.animateSpeed(targetValues.animationSpeed);
         
-        // 밝기 강화: 0.1초만에 설정치+1로 갔다가 0.2초동안 복귀
+        // 밝기 강화: 0.1초만에 설정치+1로 갔다가 0.4초동안 복귀
         this.animateBrightness(targetValues.toonBrightness);
         
         requestAnimationFrame(animate);
@@ -807,9 +807,9 @@ class FireApp {
                 }
                 
                 requestAnimationFrame(animate);
-            } else if (elapsed < 300) {
-                // 0.2초동안 원래대로 복귀
-                const progress = (elapsed - 100) / 200;
+            } else if (elapsed < 500) {
+                // 0.4초동안 원래대로 복귀
+                const progress = (elapsed - 100) / 400;
                 const brightness = tempBrightness + (targetBrightness - tempBrightness) * progress;
                 
                 if (this.fire.material.uniforms.toonBrightness) {
