@@ -10,6 +10,8 @@ class FireControls {
         // 기본값
         this.defaultValues = {
             scale: 1.5,
+            positionX: 0,
+            positionY: 0,
             magnitude: 1.6,
             lacunarity: 2.0,
             gain: 0.5,
@@ -158,6 +160,18 @@ class FireControls {
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">애니메이션 속도</label>
                             <input id="animationSpeed" type="range" min="0.1" max="3" step="0.1" value="${this.currentValues.animationSpeed}" class="modern-slider">
                             <span id="animationSpeed-value" class="value-display">${this.currentValues.animationSpeed}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">X 위치</label>
+                            <input id="positionX" type="range" min="-800" max="800" step="10" value="${this.currentValues.positionX}" class="modern-slider">
+                            <span id="positionX-value" class="value-display">${this.currentValues.positionX}</span>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Y 위치</label>
+                            <input id="positionY" type="range" min="-600" max="600" step="10" value="${this.currentValues.positionY}" class="modern-slider">
+                            <span id="positionY-value" class="value-display">${this.currentValues.positionY}</span>
                         </div>
                     </div>
 
@@ -375,6 +389,19 @@ class FireControls {
             this.saveSettings();
         });
 
+        // 위치 조정 컨트롤 (CSS transform으로 캔버스 전체 이동)
+        this.setupSlider('positionX', (value) => {
+            this.updateCanvasPosition();
+            this.currentValues.positionX = value;
+            this.saveSettings();
+        });
+
+        this.setupSlider('positionY', (value) => {
+            this.updateCanvasPosition();
+            this.currentValues.positionY = value;
+            this.saveSettings();
+        });
+
         // 불 모양 조정 컨트롤
         this.setupSlider('fireScale', (value) => {
             if (this.fire) {
@@ -559,6 +586,9 @@ class FireControls {
             this.currentValues.fireScale
         );
         
+        // 캔버스 위치 적용
+        this.updateCanvasPosition();
+        
         this.fire.material.uniforms.magnitude.value = this.currentValues.magnitude;
         this.fire.material.uniforms.lacunarity.value = this.currentValues.lacunarity;
         this.fire.material.uniforms.gain.value = this.currentValues.gain;
@@ -630,6 +660,15 @@ class FireControls {
     // 컨트롤 패널 숨기기/보이기 (하위 호환성)
     toggleControls() {
         this.toggleSidebar();
+    }
+
+    updateCanvasPosition() {
+        // CSS transform으로 전체 캔버스 이동
+        if (window.fireApp && window.fireApp.renderer && window.fireApp.renderer.domElement) {
+            const canvas = window.fireApp.renderer.domElement;
+            const transformString = `translate(${this.currentValues.positionX}px, ${this.currentValues.positionY}px)`;
+            canvas.style.transform = transformString;
+        }
     }
 }
 
