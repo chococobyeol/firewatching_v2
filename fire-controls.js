@@ -171,7 +171,7 @@ class FireControls {
             boxShadow: '-2px 0 15px rgba(0, 0, 0, 0.5)',
             transition: 'right 0.3s ease',
             zIndex: '101',
-            backdropFilter: 'blur(10px)',
+            backdropFilter: 'blur(15px)',
             fontFamily: "'Arial', sans-serif",
             overflowY: 'auto',
             visibility: 'visible',
@@ -190,7 +190,7 @@ class FireControls {
                     
                     <!-- 기본 설정 -->
                     <div class="setting-section">
-                        <h4 style="color:#ff6600;margin:0 0 16px 0;font-size:14px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:6px;">기본 설정</h4>
+                        <h4 style="color:#fff;margin:0 0 16px 0;font-size:16px;font-weight:500;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:6px;">기본 설정</h4>
                         
                         <!-- 크기 -->
                         <div class="setting-item">
@@ -286,16 +286,16 @@ class FireControls {
 
                     <!-- 고급 설정 -->
                     <div class="advanced-settings">
-                        <div class="accordion-header" id="advancedToggle" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer;border-bottom:1px solid rgba(255,102,0,0.3);margin-bottom:12px;">
-                            <h4 style="color:#ff6600;margin:0;font-size:14px;">고급 설정</h4>
-                            <span id="advancedArrow" style="color:#ff6600;font-size:16px;display:inline-block;width:1em;text-align:center;font-family:monospace;line-height:1;">+</span>
+                        <div class="accordion-header" id="advancedToggle" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:12px;">
+                            <h4 style="color:#fff;margin:0;font-size:16px;font-weight:500;">고급 설정</h4>
+                            <span id="advancedArrow" style="color:#fff;font-size:16px;display:inline-block;width:1em;text-align:center;font-family:monospace;line-height:1;">+</span>
                         </div>
                         
                         <div id="advancedContent" style="display:none;gap:20px;flex-direction:column;">
                             
                             <!-- 불꽃 세부 조정 -->
                             <div class="setting-subsection">
-                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">불꽃 세부 조정</h5>
+                                <h5 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;font-weight:500;">불꽃 세부 조정</h5>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">불꽃 크기</label>
@@ -340,7 +340,7 @@ class FireControls {
 
                             <!-- 노이즈 스케일 -->
                             <div class="setting-subsection">
-                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">노이즈 스케일</h5>
+                                <h5 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;font-weight:500;">노이즈 스케일</h5>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">X 스케일</label>
@@ -369,7 +369,7 @@ class FireControls {
 
                             <!-- 색상 조정 -->
                             <div class="setting-subsection">
-                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">색상 조정</h5>
+                                <h5 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;font-weight:500;">색상 조정</h5>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빨강 (Red)</label>
@@ -398,7 +398,7 @@ class FireControls {
 
                             <!-- 카툰 스타일 -->
                             <div class="setting-subsection">
-                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">카툰 스타일</h5>
+                                <h5 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;font-weight:500;">카툰 스타일</h5>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">색상 단계 수</label>
@@ -427,7 +427,7 @@ class FireControls {
                             
                             <!-- 연기 강도 -->
                             <div class="setting-subsection">
-                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">연기 효과</h5>
+                                <h5 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;font-weight:500;">연기 효과</h5>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">연기 강도</label>
@@ -440,7 +440,7 @@ class FireControls {
                             
                             <!-- 빛무리 효과 -->
                             <div class="setting-subsection">
-                                <h5 style="color:#ffaa44;margin:0 0 12px 0;font-size:13px;opacity:0.9;">빛무리 효과</h5>
+                                <h5 style="color:#ff6600;margin:0 0 12px 0;font-size:14px;font-weight:500;">빛무리 효과</h5>
                                 
                                 <div class="setting-item">
                                     <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">빛무리 범위</label>

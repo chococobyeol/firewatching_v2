@@ -68,7 +68,7 @@
       boxSizing: 'border-box',
       boxShadow: '2px 0 15px rgba(0,0,0,0.5)',
       transition: 'left 0.3s ease', zIndex: '101',
-      backdropFilter: 'blur(10px)', overflowY: 'auto',
+      backdropFilter: 'blur(15px)', overflowY: 'auto',
       fontFamily: "'Arial', sans-serif", color: '#fff'
     });
     sidebar.innerHTML = `

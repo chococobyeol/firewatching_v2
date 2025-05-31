@@ -69,7 +69,7 @@
       boxShadow: '2px 0 15px rgba(0,0,0,0.5)',
       transition: 'left 0.3s ease', 
       zIndex: '101',
-      backdropFilter: 'blur(10px)', 
+      backdropFilter: 'blur(15px)', 
       overflowY: 'auto',
       fontFamily: "'Arial', sans-serif", 
       color: '#fff',
@@ -175,12 +175,48 @@
     // CSS 스타일 추가
     const style = document.createElement('style');
     style.textContent = `
+      /* 탭 버튼 기본 스타일 (비활성) */
+      .tab-button {
+        background-color: #222 !important;
+        color: #ccc !important;
+        transition: background-color 0.3s;
+      }
+
+      /* 활성 탭 */
       .tab-button.active {
-        background-color: #ff6b00 !important;
+        background-color: #444 !important;
         color: #fff !important;
         font-weight: 500;
       }
-      // ... 추가 스타일 생략 ...
+
+      /* 탭 버튼 호버 */
+      .tab-button:hover {
+        background-color: #333 !important;
+        color: #fff !important;
+      }
+      
+      /* 스톱워치 랩 리스트 스타일 */
+      #lapTimes li {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        background-color: rgba(60,60,60,0.5);
+        border-radius: 4px;
+        font-size: 14px;
+        border-left: 3px solid #ff6b00;
+      }
+
+      .timer-preset:hover {
+        background-color: #444 !important;
+      }
+      
+      #timerSidebar::-webkit-scrollbar {
+        width: 8px;
+        background-color: rgba(60,60,60,0.4);
+      }
+
+      /* 기존 추가 스타일 계속 유지 */
     `;
     
     document.head.appendChild(style);
@@ -314,8 +350,9 @@
       if (lapsList) {
         const lapItem = document.createElement('li');
         const current = formatStopwatchTime(stopwatchElapsedTime);
-        lapItem.innerHTML = `<span>랩 ${lapsList.children.length+1}</span><span>${current}</span>`;
-        lapItem.className = 'new-lap';
+        const lapNumber = lapsList.children.length + 1;
+        lapItem.innerHTML = `<span class="lap-label">랩 ${lapNumber}</span><span class="lap-time">${current}</span>`;
+        lapItem.className = 'lap-item new-lap';
         lapsList.querySelectorAll('li.new-lap').forEach(l => l.classList.remove('new-lap'));
         lapsList.prepend(lapItem);
       }

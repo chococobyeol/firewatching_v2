@@ -419,11 +419,6 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: 0 0 8px rgba(255, 102, 0, 0.5);
 }
 
-#resetSettings:focus {
-    outline: 2px solid rgba(255, 102, 0, 0.5);
-    outline-offset: 2px;
-}
-
 /* 어두운 테마 최적화 */
 .setting-section h4 {
     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
@@ -435,9 +430,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* 접근성 개선 */
 .modern-slider:focus,
-.toggle-switch input:focus + .toggle-slider,
-#resetSettings:focus,
-#settingsBtn:focus {
+.toggle-switch input:focus + .toggle-slider {
     outline: 2px solid #ff6600;
     outline-offset: 2px;
 }
@@ -455,4 +448,65 @@ input[type="range"]::-moz-range-thumb {
     input:checked + .toggle-slider {
         background-color: #ff4500;
     }
+}
+
+/* 사이드바 헤더 고정 및 콘텐츠 분리 (알람, 타이머) */
+#alarmSidebar > div:first-child,
+#timerSidebar > div:first-child,
+#weatherSidebar > div:first-child {
+    position: sticky;
+    top: 0;
+    background: rgba(20,20,20,0.9);
+    z-index: 10;
+}
+
+#alarmSidebar,
+#timerSidebar,
+#weatherSidebar {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#alarmSidebar #alarmContent,
+#timerSidebar .timer-content,
+#weatherSidebar .weather-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* 통합 사이드바 스크롤바 스타일 */
+#settingsSidebar,
+#alarmSidebar,
+#timerSidebar,
+#weatherSidebar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 102, 0, 0.6) transparent;
+}
+#settingsSidebar::-webkit-scrollbar,
+#alarmSidebar::-webkit-scrollbar,
+#timerSidebar::-webkit-scrollbar,
+#weatherSidebar::-webkit-scrollbar {
+    width: 8px;
+}
+#settingsSidebar::-webkit-scrollbar-track,
+#alarmSidebar::-webkit-scrollbar-track,
+#timerSidebar::-webkit-scrollbar-track,
+#weatherSidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+#settingsSidebar::-webkit-scrollbar-thumb,
+#alarmSidebar::-webkit-scrollbar-thumb,
+#timerSidebar::-webkit-scrollbar-thumb,
+#weatherSidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 102, 0, 0.6);
+    border-radius: 4px;
+}
+#settingsSidebar::-webkit-scrollbar-thumb:hover,
+#alarmSidebar::-webkit-scrollbar-thumb:hover,
+#timerSidebar::-webkit-scrollbar-thumb:hover,
+#weatherSidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 102, 0, 0.8);
 } 

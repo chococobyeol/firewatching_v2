@@ -142,17 +142,18 @@
         boxShadow: '2px 0 15px rgba(0,0,0,0.5)',
         transition: 'left 0.3s ease', 
         zIndex: '101',
-        backdropFilter: 'blur(10px)', 
-        overflowY: 'auto',
+        backdropFilter: 'blur(15px)', 
+        overflowY: 'hidden',
         fontFamily: "'Arial', sans-serif", 
         color: '#fff'
       });
       
       weatherSidebar.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:16px;">
+        <div class="sidebar-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:16px;">
           <h3 style="color:#fff;margin:0;font-size:18px;font-weight:600;">세계 시간 / 날씨</h3>
           <button id="closeWeatherSidebar" style="background:none;border:none;color:#fff;cursor:pointer;font-size:24px;padding:0;">&times;</button>
         </div>
+        <div class="weather-content" style="display:flex;flex-direction:column;flex:1;overflow-y:auto;padding-right:5px;">
         
         <div id="currentLocationCard" class="location-card" style="margin-bottom:20px;padding:15px;background-color:rgba(40,40,40,0.8);border-radius:8px;border-left:4px solid #ff9800;">
           <div class="location-top" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -170,8 +171,8 @@
           </div>
         </div>
         
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:8px;">
-          <h4 style="color:#ff6600;margin:0;font-size:14px;font-weight:500;">주요 도시</h4>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:8px;">
+          <h4 style="color:#fff;margin:0;font-size:16px;font-weight:500;">주요 도시</h4>
           <div>
             <button id="addCityBtn" style="background:rgba(50,50,50,0.8);border:none;color:#fff;cursor:pointer;font-size:14px;padding:4px 8px;border-radius:4px;transition:all 0.2s;">
               <i class="fas fa-plus-circle"></i>
@@ -240,6 +241,7 @@
             </div>
           </div>
         </div>
+      </div>
       `;
       
       document.body.appendChild(weatherSidebar);
