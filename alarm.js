@@ -88,7 +88,7 @@
         
         <div class="setting-group">
           <label style="color:#fff;margin-bottom:8px;display:block;font-size:14px;font-weight:500;">제목</label>
-          <input type="text" id="alarmTitle" placeholder="알람 제목" style="width:100%;padding:8px;background-color:rgba(60,60,60,0.8);color:#fff;border:none;border-radius:4px;">
+          <input type="text" id="alarmTitle" placeholder="알람 제목" style="width:100%;padding:8px;background-color:rgba(60,60,60,0.8);color:#fff;border:none;border-radius:4px;box-sizing:border-box;">
         </div>
         
         <div class="setting-group" style="display:flex;justify-content:space-between;align-items:center;">
