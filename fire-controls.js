@@ -470,8 +470,8 @@ class FireControls {
                 </div>
             </div>
             
-            <div style="position:absolute;bottom:20px;left:20px;right:20px;text-align:center;">
-                <div style="color:rgba(255,255,255,0.5);font-size:12px;">불멍 시뮬레이터 v2.0</div>
+            <div style="position:absolute;bottom:50px;left:20px;right:20px;text-align:center;">
+                <a href="privacy.html" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.7);font-size:12px;text-decoration:none;">개인정보처리방침</a>
             </div>
         `;
         
