@@ -113,14 +113,14 @@
         
         <div class="setting-group" style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.2);padding-top:16px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <label style="color:#fff;font-size:14px;font-weight:500;">정각 알림 추가</label>
+            <label style="color:#ff6b00;font-size:14px;font-weight:500;">정각 알림 추가</label>
             <button id="addHourlyAlarms" style="padding:6px 10px;background:linear-gradient(to right, #3f51b5, #5677fc);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;">추가하기</button>
           </div>
           <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:16px;">24시간 동안의 정각 알림(00:00~23:00)을 추가합니다.</p>
         </div>
         
         <div class="setting-group" style="border-top:1px solid rgba(255,255,255,0.2);padding-top:16px;">
-          <label style="color:#fff;margin-bottom:12px;display:block;font-size:14px;font-weight:500;">알람 목록</label>
+          <label style="color:#ff6b00;margin-bottom:12px;display:block;font-size:14px;font-weight:500;">알람 목록</label>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
             <span style="font-size:12px;color:rgba(255,255,255,0.6);" id="alarmCount">0개 알람</span>
           </div>

@@ -150,7 +150,7 @@
       
       weatherSidebar.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:16px;">
-          <h3 style="margin:0;font-size:18px;font-weight:600;">세계 시간 / 날씨</h3>
+          <h3 style="color:#fff;margin:0;font-size:18px;font-weight:600;">세계 시간 / 날씨</h3>
           <button id="closeWeatherSidebar" style="background:none;border:none;color:#fff;cursor:pointer;font-size:24px;padding:0;">&times;</button>
         </div>
         
@@ -170,8 +170,8 @@
           </div>
         </div>
         
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);">
-          <h4 style="margin:0;font-size:16px;font-weight:500;">주요 도시</h4>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid rgba(255,102,0,0.3);padding-bottom:8px;">
+          <h4 style="color:#ff6600;margin:0;font-size:14px;font-weight:500;">주요 도시</h4>
           <div>
             <button id="addCityBtn" style="background:rgba(50,50,50,0.8);border:none;color:#fff;cursor:pointer;font-size:14px;padding:4px 8px;border-radius:4px;transition:all 0.2s;">
               <i class="fas fa-plus-circle"></i>

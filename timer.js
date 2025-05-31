@@ -176,7 +176,7 @@
     const style = document.createElement('style');
     style.textContent = `
       .tab-button.active {
-        background-color: #444 !important;
+        background-color: #ff6b00 !important;
         color: #fff !important;
         font-weight: 500;
       }
