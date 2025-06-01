@@ -220,7 +220,33 @@
     `;
     
     document.head.appendChild(style);
-    
+
+    // 추가: 미니 타이머 및 time-ending CSS 정의
+    const miniStyle = document.createElement('style');
+    miniStyle.textContent = `
+      .mini-timer {
+        position: fixed;
+        left: 80px;
+        top: 20px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        z-index: 100;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        user-select: none;
+        display: none;
+      }
+      .time-ending {
+        color: #ff5252;
+        animation: pulse 1s infinite;
+      }
+    `;
+    document.head.appendChild(miniStyle);
+
     // 미니 타이머 생성 (초기에는 화면에 표시되지 않음)
     const miniTimer = document.createElement('div');
     miniTimer.className = 'mini-timer';
