@@ -511,18 +511,6 @@ class FireControls {
             }
         });
 
-        // 키보드 단축키
-        document.addEventListener('keydown', (event) => {
-            if (event.code === 'KeyH' && !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
-                this.toggleSidebar();
-            } else if (event.code === 'KeyR' && !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
-                console.log('🔄 FireControls: R 키 단독 입력 - 설정 리셋');
-                this.resetToDefaults();
-            } else if (event.code === 'KeyR') {
-                console.log('🚫 FireControls: 조합키와 함께 R 키 입력 - 리셋 무시');
-            }
-        });
-
         // 윈도우 리사이즈 이벤트 - 반응형 사이드바 크기 조정
         window.addEventListener('resize', () => {
             this.handleResize();
