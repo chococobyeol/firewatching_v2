@@ -521,23 +521,9 @@
           createdAt: Date.now() // 알람 생성 시간 추가
         };
         
-        // 페이지가 보이는 상태면 바로 표시, 아니면 보류
-        if (isPageVisible) {
-          document.body.appendChild(containerDiv);
-          setupAlarmPopupEvents(popupData);
-        } else {
-          // 페이지가 비활성화된 상태이면 알람 팝업을 보류
-          pendingAlarmPopup = popupData;
-          
-          // 애니메이션 프레임 재개를 위한 플래그 설정
-          if (window.fireAnimationPaused) {
-            window.fireAnimationPaused = false;
-            // 이 시점에서 애니메이션 프레임이 다시 시작될 수 있도록 알림
-            if (typeof window.resumeFireAnimation === 'function') {
-              window.resumeFireAnimation();
-            }
-          }
-        }
+        // 숨김 상태와 관계없이 즉시 알람 팝업을 표시
+        document.body.appendChild(containerDiv);
+        setupAlarmPopupEvents(popupData);
       };
     }
   
