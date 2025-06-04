@@ -381,22 +381,11 @@
             console.log('알람 컨테이너가 이미 제거됨');
           }
           
-          // 알람 목록에서 제거 (반복이 아닌 경우)
+          // 반복이 아닌 알람만 목록에서 제거
           if (!alarm.repeat) {
             removeAlarm(alarm.id);
-          } else {
-            // 반복 알람 재설정
-            const existingAlarm = alarms.find(a => a.id === alarm.id);
-            if (existingAlarm) {
-              const newTarget = new Date();
-              newTarget.setHours(alarm.hour, alarm.minute, 0, 0);
-              newTarget.setDate(newTarget.getDate() + 1);
-              const newDiff = newTarget.getTime() - new Date().getTime();
-              
-              existingAlarm.timeoutId = setTimeout(createAlarmCallback(alarm), newDiff);
-              saveAlarms();
-            }
           }
+          // 반복 알람은 자동 재스케줄링되었으므로 추가 처리 불필요
         };
         
         stopAlarmBtn.addEventListener('click', popupData.clickHandler);
@@ -423,6 +412,17 @@
       return () => {
         // 알람이 비활성화 상태면 실행하지 않음
         if (!alarm.active) return;
+        
+        // 반복 알람일 경우 다음 알람 예약 (사용자 확인과 무관하게)
+        if (alarm.repeat) {
+          const nextTarget = new Date();
+          nextTarget.setHours(alarm.hour, alarm.minute, 0, 0);
+          nextTarget.setDate(nextTarget.getDate() + 1);
+          const diffNext = nextTarget.getTime() - Date.now();
+          if (alarm.timeoutId) clearTimeout(alarm.timeoutId);
+          alarm.timeoutId = setTimeout(createAlarmCallback(alarm), diffNext);
+          saveAlarms();
+        }
         
         // 오디오 컨텍스트 초기화 확인
         if (window.audioContext && window.audioContext.state === 'suspended') {
