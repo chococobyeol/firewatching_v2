@@ -3,20 +3,8 @@
 (function() {
     // 페이지 활성화/비활성화 상태 추적 변수
     let isPageVisible = !document.hidden;
-    let pendingAlarmQueue = [];
+    let pendingAlarmPopup = null;
     let lastVisibleTime = Date.now(); // 마지막으로 페이지가 보였던 시간 추적
-  
-    // 시스템 절전 후 복귀 감지용 타이머
-    let lastTick = Date.now();
-    setInterval(() => {
-      const nowTick = Date.now();
-      const delta = nowTick - lastTick;
-      lastTick = nowTick;
-      if (delta > SLEEP_TOLERANCE) {
-        // PC 절전 후 복귀 감지 시 알람 스케줄 재조정
-        rescheduleAllAlarms();
-      }
-    }, 1000);
   
     // 페이지 가시성 변화 이벤트 리스너 추가
     document.addEventListener('visibilitychange', () => {
@@ -26,17 +14,21 @@
         // 페이지가 숨겨질 때 시간 기록
         lastVisibleTime = now;
       } else {
-        // 복귀 시점에 알람 타이머 재조정
-        rescheduleAllAlarms();
         // 페이지가 다시 보일 때
         isPageVisible = true;
         const hiddenDuration = now - lastVisibleTime;
         
-        // 대기 중인 알람이 있으면 순차 표시 (최신 알림 우선)
-        if (pendingAlarmQueue.length > 0) {
-          const nextPopup = pendingAlarmQueue.pop();
-          document.body.appendChild(nextPopup.containerDiv);
-          setupAlarmPopupEvents(nextPopup);
+        // 장시간(5분 이상) 절전모드 후 돌아온 경우, 대기 중인 알람 팝업 초기화
+        if (hiddenDuration > 5 * 60 * 1000 && pendingAlarmPopup) {
+          pendingAlarmPopup = null;
+        }
+        
+        // 대기 중인 알람 팝업이 있으면 표시
+        if (pendingAlarmPopup) {
+          document.body.appendChild(pendingAlarmPopup.containerDiv);
+          // 이벤트 리스너 다시 바인딩
+          setupAlarmPopupEvents(pendingAlarmPopup);
+          pendingAlarmPopup = null;
         }
       }
     });
@@ -240,10 +232,6 @@
     let alarms = [];
     let testTimeout = null;
     const STORAGE_KEY = 'bulmeong_alarms';
-    const SLEEP_TOLERANCE = 5000; // 5초 이상 늦어진 알람은 스킵
-    // 디버그 모드: URL 파라미터로 반복 알람 테스트 간격(ms) 지정
-    const urlParams = new URLSearchParams(window.location.search);
-    const TEST_REPEAT_MS = urlParams.get('testRepeatMs') ? Number(urlParams.get('testRepeatMs')) : null;
   
     // 알람 시간순 정렬 함수
     function sortAlarmsByTime() {
@@ -300,7 +288,6 @@
             if (target <= now) target.setDate(target.getDate() + 1);
             const diff = target.getTime() - now.getTime();
             
-            alarm.nextTriggerTime = target.getTime(); // 다음 트리거 시간 기록
             timeoutId = setTimeout(createAlarmCallback(alarm), diff);
           }
           
@@ -355,7 +342,6 @@
         };
         
         // 타이머 설정
-        newAlarm.nextTriggerTime = target.getTime(); // 다음 트리거 시간 기록
         newAlarm.timeoutId = setTimeout(createAlarmCallback(newAlarm), diff);
         alarms.push(newAlarm);
       }
@@ -398,12 +384,18 @@
           // 알람 목록에서 제거 (반복이 아닌 경우)
           if (!alarm.repeat) {
             removeAlarm(alarm.id);
-          }
-          // 이후 대기 중인 알림이 있으면 표시 (최신 알림 우선)
-          if (pendingAlarmQueue.length > 0) {
-            const nextPopup = pendingAlarmQueue.pop();
-            document.body.appendChild(nextPopup.containerDiv);
-            setupAlarmPopupEvents(nextPopup);
+          } else {
+            // 반복 알람 재설정
+            const existingAlarm = alarms.find(a => a.id === alarm.id);
+            if (existingAlarm) {
+              const newTarget = new Date();
+              newTarget.setHours(alarm.hour, alarm.minute, 0, 0);
+              newTarget.setDate(newTarget.getDate() + 1);
+              const newDiff = newTarget.getTime() - new Date().getTime();
+              
+              existingAlarm.timeoutId = setTimeout(createAlarmCallback(alarm), newDiff);
+              saveAlarms();
+            }
           }
         };
         
@@ -429,26 +421,9 @@
     // 알람 콜백 생성 함수 (클로저로 알람 정보 유지)
     function createAlarmCallback(alarm) {
       return () => {
-        const nowTs = Date.now();
         // 알람이 비활성화 상태면 실행하지 않음
         if (!alarm.active) return;
-        // 반복 알람인 경우 다음 알람 즉시 스케줄링
-        if (alarm.repeat) {
-          // 테스트 모드가 지정된 경우 TEST_REPEAT_MS, 아니면 24시간 뒤
-          let nextDiff;
-          if (TEST_REPEAT_MS) {
-            nextDiff = TEST_REPEAT_MS;
-            alarm.nextTriggerTime = Date.now() + nextDiff;
-          } else {
-            const next = new Date();
-            next.setHours(alarm.hour, alarm.minute, 0, 0);
-            next.setDate(next.getDate() + 1);
-            nextDiff = next.getTime() - Date.now();
-            alarm.nextTriggerTime = next.getTime();
-          }
-          alarm.timeoutId = setTimeout(createAlarmCallback(alarm), nextDiff);
-          saveAlarms();
-        }
+        
         // 오디오 컨텍스트 초기화 확인
         if (window.audioContext && window.audioContext.state === 'suspended') {
           window.audioContext.resume();
@@ -542,17 +517,13 @@
         const popupData = {
           containerDiv,
           alarm,
-          clickHandler: null,
-          createdAt: Date.now()
+          clickHandler: null, // 이벤트 핸들러 참조를 저장할 속성
+          createdAt: Date.now() // 알람 생성 시간 추가
         };
         
-        // 페이지 숨김 중이거나 알림 큐에 대기 중이면 큐에 보관 (최신 알림 우선)
-        if (document.hidden || pendingAlarmQueue.length > 0) {
-          pendingAlarmQueue.push(popupData);
-        } else {
-          document.body.appendChild(containerDiv);
-          setupAlarmPopupEvents(popupData);
-        }
+        // 숨김 상태와 관계없이 즉시 알람 팝업을 표시
+        document.body.appendChild(containerDiv);
+        setupAlarmPopupEvents(popupData);
       };
     }
   
@@ -614,7 +585,6 @@
       };
       
       // 타이머 설정 및 알람 추가
-      newAlarm.nextTriggerTime = target.getTime(); // 다음 트리거 시간 기록
       newAlarm.timeoutId = setTimeout(createAlarmCallback(newAlarm), diff);
       alarms.push(newAlarm);
       
@@ -877,7 +847,6 @@
         if (target <= now) target.setDate(target.getDate() + 1);
         const diff = target.getTime() - now.getTime();
         
-        alarm.nextTriggerTime = target.getTime(); // 다음 트리거 시간 갱신
         alarm.timeoutId = setTimeout(createAlarmCallback(alarm), diff);
       } else {
         // 비활성화: 기존 타이머 취소
@@ -890,31 +859,5 @@
       // 저장 및 렌더링
       saveAlarms();
       renderAlarms();
-    }
-  
-    // 페이지 복귀 시 모든 알람 타이머 재조정 함수
-    function rescheduleAllAlarms() {
-      const now = Date.now();
-      alarms.forEach(alarm => {
-        if (!alarm.active) {
-          if (alarm.timeoutId) clearTimeout(alarm.timeoutId);
-          alarm.timeoutId = null;
-          return;
-        }
-        const target = new Date();
-        target.setHours(alarm.hour, alarm.minute, 0, 0);
-        if (target.getTime() <= now) {
-          if (!alarm.repeat) {
-            removeAlarm(alarm.id);
-            return;
-          }
-          target.setDate(target.getDate() + 1);
-        }
-        const diff = target.getTime() - now;
-        if (alarm.timeoutId) clearTimeout(alarm.timeoutId);
-        alarm.nextTriggerTime = target.getTime(); // 다음 트리거 시간 갱신
-        alarm.timeoutId = setTimeout(createAlarmCallback(alarm), diff);
-      });
-      saveAlarms();
     }
   })(); 
