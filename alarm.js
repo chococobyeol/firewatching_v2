@@ -32,10 +32,6 @@
         isPageVisible = true;
         const hiddenDuration = now - lastVisibleTime;
         
-        // 장시간(5분 이상) 절전모드 후 돌아온 경우, 대기 중인 알람 큐 초기화
-        if (hiddenDuration > 5 * 60 * 1000) {
-          pendingAlarmQueue = [];
-        }
         // 대기 중인 알람이 있으면 순차 표시 (최신 알림 우선)
         if (pendingAlarmQueue.length > 0) {
           const nextPopup = pendingAlarmQueue.pop();
