@@ -461,16 +461,21 @@ class FireControls {
                         </div>
                     </div>
 
-                    <!-- 설정 초기화 -->
-                    <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,0.2);padding-top:16px;">
-                        <button id="resetSettings" style="width:100%;padding:12px;background-color:rgba(255,80,80,0.2);color:rgba(255,80,80,0.9);border:none;border-radius:6px;cursor:pointer;font-weight:500;font-size:14px;transition:all 0.2s;">
+                    <!-- 설정 초기화 및 후원하기 버튼 컨테이너 -->
+                    <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,0.2);padding-top:16px;display:flex;flex-direction:column;gap:10px;">
+                        <button id="resetSettings" style="width:100%;box-sizing:border-box;padding:12px;background-color:rgba(255,80,80,0.2);color:rgba(255,80,80,0.9);border:none;border-radius:6px;cursor:pointer;font-weight:500;font-size:14px;transition:all 0.2s;">
                             설정 초기화
                         </button>
+                        <a id="bmcButton" href="https://www.buymeacoffee.com/chococo" target="_blank" rel="noopener" style="display:block;width:100%;box-sizing:border-box;padding:12px;background-color:#333;color:#ffffff;border:none;border-radius:6px;cursor:pointer;font-weight:400;font-size:14px;text-decoration:none;transition:all 0.2s;text-align:center;">☕ 후원하기 (Buy me a coffee)</a>
                     </div>
                 </div>
             </div>
             
-            <div style="position:absolute;bottom:50px;left:20px;right:20px;text-align:center;">
+            <!-- 문의/버그 제보 및 개인정보처리방침 링크 -->
+            <div style="margin-top:20px;text-align:center;">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSf131mGyiZ52mHARoaSBV_9UqBsT3KHThLQhV5FT_3hW87zYA/viewform?usp=header" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.7);font-size:12px;text-decoration:none;">문의/버그 제보</a>
+            </div>
+            <div style="margin-top:8px;text-align:center;">
                 <a href="privacy.html" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.7);font-size:12px;text-decoration:none;">개인정보처리방침</a>
             </div>
         `;
@@ -519,24 +524,6 @@ class FireControls {
         // 모든 슬라이더와 토글에 이벤트 리스너 추가
         this.setupControls();
 
-        // 초기화 버튼
-        document.getElementById('resetSettings').addEventListener('click', () => {
-            if (confirm('모든 설정을 초기화하시겠습니까?')) {
-                this.resetToDefaults();
-            }
-        });
-
-        // 초기화 버튼 호버 효과
-        const resetBtn = document.getElementById('resetSettings');
-        resetBtn.addEventListener('mouseover', () => {
-            resetBtn.style.backgroundColor = 'rgba(255,80,80,0.3)';
-            resetBtn.style.color = 'rgba(255,100,100,1)';
-        });
-        resetBtn.addEventListener('mouseout', () => {
-            resetBtn.style.backgroundColor = 'rgba(255,80,80,0.2)';
-            resetBtn.style.color = 'rgba(255,80,80,0.9)';
-        });
-
         // 음소거 토글 기능 (볼륨 값 표시 클릭)
         const soundVolumeValue = document.getElementById('soundVolume-value');
         const soundVolumeSlider = document.getElementById('soundVolume');
@@ -571,6 +558,33 @@ class FireControls {
                         }
                     }
                 }
+            });
+        }
+
+        // 리셋 및 후원하기 버튼 이벤트 추가
+        const resetBtn = document.getElementById('resetSettings');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                if (confirm('모든 설정을 초기화하시겠습니까?')) {
+                    this.resetToDefaults();
+                }
+            });
+            resetBtn.addEventListener('mouseover', () => {
+                resetBtn.style.backgroundColor = 'rgba(255,80,80,0.3)';
+                resetBtn.style.color = 'rgba(255,100,100,1)';
+            });
+            resetBtn.addEventListener('mouseout', () => {
+                resetBtn.style.backgroundColor = 'rgba(255,80,80,0.2)';
+                resetBtn.style.color = 'rgba(255,80,80,0.9)';
+            });
+        }
+        const bmcBtn = document.getElementById('bmcButton');
+        if (bmcBtn) {
+            bmcBtn.addEventListener('mouseover', () => {
+                bmcBtn.style.backgroundColor = '#444';
+            });
+            bmcBtn.addEventListener('mouseout', () => {
+                bmcBtn.style.backgroundColor = '#333';
             });
         }
     }
