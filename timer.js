@@ -131,12 +131,12 @@
           <!-- 타이머 컨텐츠 -->
           <div id="timerTabContent" class="tab-content" style="height:100%;display:none;flex-direction:column;">
             <div class="timer-setup" style="margin-bottom:20px;flex-shrink:0;">
-              <div style="display:flex;align-items:center;gap:5px;justify-content:center;margin-bottom:15px;">
-                <input id="timerHours" type="number" min="0" max="23" value="0" style="width:60px;padding:10px;text-align:center;background-color:rgba(60,60,60,0.8);color:#fff;border:none;border-radius:4px;font-size:18px;">
-                <span style="font-size:24px;">:</span>
-                <input id="timerMinutes" type="number" min="0" max="59" value="0" style="width:60px;padding:10px;text-align:center;background-color:rgba(60,60,60,0.8);color:#fff;border:none;border-radius:4px;font-size:18px;">
-                <span style="font-size:24px;">:</span>
-                <input id="timerSeconds" type="number" min="0" max="59" value="0" style="width:60px;padding:10px;text-align:center;background-color:rgba(60,60,60,0.8);color:#fff;border:none;border-radius:4px;font-size:18px;">
+              <div class="timer-input-group">
+                <input id="timerHours" type="number" min="0" max="23" value="0" class="timer-input">
+                <span class="timer-separator">:</span>
+                <input id="timerMinutes" type="number" min="0" max="59" value="0" class="timer-input">
+                <span class="timer-separator">:</span>
+                <input id="timerSeconds" type="number" min="0" max="59" value="0" class="timer-input">
               </div>
               
               <div class="preset-buttons" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:15px;">
