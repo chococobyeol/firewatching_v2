@@ -279,6 +279,7 @@
           
           // 타이머 설정 (활성화된 알람만)
           let timeoutId = null;
+          let nextTriggerTime = null;
           if (alarm.active) {
             const now = new Date();
             const target = new Date();
@@ -288,12 +289,15 @@
             if (target <= now) target.setDate(target.getDate() + 1);
             const diff = target.getTime() - now.getTime();
             
+            // 동기화용 다음 트리거 시간 저장
+            nextTriggerTime = target.getTime();
             timeoutId = setTimeout(createAlarmCallback(alarm), diff);
           }
           
           return {
             ...alarm,
-            timeoutId
+            timeoutId,
+            nextTriggerTime
           };
         });
         
@@ -341,6 +345,8 @@
           isHourly: true
         };
         
+        // 동기화용 다음 트리거 시간 저장
+        newAlarm.nextTriggerTime = target.getTime();
         // 타이머 설정
         newAlarm.timeoutId = setTimeout(createAlarmCallback(newAlarm), diff);
         alarms.push(newAlarm);
@@ -413,13 +419,23 @@
         // 알람이 비활성화 상태면 실행하지 않음
         if (!alarm.active) return;
         
+        // 중복 트리거 방지: 기존 예약과 nextTriggerTime 초기화
+        if (alarm.timeoutId) {
+          clearTimeout(alarm.timeoutId);
+          alarm.timeoutId = null;
+        }
+        if (!alarm.repeat) {
+          alarm.nextTriggerTime = null;
+        }
+        
         // 반복 알람일 경우 다음 알람 예약 (사용자 확인과 무관하게)
         if (alarm.repeat) {
           const nextTarget = new Date();
           nextTarget.setHours(alarm.hour, alarm.minute, 0, 0);
           nextTarget.setDate(nextTarget.getDate() + 1);
           const diffNext = nextTarget.getTime() - Date.now();
-          if (alarm.timeoutId) clearTimeout(alarm.timeoutId);
+          // 동기화용 다음 트리거 시간 저장
+          alarm.nextTriggerTime = nextTarget.getTime();
           alarm.timeoutId = setTimeout(createAlarmCallback(alarm), diffNext);
           saveAlarms();
         }
@@ -584,6 +600,8 @@
         isHourly: false
       };
       
+      // 동기화용 다음 트리거 시간 저장
+      newAlarm.nextTriggerTime = target.getTime();
       // 타이머 설정 및 알람 추가
       newAlarm.timeoutId = setTimeout(createAlarmCallback(newAlarm), diff);
       alarms.push(newAlarm);
@@ -838,7 +856,6 @@
       
       // 타이머 처리
       if (alarm.active) {
-        // 활성화: 새 타이머 설정
         const now = new Date();
         const target = new Date();
         target.setHours(alarm.hour, alarm.minute, 0, 0);
@@ -847,6 +864,8 @@
         if (target <= now) target.setDate(target.getDate() + 1);
         const diff = target.getTime() - now.getTime();
         
+        // 동기화용 다음 트리거 시간 저장
+        alarm.nextTriggerTime = target.getTime();
         alarm.timeoutId = setTimeout(createAlarmCallback(alarm), diff);
       } else {
         // 비활성화: 기존 타이머 취소
@@ -854,10 +873,32 @@
           clearTimeout(alarm.timeoutId);
           alarm.timeoutId = null;
         }
+        // 동기화용 정보 초기화
+        alarm.nextTriggerTime = null;
       }
       
       // 저장 및 렌더링
       saveAlarms();
       renderAlarms();
     }
+  
+    // 시간 동기화 기능: 1초마다 missed alarm 점검
+    setInterval(() => {
+      const now = Date.now();
+      alarms.forEach(alarm => {
+        if (alarm.active && alarm.nextTriggerTime && now >= alarm.nextTriggerTime) {
+          // 예약된 타이머 취소
+          if (alarm.timeoutId) {
+            clearTimeout(alarm.timeoutId);
+            alarm.timeoutId = null;
+          }
+          // 알람 콜백 수동 실행
+          createAlarmCallback(alarm)();
+          // 반복이 아닌 알람은 동기화 정보 초기화
+          if (!alarm.repeat) {
+            alarm.nextTriggerTime = null;
+          }
+        }
+      });
+    }, 1000);
   })(); 
