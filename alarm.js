@@ -887,8 +887,6 @@
       const now = Date.now();
       alarms.forEach(alarm => {
         if (alarm.active && alarm.nextTriggerTime && now >= alarm.nextTriggerTime) {
-          // 예약된 timeout이 남아있으면 중복 방지를 위해 스킵
-          if (alarm.timeoutId) return;
           // 알람 콜백 수동 실행
           createAlarmCallback(alarm)();
           // 반복이 아닌 알람은 동기화 정보 초기화
