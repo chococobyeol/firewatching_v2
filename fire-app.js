@@ -409,12 +409,10 @@ class FireApp {
         grabTarget.addEventListener('touchend', this.onDragEnd.bind(this));
         grabTarget.addEventListener('touchcancel', this.onDragEnd.bind(this));
 
-        // 클릭 이벤트 (불꽃 점화)
-        if (this.renderer && this.renderer.domElement) {
-            this.renderer.domElement.addEventListener('click', (event) => {
-                this.handleClick(event);
-            }, false);
-        }
+        // 클릭 이벤트 통합 핸들러
+        document.body.addEventListener('click', (event) => {
+            this.handleClick(event);
+        }, false);
     }
 
     onWindowResize() {
@@ -719,7 +717,32 @@ class FireApp {
 
     // 클릭 이벤트 처리
     handleClick(event) {
-        // 점화 사운드 재생
+        // UI 요소 위에서의 클릭은 무시
+        if (event.target.closest('input, button, a, #settingsSidebar')) {
+            return;
+        }
+
+        // book_1 클릭 확인
+        const { drawX, drawY, drawWidth, drawHeight } = this.getBgImageDrawInfo();
+        const { naturalWidth, naturalHeight } = this.backgroundImage;
+        if (drawWidth) {
+            const scaleX = drawWidth / naturalWidth;
+            const scaleY = drawHeight / naturalHeight;
+            const book1 = this.hoverableItems.find(item => item.name === 'book_1');
+
+            if (book1) {
+                const targetX = drawX + this.panOffset.x + book1.x * scaleX;
+                const targetY = drawY + this.panOffset.y + book1.y * scaleY;
+
+                if (Math.abs(event.clientX - targetX) < book1.tolerance &&
+                    Math.abs(event.clientY - targetY) < book1.tolerance) {
+                    this.showRandomQuote(event.clientX, event.clientY);
+                    return; // 책 클릭 시 불꽃 점화 방지
+                }
+            }
+        }
+
+        // 기존 불꽃 점화 로직
         if (this.ignitionAudio) {
             this.ignitionAudio.currentTime = 0;
             this.ignitionAudio.play().catch(e => {
@@ -734,6 +757,39 @@ class FireApp {
             // 불이 켜져있을 때 클릭
             this.flareFireAnimation();
         }
+    }
+
+    showRandomQuote(x, y) {
+        // 기존 팝업이 있으면 제거
+        const existingPopup = document.querySelector('.quote-popup');
+        if (existingPopup) existingPopup.remove();
+
+        // 랜덤 명언 선택
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+        // 팝업 요소 생성
+        const popup = document.createElement('div');
+        popup.className = 'quote-popup';
+        popup.innerHTML = `
+            <div class="quote-text">"${randomQuote.quote}"</div>
+            <div class="quote-author">- ${randomQuote.author}</div>
+        `;
+        document.body.appendChild(popup);
+
+        // 팝업 위치 설정 (클릭 위치 기준)
+        popup.style.left = `${x - popup.offsetWidth / 2}px`;
+        popup.style.top = `${y - popup.offsetHeight - 20}px`; // 클릭 위치보다 위쪽으로
+
+        // 페이드인
+        setTimeout(() => {
+            popup.classList.add('show');
+        }, 10);
+
+        // 5초 후 페이드아웃 및 제거
+        setTimeout(() => {
+            popup.classList.remove('show');
+            popup.addEventListener('transitionend', () => popup.remove());
+        }, 5000);
     }
 
     // 불 점화 애니메이션

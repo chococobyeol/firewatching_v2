@@ -546,7 +546,44 @@ input[type="range"]::-moz-range-thumb {
 
 /* 타이머 구분자 스타일 */
 .timer-separator {
-    font-size: 24px;
+    animation: blink 1s infinite;
+    margin: 0 5px;
+    font-size: 20px;
+}
+
+/* 명언 팝업 스타일 */
+.quote-popup {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.85);
     color: #fff;
-    text-align: center;
+    padding: 20px 25px;
+    border-radius: 8px;
+    border-left: 4px solid #ff6600;
+    z-index: 110;
+    max-width: 350px;
+    font-family: 'Georgia', 'serif';
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    transform: translateY(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    pointer-events: none; /* 팝업 위로 마우스 이벤트가 지나가도록 */
+}
+
+.quote-popup.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.quote-popup .quote-text {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-style: italic;
+}
+
+.quote-popup .quote-author {
+    font-size: 14px;
+    text-align: right;
+    color: #ff6600;
+    font-weight: bold;
 } 
