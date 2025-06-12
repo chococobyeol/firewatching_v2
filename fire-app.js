@@ -23,6 +23,7 @@ class FireApp {
         this.bgImageCtx = null;
         this.backgroundImage = null;
         this.isBgImageEnabled = false;
+        this.bgImageFireOffset = { x: 0, y: 0 }; // 배경 이미지 기준 불의 기본 오프셋
         this.overlayImages = {}; // 오버레이 이미지 저장
         
         // 빛무리(glow) 관련 변수 추가
@@ -1028,6 +1029,26 @@ class FireApp {
             }
             
             this.bgImageCtx.drawImage(this.backgroundImage, drawX, drawY, drawWidth, drawHeight);
+
+            // 배경 이미지 기준 불의 기본 오프셋 계산
+            const fireRelativeX = 0.495; // 가로 49.5%
+            const fireRelativeY = 0.79;  // 세로 79%
+
+            const fireScreenX = drawX + drawWidth * fireRelativeX;
+            const fireScreenY = drawY + drawHeight * fireRelativeY;
+
+            this.bgImageFireOffset = {
+                x: fireScreenX - window.innerWidth / 2,
+                y: fireScreenY - window.innerHeight / 2
+            };
+        } else {
+            // 배경 이미지가 없으면 오프셋은 0
+            this.bgImageFireOffset = { x: 0, y: 0 };
+        }
+        
+        // 배경 변경 시 위치 업데이트 트리거
+        if (window.fireControls) {
+            window.fireControls.updateCanvasPosition();
         }
     }
 }

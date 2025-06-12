@@ -11,7 +11,7 @@ class FireControls {
         this.defaultValues = {
             scale: 0.9,
             positionX: 0,
-            positionY: 190,
+            positionY: -160,
             nightSky: true,
             backgroundImage: true,
             magnitude: 1.6,
@@ -1114,13 +1114,25 @@ class FireControls {
 
     updateCanvasPosition(x = null, y = null) {
         // 파라미터가 주어지면 사용하고, 아니면 currentValues 사용
-        const posX = x !== null ? x : this.currentValues.positionX;
-        const posY = y !== null ? y : this.currentValues.positionY;
+        const sliderX = x !== null ? x : this.currentValues.positionX;
+        const sliderY = y !== null ? y : this.currentValues.positionY;
+
+        // 배경 이미지 기반의 기본 오프셋 가져오기
+        let baseOffsetX = 0;
+        let baseOffsetY = 0;
+        if (window.fireApp && window.fireApp.bgImageFireOffset) {
+            baseOffsetX = window.fireApp.bgImageFireOffset.x;
+            baseOffsetY = window.fireApp.bgImageFireOffset.y;
+        }
         
+        // 최종 오프셋 계산 = 기본 오프셋 + 슬라이더 오프셋
+        const finalX = baseOffsetX + sliderX;
+        const finalY = baseOffsetY + sliderY;
+
         // CSS transform으로 전체 캔버스 이동
         if (window.fireApp && window.fireApp.renderer && window.fireApp.renderer.domElement) {
             const canvas = window.fireApp.renderer.domElement;
-            const transformString = `translate(${posX}px, ${posY}px)`;
+            const transformString = `translate(${finalX}px, ${finalY}px)`;
             canvas.style.transform = transformString;
             
             // Glow 캔버스도 동일하게 이동
