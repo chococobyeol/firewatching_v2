@@ -60,6 +60,12 @@ class FireApp {
         ];
         this.currentHoveredItem = null;
         
+        // 클릭 제한 기능
+        this.clickLimits = {
+            book_1: { count: 0, lastReset: Date.now(), threshold: 8, timeWindow: 60000 }, // 1분에 8번
+            book_2: { count: 0, lastReset: Date.now(), threshold: 8, timeWindow: 60000 }
+        };
+        
         // Panning state
         this.isDragging = false;
         this.dragStart = { x: 0, y: 0 };
@@ -740,7 +746,11 @@ class FireApp {
 
                 if (Math.abs(event.clientX - targetX) < book1.tolerance &&
                     Math.abs(event.clientY - targetY) < book1.tolerance) {
-                    this.showRandomQuote(event.clientX, event.clientY);
+                    if (this.checkClickLimit('book_1')) {
+                        this.showRandomQuote(event.clientX, event.clientY);
+                    } else {
+                        this.showClickLimitWarning(event.clientX, event.clientY);
+                    }
                     return; // 책 클릭 시 불꽃 점화 방지
                 }
             }
@@ -751,7 +761,11 @@ class FireApp {
 
                 if (Math.abs(event.clientX - targetX) < book2.tolerance &&
                     Math.abs(event.clientY - targetY) < book2.tolerance) {
-                    this.showRandomFortune(event.clientX, event.clientY);
+                    if (this.checkClickLimit('book_2')) {
+                        this.showRandomFortune(event.clientX, event.clientY);
+                    } else {
+                        this.showClickLimitWarning(event.clientX, event.clientY);
+                    }
                     return; // 책 클릭 시 불꽃 점화 방지
                 }
             }
@@ -791,9 +805,20 @@ class FireApp {
         `;
         document.body.appendChild(popup);
 
-        // 팝업 위치 설정 (클릭 위치 기준)
-        popup.style.left = `${x - popup.offsetWidth / 2}px`;
-        popup.style.top = `${y - popup.offsetHeight - 20}px`; // 클릭 위치보다 위쪽으로
+        // 팝업 위치 설정 (화면 경계 고려)
+        const popupWidth = popup.offsetWidth || 350; // 기본값 설정
+        const popupHeight = popup.offsetHeight || 150;
+        
+        let leftPos = x - popupWidth / 2;
+        let topPos = y - popupHeight - 20;
+        
+        // 화면 경계 체크 및 조정
+        if (leftPos < 10) leftPos = 10;
+        if (leftPos + popupWidth > window.innerWidth - 10) leftPos = window.innerWidth - popupWidth - 10;
+        if (topPos < 10) topPos = y + 20;
+        
+        popup.style.left = `${leftPos}px`;
+        popup.style.top = `${topPos}px`; // 클릭 위치보다 위쪽으로
 
         // 페이드인
         setTimeout(() => {
@@ -805,6 +830,60 @@ class FireApp {
             popup.classList.remove('show');
             popup.addEventListener('transitionend', () => popup.remove());
         }, 5000);
+    }
+
+    checkClickLimit(bookName) {
+        const now = Date.now();
+        const limit = this.clickLimits[bookName];
+        
+        // 시간 윈도우가 지났으면 카운터 리셋
+        if (now - limit.lastReset > limit.timeWindow) {
+            limit.count = 0;
+            limit.lastReset = now;
+        }
+        
+        // 카운터 증가
+        limit.count++;
+        
+        // 임계값 초과 확인
+        return limit.count <= limit.threshold;
+    }
+
+    showClickLimitWarning(x, y) {
+        // 기존 경고 팝업이 있으면 제거
+        const existingPopup = document.querySelector('.warning-popup');
+        if (existingPopup) existingPopup.remove();
+
+        const popup = document.createElement('div');
+        popup.className = 'quote-popup warning-popup';
+        popup.innerHTML = '<div class="warning-title">그만 좀 누르세요...</div>';
+        document.body.appendChild(popup);
+
+        // 팝업 위치 설정 (화면 경계 고려)
+        const popupWidth = popup.offsetWidth || 300;
+        const popupHeight = popup.offsetHeight || 100;
+        
+        let leftPos = x - popupWidth / 2;
+        let topPos = y - popupHeight - 20;
+        
+        // 화면 경계 체크 및 조정
+        if (leftPos < 10) leftPos = 10;
+        if (leftPos + popupWidth > window.innerWidth - 10) leftPos = window.innerWidth - popupWidth - 10;
+        if (topPos < 10) topPos = y + 20;
+        
+        popup.style.left = `${leftPos}px`;
+        popup.style.top = `${topPos}px`;
+
+        // 페이드인
+        setTimeout(() => {
+            popup.classList.add('show');
+        }, 10);
+
+        // 3초 후 페이드아웃 및 제거
+        setTimeout(() => {
+            popup.classList.remove('show');
+            popup.addEventListener('transitionend', () => popup.remove());
+        }, 3000);
     }
 
     showRandomFortune(x, y) {
@@ -825,7 +904,7 @@ class FireApp {
         const popup = document.createElement('div');
         popup.className = 'quote-popup fortune-popup';
         popup.innerHTML = `
-            <div class="fortune-title">- 오늘의 행운 -</div>
+            <div class="fortune-title">- 행운의 책 -</div>
             <ul class="fortune-list">
                 <li class="advice-item">
                     <span class="fortune-content advice">"${selectedAdvice.content}"</span>
@@ -849,9 +928,20 @@ class FireApp {
         `;
         document.body.appendChild(popup);
 
-        // 팝업 위치 설정 (클릭 위치 기준)
-        popup.style.left = `${x - 175}px`; // 너비를 고려하여 위치 조정
-        popup.style.top = `${y - popup.offsetHeight - 20}px`; // 클릭 위치보다 위쪽으로
+        // 팝업 위치 설정 (화면 경계 고려)
+        const popupWidth = popup.offsetWidth || 380;
+        const popupHeight = popup.offsetHeight || 200;
+        
+        let leftPos = x - popupWidth / 2;
+        let topPos = y - popupHeight - 20;
+        
+        // 화면 경계 체크 및 조정
+        if (leftPos < 10) leftPos = 10;
+        if (leftPos + popupWidth > window.innerWidth - 10) leftPos = window.innerWidth - popupWidth - 10;
+        if (topPos < 10) topPos = y + 20;
+        
+        popup.style.left = `${leftPos}px`;
+        popup.style.top = `${topPos}px`;
 
         // 페이드인
         setTimeout(() => {

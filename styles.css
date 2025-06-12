@@ -613,7 +613,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .fortune-popup .fortune-list li {
-    margin-bottom: 12px;
+    margin-bottom: 12px; /* 원래 간격으로 복원 */
     padding: 10px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 6px;
@@ -621,11 +621,15 @@ input[type="range"]::-moz-range-thumb {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 20px; /* 양쪽 요소 사이 최소 간격 보장 */
 }
 
 .fortune-popup .fortune-list li.advice-item {
     justify-content: center;
-    padding: 15px 10px;
+    padding: 15px 10px; /* 원래 패딩으로 복원 */
+    min-height: 60px; /* 원래 높이로 복원 */
+    margin-bottom: 20px; /* 원래 간격으로 복원 */
+    gap: 0; /* 조언 아이템은 gap 없음 */
 }
 
 .fortune-popup .fortune-list li:last-child {
@@ -666,4 +670,22 @@ input[type="range"]::-moz-range-thumb {
     border-radius: 50%;
     margin-right: 8px;
     border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* 경고 팝업 스타일 */
+.warning-popup {
+    border-left-color: #ff6600; /* 기본 테마색과 동일 */
+    background: rgba(20, 20, 20, 0.9); /* 다른 팝업과 동일한 배경 */
+    backdrop-filter: blur(5px);
+    max-width: 300px;
+    text-align: center;
+}
+
+.warning-popup .warning-title {
+    font-size: 16px;
+    color: #ccc; /* 화려하지 않은 회색 */
+    font-weight: normal; /* 굵기 제거 */
+    margin-bottom: 10px;
+    font-family: 'Georgia', 'serif';
+    text-shadow: none; /* 그림자 제거 */
 } 

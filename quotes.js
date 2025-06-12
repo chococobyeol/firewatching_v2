@@ -570,5 +570,122 @@ const quotes = [
     {
         "quote": "I'm the king of the world!",
         "author": "타이타닉"
+    },
+    // 프로게이머 & 게임 명언 추가
+    {
+        "quote": "중요한 건 꺾이지 않는 마음",
+        "author": "데프트"
+    },
+    {
+        "quote": "More GG, More Skill",
+        "author": "WhiteRa"
+    },
+    {
+        "quote": "I don't think I'm the best, but I also don't think there is anyone better",
+        "author": "Olofmeister"
+    },
+    {
+        "quote": "Every single person who's succeeded in life has experienced failure at some point",
+        "author": "Faker"
+    },
+    {
+        "quote": "Up until they lose the game, they're winning",
+        "author": "Scarra"
+    },
+    {
+        "quote": "중요한 건 이기는 것이다. 하지만 그것만으로는 부족하다",
+        "author": "임요환 BoxeR"
+    },
+    {
+        "quote": "승부에서 가장 중요한 것은 절대 포기하지 않는 것",
+        "author": "이영호 FlaSh"
+    },
+    {
+        "quote": "게임에서 이기는 방법은 단 하나, 상대보다 더 잘하는 것",
+        "author": "작자 미상"
+    },
+    {
+        "quote": "연습은 거짓말을 하지 않는다",
+        "author": "이제동"
+    },
+    {
+        "quote": "천리길도 한 걸음부터",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "구슬이 서 말이라도 꿰어야 보배",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "백지장도 맞들면 낫다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "소 잃고 외양간 고친다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "하늘은 스스로 돕는 자를 돕는다",
+        "author": "서양 격언"
+    },
+    {
+        "quote": "로마는 하루아침에 이루어지지 않았다",
+        "author": "서양 격언"
+    },
+    {
+        "quote": "개미가 태산을 무너뜨린다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "물이 깊을수록 소리가 없다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "우물 안 개구리",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "급할수록 돌아가라",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "돌다리도 두들겨 보고 건너라",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "가는 말이 고와야 오는 말이 곱다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "원숭이도 나무에서 떨어진다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "티끌 모아 태산",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "열 번 찍어 안 넘어가는 나무 없다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "웃는 얼굴에 침 못 뱉는다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "누워서 떡 먹기",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "꿩 먹고 알 먹는다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "날개 없는 말이 천 리 간다",
+        "author": "한국 속담"
+    },
+    {
+        "quote": "시작이 반이다",
+        "author": "한국 속담"
     }
 ]; 
