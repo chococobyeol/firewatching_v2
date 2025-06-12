@@ -5,6 +5,7 @@ class ImageLayer {
         this.canvas = null;
         this.ctx = null;
         this.enabled = true;
+        this.hoveredImage = null;
         this.createCanvas(zIndex);
         this.loadImages();
         window.addEventListener('resize', () => this.update());
@@ -70,9 +71,21 @@ class ImageLayer {
             this.names.forEach(name => {
                 const img = this.images[name];
                 if (img && img.complete) {
+                    // 호버 효과 적용
+                    if (name === this.hoveredImage) {
+                        this.ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+                        this.ctx.shadowBlur = 20;
+                    } else {
+                        this.ctx.shadowColor = 'transparent';
+                        this.ctx.shadowBlur = 0;
+                    }
                     this.ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
                 }
             });
+
+            // 컨텍스트 초기화
+            this.ctx.shadowColor = 'transparent';
+            this.ctx.shadowBlur = 0;
         }
     }
 

@@ -53,6 +53,18 @@ class FireApp {
         this.smokeFadeDuration = 2000;    // 연기 페이드인 지속 시간 (ms)
         this.canvasSizeFactor = 2.0; // 모닥불 캔버스 크기 비율 (예: 1.2)
         
+        this.hoverableItems = [
+            { name: 'book_1', x: 450, y: 730, tolerance: 20 },
+            { name: 'book_2', x: 487, y: 737, tolerance: 20 },
+            { name: 'adv_1',  x: 954, y: 846, tolerance: 30 }
+        ];
+        this.currentHoveredItem = null;
+        
+        // 현재 설정값
+        this.currentValues = { ...this.defaultValues };
+        
+        this.isBookHovered = false; // 책 호버 상태
+
         this.init();
     }
 
@@ -371,6 +383,11 @@ class FireApp {
         window.addEventListener('resize', () => {
             this.onWindowResize();
         }, false);
+
+        // 마우스 이동 이벤트 (호버 효과용)
+        window.addEventListener('mousemove', (event) => {
+            this.handleMouseMove(event);
+        });
 
         // 클릭 이벤트 (불꽃 점화)
         if (this.renderer && this.renderer.domElement) {
@@ -1050,6 +1067,76 @@ class FireApp {
         if (window.fireControls) {
             window.fireControls.updateCanvasPosition();
         }
+    }
+
+    handleMouseMove(event) {
+        if (!this.backgroundImage || !this.backgroundImage.complete || !this.bgImageFireOffset) {
+            return;
+        }
+
+        // 배경 이미지의 렌더링 정보 가져오기
+        const { drawX, drawY, drawWidth, drawHeight } = this.getBgImageDrawInfo();
+        const { naturalWidth, naturalHeight } = this.backgroundImage;
+
+        if (!drawWidth) return;
+
+        // 마우스 위치
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
+
+        let hoveredItemName = null;
+
+        // 호버 가능한 아이템 목록을 순회하며 확인
+        for (const item of this.hoverableItems) {
+            const targetScreenX = drawX + item.x * drawWidth / naturalWidth;
+            const targetScreenY = drawY + item.y * drawHeight / naturalHeight;
+
+            // 마우스가 타겟 영역 안에 있는지 확인
+            const isHovering = 
+                Math.abs(mouseX - targetScreenX) < item.tolerance &&
+                Math.abs(mouseY - targetScreenY) < item.tolerance;
+
+            if (isHovering) {
+                hoveredItemName = item.name;
+                break; // 첫 번째로 발견된 아이템에만 효과 적용
+            }
+        }
+
+        // 호버 상태가 변경되었을 때만 업데이트
+        if (hoveredItemName !== this.currentHoveredItem) {
+            this.currentHoveredItem = hoveredItemName;
+            this.imageLayer.hoveredImage = hoveredItemName;
+            this.imageLayer.update(); // 소품 레이어만 다시 그리기
+        }
+    }
+
+    getBgImageDrawInfo() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const img = this.backgroundImage;
+
+        if (!img || !img.complete) {
+            return {};
+        }
+
+        const imgAspect = img.naturalWidth / img.naturalHeight;
+        const screenAspect = width / height;
+        
+        let drawWidth, drawHeight, drawX, drawY;
+        
+        if (imgAspect > screenAspect) {
+            drawHeight = height;
+            drawWidth = height * imgAspect;
+            drawX = (width - drawWidth) / 2;
+            drawY = 0;
+        } else {
+            drawWidth = width;
+            drawHeight = width / imgAspect;
+            drawX = 0;
+            drawY = (height - drawHeight) / 2;
+        }
+
+        return { drawX, drawY, drawWidth, drawHeight };
     }
 }
 
