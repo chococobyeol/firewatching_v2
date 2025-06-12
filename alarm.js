@@ -374,7 +374,13 @@
         stopAlarmBtn.removeEventListener('click', popupData.clickHandler);
         
         // 새 리스너 추가 및 참조 저장
-        popupData.clickHandler = () => {
+        popupData.clickHandler = (event) => {
+          // 이벤트 전파 중단 (fire-app.js 클릭 이벤트 방지)
+          if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+          }
+          
           if (alarm.sound) {
             alarmAudioEl.pause();
             alarmAudioEl.currentTime = 0;
@@ -400,14 +406,14 @@
         // 경우에 따라 버튼 이벤트가 작동하지 않을 때를 대비
         containerDiv.addEventListener('click', (e) => {
           if (e.target === stopAlarmBtn || stopAlarmBtn.contains(e.target)) {
-            popupData.clickHandler();
+            popupData.clickHandler(e);
           }
         });
         
         // 키보드 이벤트도 추가 (Enter 또는 Space 키로 확인 가능)
         containerDiv.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
-            popupData.clickHandler();
+            popupData.clickHandler(e);
           }
         });
       }
@@ -419,14 +425,13 @@
         // 알람이 비활성화 상태면 실행하지 않음
         if (!alarm.active) return;
         
-        // 중복 트리거 방지: 기존 예약과 nextTriggerTime 초기화
+        // 중복 트리거 방지: 기존 예약과 nextTriggerTime 먼저 초기화
         if (alarm.timeoutId) {
           clearTimeout(alarm.timeoutId);
           alarm.timeoutId = null;
         }
-        if (!alarm.repeat) {
-          alarm.nextTriggerTime = null;
-        }
+        // 반복/비반복 관계없이 현재 트리거 완료로 즉시 초기화
+        alarm.nextTriggerTime = null;
         
         // 반복 알람일 경우 다음 알람 예약 (사용자 확인과 무관하게)
         if (alarm.repeat) {
@@ -465,6 +470,7 @@
         
         // 알람 창을 표시하는 커스텀 함수 만들기
         const containerDiv = document.createElement('div');
+        containerDiv.className = 'alarm-popup-container'; // fire-app.js 클릭 이벤트 필터링용
         containerDiv.style.cssText = `
           position: fixed;
           top: 0;

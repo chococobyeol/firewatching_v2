@@ -741,7 +741,7 @@ class FireApp {
     // 배경 이미지 인터랙티브 요소 클릭 처리
     handleBackgroundClick(event) {
         // UI 요소 위에서의 클릭은 무시 (알람 팝업 포함)
-        if (event.target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar, [style*="z-index: 9999"], .quote-popup, .fortune-popup, .warning-popup, .ad-confirm-popup, .ad-modal-overlay')) {
+        if (event.target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar, .alarm-popup-container, .quote-popup, .fortune-popup, .warning-popup, .ad-confirm-popup, .ad-modal-overlay')) {
             return;
         }
 
