@@ -732,6 +732,7 @@ class FireApp {
             const scaleX = drawWidth / naturalWidth;
             const scaleY = drawHeight / naturalHeight;
             const book1 = this.hoverableItems.find(item => item.name === 'book_1');
+            const book2 = this.hoverableItems.find(item => item.name === 'book_2');
 
             if (book1) {
                 const targetX = drawX + this.panOffset.x + book1.x * scaleX;
@@ -740,6 +741,17 @@ class FireApp {
                 if (Math.abs(event.clientX - targetX) < book1.tolerance &&
                     Math.abs(event.clientY - targetY) < book1.tolerance) {
                     this.showRandomQuote(event.clientX, event.clientY);
+                    return; // 책 클릭 시 불꽃 점화 방지
+                }
+            }
+
+            if (book2) {
+                const targetX = drawX + this.panOffset.x + book2.x * scaleX;
+                const targetY = drawY + this.panOffset.y + book2.y * scaleY;
+
+                if (Math.abs(event.clientX - targetX) < book2.tolerance &&
+                    Math.abs(event.clientY - targetY) < book2.tolerance) {
+                    this.showRandomFortune(event.clientX, event.clientY);
                     return; // 책 클릭 시 불꽃 점화 방지
                 }
             }
@@ -793,6 +805,64 @@ class FireApp {
             popup.classList.remove('show');
             popup.addEventListener('transitionend', () => popup.remove());
         }, 5000);
+    }
+
+    showRandomFortune(x, y) {
+        // 기존 팝업이 있으면 제거
+        const existingPopup = document.querySelector('.fortune-popup');
+        if (existingPopup) existingPopup.remove();
+
+        // 각 타입별로 행운 콘텐츠 생성
+        const advicePool = fortunes.filter(f => f.type === '조언');
+        const itemPool = fortunes.filter(f => f.type === '아이템');
+        
+        const selectedAdvice = advicePool[Math.floor(Math.random() * advicePool.length)];
+        const selectedItem = itemPool[Math.floor(Math.random() * itemPool.length)];
+        const finalNumber = Math.floor(Math.random() * 100) + 1;
+        const finalColor = fortune_colors[Math.floor(Math.random() * fortune_colors.length)];
+
+        // 팝업 요소 생성
+        const popup = document.createElement('div');
+        popup.className = 'quote-popup fortune-popup';
+        popup.innerHTML = `
+            <div class="fortune-title">- 오늘의 행운 -</div>
+            <ul class="fortune-list">
+                <li class="advice-item">
+                    <span class="fortune-content advice">"${selectedAdvice.content}"</span>
+                </li>
+                <li>
+                    <span class="fortune-type">행운의 숫자</span>
+                    <span class="fortune-content number">${finalNumber}</span>
+                </li>
+                <li>
+                    <span class="fortune-type">행운의 색상</span>
+                    <span class="fortune-content color">
+                        <span class="color-swatch" style="background-color: ${finalColor.hex};"></span>
+                        ${finalColor.name}
+                    </span>
+                </li>
+                <li>
+                    <span class="fortune-type">행운의 아이템</span>
+                    <span class="fortune-content item">${selectedItem.content}</span>
+                </li>
+            </ul>
+        `;
+        document.body.appendChild(popup);
+
+        // 팝업 위치 설정 (클릭 위치 기준)
+        popup.style.left = `${x - 175}px`; // 너비를 고려하여 위치 조정
+        popup.style.top = `${y - popup.offsetHeight - 20}px`; // 클릭 위치보다 위쪽으로
+
+        // 페이드인
+        setTimeout(() => {
+            popup.classList.add('show');
+        }, 10);
+
+        // 8초 후 페이드아웃 및 제거 (시간을 늘림)
+        setTimeout(() => {
+            popup.classList.remove('show');
+            popup.addEventListener('transitionend', () => popup.remove());
+        }, 8000);
     }
 
     // 불 점화 애니메이션

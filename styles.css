@@ -554,7 +554,7 @@ input[type="range"]::-moz-range-thumb {
 /* 명언 팝업 스타일 */
 .quote-popup {
     position: fixed;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(20, 20, 20, 0.9);
     color: #fff;
     padding: 20px 25px;
     border-radius: 8px;
@@ -586,4 +586,84 @@ input[type="range"]::-moz-range-thumb {
     text-align: right;
     color: #ff6600;
     font-weight: bold;
+}
+
+/* 행운 팝업 전용 스타일 */
+.fortune-popup {
+    border-left-color: #ff8c00; /* 사이트 테마 색상으로 변경 */
+    background: rgba(20, 20, 20, 0.9);
+    backdrop-filter: blur(5px);
+    max-width: 380px; /* 너비 확장 */
+}
+
+.fortune-popup .fortune-title {
+    font-size: 20px;
+    text-align: center;
+    color: #ff8c00; /* 사이트 테마 색상으로 변경 */
+    font-weight: bold;
+    margin-bottom: 20px;
+    font-family: 'Georgia', 'serif';
+    text-shadow: 0 0 8px rgba(255, 140, 0, 0.5);
+}
+
+.fortune-popup .fortune-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.fortune-popup .fortune-list li {
+    margin-bottom: 12px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fortune-popup .fortune-list li.advice-item {
+    justify-content: center;
+    padding: 15px 10px;
+}
+
+.fortune-popup .fortune-list li:last-child {
+    margin-bottom: 0;
+}
+
+.fortune-popup .fortune-type {
+    font-size: 14px;
+    color: #ccc;
+    font-weight: normal;
+}
+
+.fortune-popup .fortune-content {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    text-align: right;
+}
+
+.fortune-popup .fortune-content.advice {
+    font-size: 16px;
+    font-style: italic;
+    font-weight: normal;
+    color: #f1c40f; /* 조언은 노란색으로 강조 */
+    text-align: center;
+}
+
+.fortune-popup .fortune-content.color {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.color-swatch {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
 } 
