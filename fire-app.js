@@ -769,6 +769,19 @@ class FireApp {
                     return; // 책 클릭 시 불꽃 점화 방지
                 }
             }
+
+            // adv_1 클릭 처리
+            const adv1 = this.hoverableItems.find(item => item.name === 'adv_1');
+            if (adv1) {
+                const targetX = drawX + this.panOffset.x + adv1.x * scaleX;
+                const targetY = drawY + this.panOffset.y + adv1.y * scaleY;
+
+                if (Math.abs(event.clientX - targetX) < adv1.tolerance &&
+                    Math.abs(event.clientY - targetY) < adv1.tolerance) {
+                    this.showAdConfirmation(event.clientX, event.clientY);
+                    return; // 광고 클릭 시 불꽃 점화 방지
+                }
+            }
         }
 
         // 기존 불꽃 점화 로직
@@ -953,6 +966,138 @@ class FireApp {
             popup.classList.remove('show');
             popup.addEventListener('transitionend', () => popup.remove());
         }, 8000);
+    }
+
+    // 광고 확인 팝업 표시 - 보기/그만두기 버튼 포함
+    showAdConfirmation(x, y) {
+        // 기존 팝업이 있으면 제거
+        const existingPopup = document.querySelector('.ad-confirm-popup');
+        if (existingPopup) existingPopup.remove();
+
+        // 팝업 요소 생성
+        const popup = document.createElement('div');
+        popup.className = 'ad-confirm-popup';
+        popup.innerHTML = `
+            <div class="ad-confirm-title">광고지인 것 같다...</div>
+            <div class="ad-confirm-buttons">
+                <button class="ad-confirm-btn view-btn">보기</button>
+                <button class="ad-confirm-btn cancel-btn">그만두기</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+
+        // 팝업 위치 설정 (화면 경계 고려)
+        const popupWidth = popup.offsetWidth || 280;
+        const popupHeight = popup.offsetHeight || 100;
+        
+        let leftPos = x - popupWidth / 2;
+        let topPos = y - popupHeight - 20;
+        
+        // 화면 경계 체크 및 조정
+        if (leftPos < 10) leftPos = 10;
+        if (leftPos + popupWidth > window.innerWidth - 10) leftPos = window.innerWidth - popupWidth - 10;
+        if (topPos < 10) topPos = y + 20;
+        
+        popup.style.left = `${leftPos}px`;
+        popup.style.top = `${topPos}px`;
+
+        // 이벤트 리스너 추가
+        const viewBtn = popup.querySelector('.view-btn');
+        const cancelBtn = popup.querySelector('.cancel-btn');
+
+        viewBtn.addEventListener('click', () => {
+            popup.remove();
+            this.showAdModal();
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            popup.classList.remove('show');
+            popup.addEventListener('transitionend', () => popup.remove());
+        });
+
+        // 페이드인
+        setTimeout(() => {
+            popup.classList.add('show');
+        }, 10);
+
+        // 5초 후 자동 페이드아웃 및 제거
+        setTimeout(() => {
+            if (document.body.contains(popup)) {
+                popup.classList.remove('show');
+                popup.addEventListener('transitionend', () => popup.remove());
+            }
+        }, 5000);
+    }
+
+    // 광고 모달 표시 - 사이드바 스타일 참고한 모달, 여러 광고 배열 가능
+    showAdModal() {
+        // 기존 모달이 있으면 제거
+        const existingModal = document.querySelector('.ad-modal-overlay');
+        if (existingModal) existingModal.remove();
+
+        // 모든 광고 데이터 가져오기 (나중에 여러 광고 추가 시 확장 가능)
+        const ads = adManager.ads;
+
+        // 모달 오버레이 생성
+        const overlay = document.createElement('div');
+        overlay.className = 'ad-modal-overlay';
+        
+        // 광고 아이템들 생성
+        const adItemsHTML = ads.map(ad => `
+            <div class="ad-item">
+                <img class="ad-item-image" src="${ad.imageUrl}" alt="${ad.title}" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="ad-item-fallback" style="display:none; text-align:center; padding:40px; color:#999; background:rgba(255,255,255,0.05); border-radius:4px;">${ad.fallbackText || '더이상 알아볼 수 없는 광고입니다'}</div>
+                <div class="ad-item-description">${ad.description}</div>
+                <a href="${ad.linkUrl || ad.imageUrl}" target="_blank" class="ad-item-link">
+                    자세히 보기
+                </a>
+            </div>
+        `).join('');
+
+        overlay.innerHTML = `
+            <div class="ad-modal">
+                <div class="ad-modal-header">
+                    <h3 class="ad-modal-title">광고</h3>
+                    <button class="ad-modal-close">×</button>
+                </div>
+                <div class="ad-modal-content">
+                    ${adItemsHTML}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // 이벤트 리스너 추가
+        const closeBtn = overlay.querySelector('.ad-modal-close');
+        
+        const closeModal = () => {
+            overlay.classList.remove('show');
+            overlay.addEventListener('transitionend', () => overlay.remove());
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        
+        // 오버레이 클릭 시 닫기
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal();
+            }
+        });
+
+        // ESC 키로 닫기
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        // 모달 페이드인
+        setTimeout(() => {
+            overlay.classList.add('show');
+        }, 10);
     }
 
     // 불 점화 애니메이션

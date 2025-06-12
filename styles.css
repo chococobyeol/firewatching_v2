@@ -688,4 +688,251 @@ input[type="range"]::-moz-range-thumb {
     margin-bottom: 10px;
     font-family: 'Georgia', 'serif';
     text-shadow: none; /* 그림자 제거 */
+}
+
+/* 광고 확인 팝업 스타일 - quote-popup과 동일한 스타일 */
+.ad-confirm-popup {
+    position: fixed;
+    background: rgba(20, 20, 20, 0.9);
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border-left: 4px solid #ff6600;
+    z-index: 110;
+    max-width: 280px;
+    font-family: 'Georgia', 'serif';
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    transform: translateY(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    text-align: center;
+}
+
+.ad-confirm-popup.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.ad-confirm-popup .ad-confirm-title {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 15px;
+    font-weight: normal;
+}
+
+.ad-confirm-popup .ad-confirm-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.ad-confirm-popup .ad-confirm-btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.ad-confirm-popup .ad-confirm-btn.view-btn {
+    background: rgba(255, 102, 0, 0.8);
+    color: white;
+}
+
+.ad-confirm-popup .ad-confirm-btn.view-btn:hover {
+    background: rgba(255, 102, 0, 1);
+}
+
+.ad-confirm-popup .ad-confirm-btn.cancel-btn {
+    background: rgba(80, 80, 80, 0.6);
+    color: #ccc;
+}
+
+.ad-confirm-popup .ad-confirm-btn.cancel-btn:hover {
+    background: rgba(100, 100, 100, 0.8);
+    color: white;
+}
+
+/* 광고 모달 오버레이 */
+.ad-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.ad-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 광고 모달 - 사이드바 스타일 참고 */
+.ad-modal {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    max-width: 600px;
+    max-height: 80vh;
+    width: 90%;
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 102, 0, 0.6) transparent;
+}
+
+.ad-modal-overlay.show .ad-modal {
+    transform: scale(1);
+}
+
+.ad-modal-header {
+    background: rgba(20,20,20,0.9);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.ad-modal-title {
+    color: #ff6600;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.ad-modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 0;
+}
+
+.ad-modal-content {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(80vh - 70px);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 102, 0, 0.6) transparent;
+}
+
+.ad-modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ad-modal-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.ad-modal-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 102, 0, 0.6);
+    border-radius: 4px;
+}
+
+.ad-modal-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 102, 0, 0.8);
+}
+
+/* 광고 아이템 스타일 */
+.ad-item {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border-left: 3px solid rgba(255, 102, 0, 0.5);
+}
+
+.ad-item:last-child {
+    margin-bottom: 0;
+}
+
+.ad-item-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.ad-item-description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #ddd;
+    margin-bottom: 12px;
+}
+
+.ad-item-link {
+    display: inline-block;
+    padding: 8px 16px;
+    background: rgba(255, 102, 0, 0.2);
+    color: #ff6600;
+    text-decoration: none;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 102, 0, 0.4);
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.ad-item-link:hover {
+    background: rgba(255, 102, 0, 0.3);
+    color: #fff;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+    .ad-confirm-popup {
+        max-width: 260px;
+        padding: 12px 15px;
+    }
+    
+    .ad-confirm-popup .ad-confirm-title {
+        font-size: 13px;
+    }
+    
+    .ad-confirm-popup .ad-confirm-btn {
+        padding: 5px 12px;
+        font-size: 11px;
+    }
+    
+    .ad-modal {
+        max-width: 95%;
+        max-height: 85vh;
+    }
+    
+    .ad-modal-header {
+        padding: 12px 15px;
+    }
+    
+    .ad-modal-title {
+        font-size: 15px;
+    }
+    
+    .ad-modal-content {
+        padding: 15px;
+    }
+    
+    .ad-item-image {
+        max-height: 200px;
+    }
 } 
