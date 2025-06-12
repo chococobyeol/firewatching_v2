@@ -11,7 +11,7 @@ class FireControls {
         this.defaultValues = {
             scale: 0.9,
             positionX: 0,
-            positionY: 160,
+            positionY: 140,
             nightSky: true,
             backgroundImage: true,
             magnitude: 1.6,

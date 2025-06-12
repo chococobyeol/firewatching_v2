@@ -424,9 +424,12 @@ class FireApp {
         const canvasWidth = window.innerWidth * this.canvasSizeFactor;
         const canvasHeight = window.innerHeight * this.canvasSizeFactor;
         this.renderer.setSize(canvasWidth, canvasHeight, false);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        
         // CSS 크기 및 위치 조정
         const offsetX = (canvasWidth - window.innerWidth) / 2;
         const offsetY = (canvasHeight - window.innerHeight) / 2;
+        this.renderer.domElement.style.position = 'fixed';
         this.renderer.domElement.style.top = `-${offsetY}px`;
         this.renderer.domElement.style.left = `-${offsetX}px`;
         this.renderer.domElement.style.width = `${canvasWidth}px`;
