@@ -416,16 +416,10 @@ class FireApp {
         grabTarget.addEventListener('touchend', this.onDragEnd.bind(this));
         grabTarget.addEventListener('touchcancel', this.onDragEnd.bind(this));
 
-        // 클릭 이벤트를 두 가지로 분리 처리
-        // 1. 배경 이미지의 인터랙티브 요소 클릭 (document.body)
-        document.body.addEventListener('click', (event) => {
-            this.handleBackgroundClick(event);
-        }, false);
-        
-        // 2. 불꽃 점화 클릭 (렌더러 캔버스에서만)
+        // 클릭 이벤트 (불꽃 점화)
         if (this.renderer && this.renderer.domElement) {
             this.renderer.domElement.addEventListener('click', (event) => {
-                this.handleFireClick(event);
+                this.handleClick(event);
             }, false);
         }
     }
@@ -738,78 +732,72 @@ class FireApp {
         console.log('Fire extinguished');
     }
 
-    // 배경 이미지 인터랙티브 요소 클릭 처리
-    handleBackgroundClick(event) {
-        // UI 요소 위에서의 클릭은 무시 (알람 팝업 포함)
-        if (event.target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar, .alarm-popup-container, .quote-popup, .fortune-popup, .warning-popup, .ad-confirm-popup, .ad-modal-overlay')) {
+    // 클릭 이벤트 처리
+    handleClick(event) {
+        // UI 요소 위에서의 클릭은 무시
+        if (event.target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar')) {
             return;
         }
 
-        // 소품 이미지 레이어가 비활성화되어 있으면 클릭 무시
-        if (!this.getImageLayerEnabled()) {
-            return;
-        }
+        // book_1 클릭 확인 (소품 이미지 레이어가 활성화되어 있을 때만)
+        if (this.getImageLayerEnabled()) {
+            const { drawX, drawY, drawWidth, drawHeight } = this.getBgImageDrawInfo();
+            const { naturalWidth, naturalHeight } = this.backgroundImage;
+            if (drawWidth) {
+                const scaleX = drawWidth / naturalWidth;
+                const scaleY = drawHeight / naturalHeight;
+                const book1 = this.hoverableItems.find(item => item.name === 'book_1');
+                const book2 = this.hoverableItems.find(item => item.name === 'book_2');
 
-        // book_1 클릭 확인
-        const { drawX, drawY, drawWidth, drawHeight } = this.getBgImageDrawInfo();
-        const { naturalWidth, naturalHeight } = this.backgroundImage;
-        if (drawWidth) {
-            const scaleX = drawWidth / naturalWidth;
-            const scaleY = drawHeight / naturalHeight;
-            const book1 = this.hoverableItems.find(item => item.name === 'book_1');
-            const book2 = this.hoverableItems.find(item => item.name === 'book_2');
+                if (book1) {
+                    const targetX = drawX + this.panOffset.x + book1.x * scaleX;
+                    const targetY = drawY + this.panOffset.y + book1.y * scaleY;
 
-            if (book1) {
-                const targetX = drawX + this.panOffset.x + book1.x * scaleX;
-                const targetY = drawY + this.panOffset.y + book1.y * scaleY;
-
-                if (Math.abs(event.clientX - targetX) < book1.tolerance &&
-                    Math.abs(event.clientY - targetY) < book1.tolerance) {
-                    if (this.checkClickLimit('book_1')) {
-                        this.showRandomQuote(event.clientX, event.clientY);
-                    } else {
-                        this.showClickLimitWarning(event.clientX, event.clientY);
+                    if (Math.abs(event.clientX - targetX) < book1.tolerance &&
+                        Math.abs(event.clientY - targetY) < book1.tolerance) {
+                        if (this.checkClickLimit('book_1')) {
+                            this.showRandomQuote(event.clientX, event.clientY);
+                        } else {
+                            this.showClickLimitWarning(event.clientX, event.clientY);
+                        }
+                        return;
                     }
-                    return;
                 }
-            }
 
-            if (book2) {
-                const targetX = drawX + this.panOffset.x + book2.x * scaleX;
-                const targetY = drawY + this.panOffset.y + book2.y * scaleY;
+                if (book2) {
+                    const targetX = drawX + this.panOffset.x + book2.x * scaleX;
+                    const targetY = drawY + this.panOffset.y + book2.y * scaleY;
 
-                if (Math.abs(event.clientX - targetX) < book2.tolerance &&
-                    Math.abs(event.clientY - targetY) < book2.tolerance) {
-                    if (this.checkClickLimit('book_2')) {
-                        this.showRandomFortune(event.clientX, event.clientY);
-                    } else {
-                        this.showClickLimitWarning(event.clientX, event.clientY);
+                    if (Math.abs(event.clientX - targetX) < book2.tolerance &&
+                        Math.abs(event.clientY - targetY) < book2.tolerance) {
+                        if (this.checkClickLimit('book_2')) {
+                            this.showRandomFortune(event.clientX, event.clientY);
+                        } else {
+                            this.showClickLimitWarning(event.clientX, event.clientY);
+                        }
+                        return;
                     }
-                    return;
                 }
-            }
 
-            // adv_1 클릭 처리 (클릭 제한 추가)
-            const adv1 = this.hoverableItems.find(item => item.name === 'adv_1');
-            if (adv1) {
-                const targetX = drawX + this.panOffset.x + adv1.x * scaleX;
-                const targetY = drawY + this.panOffset.y + adv1.y * scaleY;
+                // adv_1 클릭 처리 (클릭 제한 추가)
+                const adv1 = this.hoverableItems.find(item => item.name === 'adv_1');
+                if (adv1) {
+                    const targetX = drawX + this.panOffset.x + adv1.x * scaleX;
+                    const targetY = drawY + this.panOffset.y + adv1.y * scaleY;
 
-                if (Math.abs(event.clientX - targetX) < adv1.tolerance &&
-                    Math.abs(event.clientY - targetY) < adv1.tolerance) {
-                    if (this.checkClickLimit('adv_1')) {
-                        this.showAdConfirmation(event.clientX, event.clientY);
-                    } else {
-                        this.showClickLimitWarning(event.clientX, event.clientY);
+                    if (Math.abs(event.clientX - targetX) < adv1.tolerance &&
+                        Math.abs(event.clientY - targetY) < adv1.tolerance) {
+                        if (this.checkClickLimit('adv_1')) {
+                            this.showAdConfirmation(event.clientX, event.clientY);
+                        } else {
+                            this.showClickLimitWarning(event.clientX, event.clientY);
+                        }
+                        return;
                     }
-                    return;
                 }
             }
         }
-    }
 
-    // 불꽃 점화 클릭 처리 (렌더러 캔버스에서만)
-    handleFireClick(event) {
         // 점화 사운드 재생
         if (this.ignitionAudio) {
             this.ignitionAudio.currentTime = 0;
