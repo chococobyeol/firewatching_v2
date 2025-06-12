@@ -415,10 +415,18 @@ class FireApp {
         grabTarget.addEventListener('touchend', this.onDragEnd.bind(this));
         grabTarget.addEventListener('touchcancel', this.onDragEnd.bind(this));
 
-        // 클릭 이벤트 통합 핸들러
+        // 클릭 이벤트를 두 가지로 분리 처리
+        // 1. 배경 이미지의 인터랙티브 요소 클릭 (document.body)
         document.body.addEventListener('click', (event) => {
-            this.handleClick(event);
+            this.handleBackgroundClick(event);
         }, false);
+        
+        // 2. 불꽃 점화 클릭 (렌더러 캔버스에서만)
+        if (this.renderer && this.renderer.domElement) {
+            this.renderer.domElement.addEventListener('click', (event) => {
+                this.handleFireClick(event);
+            }, false);
+        }
     }
 
     onWindowResize() {
@@ -724,10 +732,10 @@ class FireApp {
         console.log('Fire extinguished');
     }
 
-    // 클릭 이벤트 처리
-    handleClick(event) {
-        // UI 요소 위에서의 클릭은 무시
-        if (event.target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar')) {
+    // 배경 이미지 인터랙티브 요소 클릭 처리
+    handleBackgroundClick(event) {
+        // UI 요소 위에서의 클릭은 무시 (알람 팝업 포함)
+        if (event.target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar, [style*="z-index: 9999"], .quote-popup, .fortune-popup, .warning-popup, .ad-confirm-popup, .ad-modal-overlay')) {
             return;
         }
 
@@ -751,7 +759,7 @@ class FireApp {
                     } else {
                         this.showClickLimitWarning(event.clientX, event.clientY);
                     }
-                    return; // 책 클릭 시 불꽃 점화 방지
+                    return;
                 }
             }
 
@@ -766,7 +774,7 @@ class FireApp {
                     } else {
                         this.showClickLimitWarning(event.clientX, event.clientY);
                     }
-                    return; // 책 클릭 시 불꽃 점화 방지
+                    return;
                 }
             }
 
@@ -779,12 +787,15 @@ class FireApp {
                 if (Math.abs(event.clientX - targetX) < adv1.tolerance &&
                     Math.abs(event.clientY - targetY) < adv1.tolerance) {
                     this.showAdConfirmation(event.clientX, event.clientY);
-                    return; // 광고 클릭 시 불꽃 점화 방지
+                    return;
                 }
             }
         }
+    }
 
-        // 기존 불꽃 점화 로직
+    // 불꽃 점화 클릭 처리 (렌더러 캔버스에서만)
+    handleFireClick(event) {
+        // 점화 사운드 재생
         if (this.ignitionAudio) {
             this.ignitionAudio.currentTime = 0;
             this.ignitionAudio.play().catch(e => {
