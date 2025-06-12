@@ -1124,10 +1124,18 @@ class FireControls {
             baseOffsetX = window.fireApp.bgImageFireOffset.x;
             baseOffsetY = window.fireApp.bgImageFireOffset.y;
         }
+
+        // 전역 패닝 오프셋 가져오기
+        let panOffsetX = 0;
+        let panOffsetY = 0;
+        if (window.fireApp && window.fireApp.panOffset) {
+            panOffsetX = window.fireApp.panOffset.x;
+            panOffsetY = window.fireApp.panOffset.y;
+        }
         
-        // 최종 오프셋 계산 = 기본 오프셋 + 슬라이더 오프셋
-        const finalX = baseOffsetX + sliderX;
-        const finalY = baseOffsetY + sliderY;
+        // 최종 오프셋 계산 = 기본 오프셋 + 슬라이더 오프셋 + 패닝 오프셋
+        const finalX = baseOffsetX + sliderX + panOffsetX;
+        const finalY = baseOffsetY + sliderY + panOffsetY;
 
         // CSS transform으로 전체 캔버스 이동
         if (window.fireApp && window.fireApp.renderer && window.fireApp.renderer.domElement) {

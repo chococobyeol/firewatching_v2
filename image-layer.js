@@ -67,6 +67,11 @@ class ImageLayer {
                 drawY = (height - drawHeight) / 2;
             }
 
+            // 전역 패닝 오프셋 적용
+            const panOffset = window.fireApp ? window.fireApp.panOffset : { x: 0, y: 0 };
+            drawX += panOffset.x;
+            drawY += panOffset.y;
+
             // 순서대로 이미지 그리기
             this.names.forEach(name => {
                 const img = this.images[name];

@@ -60,6 +60,11 @@ class FireApp {
         ];
         this.currentHoveredItem = null;
         
+        // Panning state
+        this.isDragging = false;
+        this.dragStart = { x: 0, y: 0 };
+        this.panOffset = { x: 0, y: 0 };
+        
         // 현재 설정값
         this.currentValues = { ...this.defaultValues };
         
@@ -386,8 +391,23 @@ class FireApp {
 
         // 마우스 이동 이벤트 (호버 효과용)
         window.addEventListener('mousemove', (event) => {
-            this.handleMouseMove(event);
+            if (!this.isDragging) { // 드래그 중에는 호버 비활성화
+                this.handleMouseMove(event);
+            }
         });
+
+        // 드래그-패닝 이벤트 리스너
+        const grabTarget = document.body; // 전체 화면을 드래그 대상으로
+        grabTarget.addEventListener('mousedown', this.onDragStart.bind(this));
+        grabTarget.addEventListener('mousemove', this.onDragMove.bind(this));
+        grabTarget.addEventListener('mouseup', this.onDragEnd.bind(this));
+        grabTarget.addEventListener('mouseleave', this.onDragEnd.bind(this));
+        
+        // 모바일 터치 이벤트
+        grabTarget.addEventListener('touchstart', this.onDragStart.bind(this), { passive: false });
+        grabTarget.addEventListener('touchmove', this.onDragMove.bind(this), { passive: false });
+        grabTarget.addEventListener('touchend', this.onDragEnd.bind(this));
+        grabTarget.addEventListener('touchcancel', this.onDragEnd.bind(this));
 
         // 클릭 이벤트 (불꽃 점화)
         if (this.renderer && this.renderer.domElement) {
@@ -430,6 +450,15 @@ class FireApp {
         
         // 배경 이미지 캔버스 크기 업데이트
         this.updateBackgroundImageCanvas();
+        
+        // 컨트롤러에 리사이즈 이벤트 전달
+        if (window.fireControls) {
+            window.fireControls.updateCanvasPosition();
+        }
+
+        // 패닝 상태 초기화 및 전체 위치 업데이트
+        this.panOffset = { x: 0, y: 0 };
+        this.updateAllPositions();
         
         console.log('Window resized');
     }
@@ -1045,9 +1074,10 @@ class FireApp {
                 drawY = (height - drawHeight) / 2;
             }
             
-            this.bgImageCtx.drawImage(this.backgroundImage, drawX, drawY, drawWidth, drawHeight);
+            // 패닝 오프셋을 적용하여 캔버스에 그리기
+            this.bgImageCtx.drawImage(this.backgroundImage, drawX + this.panOffset.x, drawY, drawWidth, drawHeight);
 
-            // 배경 이미지 기준 불의 기본 오프셋 계산
+            // 배경 이미지 기준 불의 기본 오프셋 계산 (패닝 전 위치 기준)
             const fireRelativeX = 0.495; // 가로 49.5%
             const fireRelativeY = 0.79;  // 세로 79%
 
@@ -1088,7 +1118,7 @@ class FireApp {
 
         // 호버 가능한 아이템 목록을 순회하며 확인
         for (const item of this.hoverableItems) {
-            const targetScreenX = drawX + item.x * drawWidth / naturalWidth;
+            const targetScreenX = drawX + this.panOffset.x + item.x * drawWidth / naturalWidth;
             const targetScreenY = drawY + item.y * drawHeight / naturalHeight;
 
             // 마우스가 타겟 영역 안에 있는지 확인
@@ -1137,6 +1167,60 @@ class FireApp {
         }
 
         return { drawX, drawY, drawWidth, drawHeight };
+    }
+
+    updateAllPositions() {
+        this.updateBackgroundImageCanvas();
+        if (this.imageLayer) {
+            this.imageLayer.update();
+        }
+        if (window.fireControls) {
+            window.fireControls.updateCanvasPosition();
+        }
+    }
+
+    onDragStart(event) {
+        const target = event.target;
+        if (target.closest('input, button, a, #settingsSidebar')) {
+            return; // UI 요소 위에서는 드래그 시작 안 함
+        }
+        event.preventDefault();
+
+        const { drawWidth } = this.getBgImageDrawInfo();
+        if (drawWidth <= window.innerWidth) {
+            return; // 패닝할 영역이 없으면 시작 안 함
+        }
+
+        this.isDragging = true;
+        document.body.style.cursor = 'grabbing';
+        
+        const T = event.touches ? event.touches[0] : event;
+        this.dragStart.x = T.clientX - this.panOffset.x;
+    }
+
+    onDragMove(event) {
+        if (!this.isDragging) return;
+        event.preventDefault();
+
+        const T = event.touches ? event.touches[0] : event;
+        const currentX = T.clientX;
+        let newPanX = currentX - this.dragStart.x;
+
+        // 패닝 범위 제한
+        const { drawWidth } = this.getBgImageDrawInfo();
+        const maxPan = Math.max(0, (drawWidth - window.innerWidth) / 2);
+        newPanX = Math.max(-maxPan, Math.min(maxPan, newPanX));
+        
+        if (newPanX !== this.panOffset.x) {
+            this.panOffset.x = newPanX;
+            this.updateAllPositions();
+        }
+    }
+
+    onDragEnd() {
+        if (!this.isDragging) return;
+        this.isDragging = false;
+        document.body.style.cursor = 'default';
     }
 }
 
