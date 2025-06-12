@@ -11,7 +11,7 @@ class FireControls {
         this.defaultValues = {
             scale: 0.9,
             positionX: 0,
-            positionY: -160,
+            positionY: 140,
             nightSky: true,
             backgroundImage: true,
             magnitude: 1.6,
@@ -224,7 +224,7 @@ class FireControls {
                         <div class="setting-item">
                             <label style="color:#fff;margin-bottom:6px;display:block;font-size:13px;">Y 위치</label>
                             <div class="slider-container">
-                                <input id="positionY" type="range" min="-600" max="600" step="5" value="${this.currentValues.positionY}" class="modern-slider">
+                                <input id="positionY" type="range" min="-300" max="300" step="5" value="${this.currentValues.positionY}" class="modern-slider">
                                 <span id="positionY-value" class="value-display">${this.currentValues.positionY}</span>
                             </div>
                         </div>
@@ -1138,9 +1138,9 @@ class FireControls {
             panOffsetY = window.fireApp.panOffset.y;
         }
         
-        // 최종 오프셋 계산 = 기본 오프셋 + 슬라이더 오프셋 + 패닝 오프셋
+        // 최종 오프셋 계산 = 기본 오프셋 + (슬라이더 변환값) + 패닝 오프셋
         const finalX = baseOffsetX + sliderX + panOffsetX;
-        const finalY = baseOffsetY + sliderY + panOffsetY;
+        const finalY = baseOffsetY + (sliderY - 300) + panOffsetY;
 
         // CSS transform으로 전체 캔버스 이동
         if (window.fireApp && window.fireApp.renderer && window.fireApp.renderer.domElement) {
