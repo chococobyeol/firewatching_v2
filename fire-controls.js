@@ -37,7 +37,8 @@ class FireControls {
             smokeIntensity: 0.2,
             glowEnabled: true,
             glowRange: 1.3,
-            glowAlpha: 0.2
+            glowAlpha: 0.2,
+            imageLayer: true
         };
         
         // 현재 설정값
@@ -251,6 +252,13 @@ class FireControls {
                                 <label style="color:#fff;font-size:13px;">배경 이미지</label>
                                 <label class="toggle-switch">
                                     <input id="backgroundImage" type="checkbox" ${this.currentValues.backgroundImage ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                <label style="color:#fff;font-size:13px;">소품 이미지</label>
+                                <label class="toggle-switch">
+                                    <input id="imageLayer" type="checkbox" ${this.currentValues.imageLayer ? 'checked' : ''}>
                                     <span class="toggle-slider"></span>
                                 </label>
                             </div>
@@ -643,6 +651,15 @@ class FireControls {
             this.saveSettings();
         });
 
+        // 소품 이미지 토글 컨트롤
+        this.setupToggle('imageLayer', (enabled) => {
+            if (window.fireApp && window.fireApp.toggleImageLayer) {
+                window.fireApp.toggleImageLayer(enabled);
+            }
+            this.currentValues.imageLayer = enabled;
+            this.saveSettings();
+        });
+
         // 불 모양 조정 컨트롤
         this.setupSlider('fireScale', (value) => {
             if (this.fire) {
@@ -999,6 +1016,11 @@ class FireControls {
         // 배경 이미지 초기 상태 적용
         if (window.fireApp && window.fireApp.toggleBackgroundImage) {
             window.fireApp.toggleBackgroundImage(this.currentValues.backgroundImage);
+        }
+        
+        // 소품 이미지 레이어 초기 상태 적용
+        if (window.fireApp && window.fireApp.toggleImageLayer) {
+            window.fireApp.toggleImageLayer(this.currentValues.imageLayer);
         }
         
         // 빛무리 초기 상태 적용

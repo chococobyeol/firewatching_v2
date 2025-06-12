@@ -23,6 +23,7 @@ class FireApp {
         this.bgImageCtx = null;
         this.backgroundImage = null;
         this.isBgImageEnabled = false;
+        this.overlayImages = {}; // 오버레이 이미지 저장
         
         // 빛무리(glow) 관련 변수 추가
         this.glowCanvas = null;
@@ -64,6 +65,7 @@ class FireApp {
         this.createLighting();
         this.loadFireTexture();
         this.loadBackgroundImage(); // 배경 이미지 로드
+        this.imageLayer = new ImageLayer(['adv_1', 'chairs', 'book_1', 'book_2'], 4);
         this.setupEventListeners();
         this.animate();
     }
@@ -118,42 +120,6 @@ class FireApp {
             console.warn('Background image failed to load');
         };
         this.backgroundImage.src = 'images/background.png';
-    }
-
-    // 배경 이미지 캔버스 업데이트
-    updateBackgroundImageCanvas() {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        
-        this.bgImageCanvas.width = width;
-        this.bgImageCanvas.height = height;
-        
-        // 캔버스 초기화
-        this.bgImageCtx.clearRect(0, 0, width, height);
-        
-        if (this.isBgImageEnabled && this.backgroundImage && this.backgroundImage.complete) {
-            // 이미지를 화면에 맞게 조정하여 그리기
-            const imgAspect = this.backgroundImage.width / this.backgroundImage.height;
-            const screenAspect = width / height;
-            
-            let drawWidth, drawHeight, drawX, drawY;
-            
-            if (imgAspect > screenAspect) {
-                // 이미지가 더 넓음 - 높이에 맞춤
-                drawHeight = height;
-                drawWidth = height * imgAspect;
-                drawX = (width - drawWidth) / 2;
-                drawY = 0;
-            } else {
-                // 이미지가 더 높음 - 너비에 맞춤
-                drawWidth = width;
-                drawHeight = width / imgAspect;
-                drawX = 0;
-                drawY = (height - drawHeight) / 2;
-            }
-            
-            this.bgImageCtx.drawImage(this.backgroundImage, drawX, drawY, drawWidth, drawHeight);
-        }
     }
 
     // 별 생성
@@ -547,6 +513,14 @@ class FireApp {
         this.isBgImageEnabled = enabled;
         this.updateBackgroundImageCanvas();
         console.log('Background image:', enabled ? 'enabled' : 'disabled');
+    }
+
+    // 이미지 레이어 토글 메서드
+    toggleImageLayer(enabled) {
+        if (this.imageLayer) {
+            this.imageLayer.toggle(enabled);
+            console.log('Image layer:', enabled ? 'enabled' : 'disabled');
+        }
     }
 
     // 밤하늘 상태 반환
@@ -1019,6 +993,42 @@ class FireApp {
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalCompositeOperation = 'source-over';
+    }
+
+    // 배경 이미지 캔버스 업데이트
+    updateBackgroundImageCanvas() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        this.bgImageCanvas.width = width;
+        this.bgImageCanvas.height = height;
+        
+        // 캔버스 초기화
+        this.bgImageCtx.clearRect(0, 0, width, height);
+        
+        if (this.isBgImageEnabled && this.backgroundImage && this.backgroundImage.complete) {
+            // 이미지를 화면에 맞게 조정하여 그리기
+            const imgAspect = this.backgroundImage.width / this.backgroundImage.height;
+            const screenAspect = width / height;
+            
+            let drawWidth, drawHeight, drawX, drawY;
+            
+            if (imgAspect > screenAspect) {
+                // 이미지가 더 넓음 - 높이에 맞춤
+                drawHeight = height;
+                drawWidth = height * imgAspect;
+                drawX = (width - drawWidth) / 2;
+                drawY = 0;
+            } else {
+                // 이미지가 더 높음 - 너비에 맞춤
+                drawWidth = width;
+                drawHeight = width / imgAspect;
+                drawX = 0;
+                drawY = (height - drawHeight) / 2;
+            }
+            
+            this.bgImageCtx.drawImage(this.backgroundImage, drawX, drawY, drawWidth, drawHeight);
+        }
     }
 }
 
