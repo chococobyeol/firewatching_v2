@@ -721,7 +721,7 @@ class FireApp {
     // 클릭 이벤트 처리
     handleClick(event) {
         // UI 요소 위에서의 클릭은 무시
-        if (event.target.closest('input, button, a, #settingsSidebar')) {
+        if (event.target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar')) {
             return;
         }
 
@@ -1240,7 +1240,7 @@ class FireApp {
 
     onDragStart(event) {
         const target = event.target;
-        if (target.closest('input, button, a, #settingsSidebar')) {
+        if (target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar')) {
             return; // UI 요소 위에서는 드래그 시작 안 함
         }
         event.preventDefault();
