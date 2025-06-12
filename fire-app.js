@@ -919,10 +919,10 @@ class FireApp {
         if (existingPopup) existingPopup.remove();
 
         // 각 타입별로 행운 콘텐츠 생성
-        const advicePool = fortunes.filter(f => f.type === '조언');
+        const messagePool = fortunes.filter(f => f.type === '메시지');
         const itemPool = fortunes.filter(f => f.type === '아이템');
         
-        const selectedAdvice = advicePool[Math.floor(Math.random() * advicePool.length)];
+        const selectedMessage = messagePool[Math.floor(Math.random() * messagePool.length)];
         const selectedItem = itemPool[Math.floor(Math.random() * itemPool.length)];
         const finalNumber = Math.floor(Math.random() * 100) + 1;
         const finalColor = fortune_colors[Math.floor(Math.random() * fortune_colors.length)];
@@ -933,8 +933,8 @@ class FireApp {
         popup.innerHTML = `
             <div class="fortune-title">- 행운의 책 -</div>
             <ul class="fortune-list">
-                <li class="advice-item">
-                    <span class="fortune-content advice">"${selectedAdvice.content}"</span>
+                <li class="message-item">
+                    <span class="fortune-content message">"${selectedMessage.content}"</span>
                 </li>
                 <li>
                     <span class="fortune-type">행운의 숫자</span>
