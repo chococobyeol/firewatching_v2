@@ -1043,6 +1043,11 @@ class FireControls {
             window.fireApp.setGlowAlpha(this.currentValues.glowAlpha);
         }
         
+        // 연기 강도 초기 적용
+        if (window.fireApp && window.fireApp.setSmokeIntensity) {
+            window.fireApp.setSmokeIntensity(this.currentValues.smokeIntensity);
+        }
+        
         // 사운드 설정 초기 상태 적용
         if (window.fireApp) {
             if (window.fireApp.setVolume) {
