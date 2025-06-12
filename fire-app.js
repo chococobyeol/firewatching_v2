@@ -63,7 +63,8 @@ class FireApp {
         // 클릭 제한 기능
         this.clickLimits = {
             book_1: { count: 0, lastReset: Date.now(), threshold: 8, timeWindow: 60000 }, // 1분에 8번
-            book_2: { count: 0, lastReset: Date.now(), threshold: 8, timeWindow: 60000 }
+            book_2: { count: 0, lastReset: Date.now(), threshold: 8, timeWindow: 60000 },
+            adv_1: { count: 0, lastReset: Date.now(), threshold: 5, timeWindow: 60000 }  // 1분에 5번
         };
         
         // Panning state
@@ -585,6 +586,11 @@ class FireApp {
         }
     }
 
+    // 이미지 레이어 상태 반환
+    getImageLayerEnabled() {
+        return this.imageLayer ? this.imageLayer.enabled : false;
+    }
+
     // 밤하늘 상태 반환
     getNightSkyEnabled() {
         return this.isSkyEnabled;
@@ -739,6 +745,11 @@ class FireApp {
             return;
         }
 
+        // 소품 이미지 레이어가 비활성화되어 있으면 클릭 무시
+        if (!this.getImageLayerEnabled()) {
+            return;
+        }
+
         // book_1 클릭 확인
         const { drawX, drawY, drawWidth, drawHeight } = this.getBgImageDrawInfo();
         const { naturalWidth, naturalHeight } = this.backgroundImage;
@@ -778,7 +789,7 @@ class FireApp {
                 }
             }
 
-            // adv_1 클릭 처리
+            // adv_1 클릭 처리 (클릭 제한 추가)
             const adv1 = this.hoverableItems.find(item => item.name === 'adv_1');
             if (adv1) {
                 const targetX = drawX + this.panOffset.x + adv1.x * scaleX;
@@ -786,7 +797,11 @@ class FireApp {
 
                 if (Math.abs(event.clientX - targetX) < adv1.tolerance &&
                     Math.abs(event.clientY - targetY) < adv1.tolerance) {
-                    this.showAdConfirmation(event.clientX, event.clientY);
+                    if (this.checkClickLimit('adv_1')) {
+                        this.showAdConfirmation(event.clientX, event.clientY);
+                    } else {
+                        this.showClickLimitWarning(event.clientX, event.clientY);
+                    }
                     return;
                 }
             }
@@ -1479,6 +1494,19 @@ class FireApp {
             return;
         }
 
+        // 소품 이미지 레이어가 비활성화되어 있으면 호버 효과 무시
+        if (!this.getImageLayerEnabled()) {
+            // 호버 상태 초기화
+            if (this.currentHoveredItem !== null) {
+                this.currentHoveredItem = null;
+                if (this.imageLayer) {
+                    this.imageLayer.hoveredImage = null;
+                    this.imageLayer.update();
+                }
+            }
+            return;
+        }
+
         // 배경 이미지의 렌더링 정보 가져오기
         const { drawX, drawY, drawWidth, drawHeight } = this.getBgImageDrawInfo();
         const { naturalWidth, naturalHeight } = this.backgroundImage;
@@ -1510,8 +1538,10 @@ class FireApp {
         // 호버 상태가 변경되었을 때만 업데이트
         if (hoveredItemName !== this.currentHoveredItem) {
             this.currentHoveredItem = hoveredItemName;
-            this.imageLayer.hoveredImage = hoveredItemName;
-            this.imageLayer.update(); // 소품 레이어만 다시 그리기
+            if (this.imageLayer) {
+                this.imageLayer.hoveredImage = hoveredItemName;
+                this.imageLayer.update(); // 소품 레이어만 다시 그리기
+            }
         }
     }
 
