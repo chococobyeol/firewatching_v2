@@ -79,6 +79,7 @@ class FireApp {
         this.isDragging = false;
         this.dragStart = { x: 0, y: 0 };
         this.panOffset = { x: 0, y: 0 };
+        this.touchStartTime = 0;  // 터치 시작 시간 (탭/드래그 구분용)
         
         // 현재 설정값
         this.currentValues = { ...this.defaultValues };
@@ -424,12 +425,51 @@ class FireApp {
         grabTarget.addEventListener('touchend', this.onDragEnd.bind(this));
         grabTarget.addEventListener('touchcancel', this.onDragEnd.bind(this));
 
-        // 클릭 이벤트 (불꽃 점화)
+        // 클릭 이벤트 (불꽃 점화) - 데스크톱용
         if (this.renderer && this.renderer.domElement) {
             this.renderer.domElement.addEventListener('click', (event) => {
                 this.handleClick(event);
             }, false);
         }
+
+        // 터치 이벤트 (모바일용) - 전체 화면에서 터치 감지
+        document.addEventListener('touchend', (event) => {
+            // 터치 시간이 너무 짧거나 드래그 중이었다면 클릭으로 처리하지 않음
+            const touchDuration = Date.now() - this.touchStartTime;
+            if (this.isDragging || touchDuration < 50) {
+                console.log('터치 이벤트 무시:', { isDragging: this.isDragging, duration: touchDuration });
+                return;
+            }
+            
+            // UI 요소가 아닌 곳에서 터치했을 때만 처리
+            if (!event.target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar')) {
+                // 터치 좌표를 클릭 이벤트 형식으로 변환
+                const touch = event.changedTouches[0];
+                const fakeEvent = {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                    target: event.target,
+                    isTouchEvent: true  // 터치 이벤트임을 표시
+                };
+                
+                console.log('터치 클릭 처리:', { x: touch.clientX, y: touch.clientY });
+                this.handleClick(fakeEvent);
+            }
+        }, { passive: true });
+
+        // 터치 호버 이벤트 (모바일용)
+        document.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 1) {
+                const touch = event.touches[0];
+                const fakeEvent = {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                    isTouchEvent: true
+                };
+                
+                this.handleMouseMove(fakeEvent);
+            }
+        }, { passive: true });
     }
 
     onWindowResize() {
@@ -742,8 +782,16 @@ class FireApp {
 
     // 클릭 이벤트 처리
     handleClick(event) {
+        console.log('handleClick 호출:', { 
+            x: event.clientX, 
+            y: event.clientY, 
+            isTouchEvent: event.isTouchEvent,
+            imageLayerEnabled: this.getImageLayerEnabled()
+        });
+        
         // UI 요소 위에서의 클릭은 무시
         if (event.target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar')) {
+            console.log('UI 요소 클릭으로 무시');
             return;
         }
 
@@ -757,12 +805,23 @@ class FireApp {
                 const book1 = this.hoverableItems.find(item => item.name === 'book_1');
                 const book2 = this.hoverableItems.find(item => item.name === 'book_2');
 
+                // 터치 이벤트인 경우 tolerance를 1.5배 확장
+                const touchMultiplier = event.isTouchEvent ? 1.5 : 1.0;
+
                 if (book1) {
                     const targetX = drawX + this.panOffset.x + book1.x * scaleX;
                     const targetY = drawY + this.panOffset.y + book1.y * scaleY;
+                    const tolerance = book1.tolerance * touchMultiplier;
 
-                    if (Math.abs(event.clientX - targetX) < book1.tolerance &&
-                        Math.abs(event.clientY - targetY) < book1.tolerance) {
+                    console.log('book1 터치 체크:', { 
+                        targetX, targetY, tolerance, 
+                        clickX: event.clientX, clickY: event.clientY,
+                        distanceX: Math.abs(event.clientX - targetX),
+                        distanceY: Math.abs(event.clientY - targetY)
+                    });
+
+                    if (Math.abs(event.clientX - targetX) < tolerance &&
+                        Math.abs(event.clientY - targetY) < tolerance) {
                         if (this.checkClickLimit('book_1')) {
                             this.showRandomQuote(event.clientX, event.clientY);
                         } else {
@@ -775,9 +834,17 @@ class FireApp {
                 if (book2) {
                     const targetX = drawX + this.panOffset.x + book2.x * scaleX;
                     const targetY = drawY + this.panOffset.y + book2.y * scaleY;
+                    const tolerance = book2.tolerance * touchMultiplier;
 
-                    if (Math.abs(event.clientX - targetX) < book2.tolerance &&
-                        Math.abs(event.clientY - targetY) < book2.tolerance) {
+                    console.log('book2 터치 체크:', { 
+                        targetX, targetY, tolerance, 
+                        clickX: event.clientX, clickY: event.clientY,
+                        distanceX: Math.abs(event.clientX - targetX),
+                        distanceY: Math.abs(event.clientY - targetY)
+                    });
+
+                    if (Math.abs(event.clientX - targetX) < tolerance &&
+                        Math.abs(event.clientY - targetY) < tolerance) {
                         if (this.checkClickLimit('book_2')) {
                             this.showRandomFortune(event.clientX, event.clientY);
                         } else {
@@ -792,9 +859,17 @@ class FireApp {
                 if (adv1) {
                     const targetX = drawX + this.panOffset.x + adv1.x * scaleX;
                     const targetY = drawY + this.panOffset.y + adv1.y * scaleY;
+                    const tolerance = adv1.tolerance * touchMultiplier;
 
-                    if (Math.abs(event.clientX - targetX) < adv1.tolerance &&
-                        Math.abs(event.clientY - targetY) < adv1.tolerance) {
+                    console.log('adv1 터치 체크:', { 
+                        targetX, targetY, tolerance, 
+                        clickX: event.clientX, clickY: event.clientY,
+                        distanceX: Math.abs(event.clientX - targetX),
+                        distanceY: Math.abs(event.clientY - targetY)
+                    });
+
+                    if (Math.abs(event.clientX - targetX) < tolerance &&
+                        Math.abs(event.clientY - targetY) < tolerance) {
                         if (this.checkClickLimit('adv_1')) {
                             this.showAdConfirmation(event.clientX, event.clientY);
                         } else {
@@ -806,6 +881,12 @@ class FireApp {
             }
         }
 
+        // 터치나 클릭으로 불 점화/플레어
+        console.log('불 클릭/터치 감지:', { 
+            isFireLit: this.isFireLit, 
+            isTouchEvent: event.isTouchEvent 
+        });
+
         // 점화 사운드 재생
         if (this.ignitionAudio) {
             this.ignitionAudio.currentTime = 0;
@@ -815,10 +896,12 @@ class FireApp {
         }
 
         if (!this.isFireLit) {
-            // 불이 꺼져있을 때 클릭
+            // 불이 꺼져있을 때 클릭/터치
+            console.log('불 점화 시작');
             this.igniteFireAnimation();
         } else {
-            // 불이 켜져있을 때 클릭
+            // 불이 켜져있을 때 클릭/터치
+            console.log('불 플레어 시작');
             this.flareFireAnimation();
         }
     }
@@ -1585,26 +1668,47 @@ class FireApp {
         if (target.closest('input, button, a, #settingsSidebar, #alarmSidebar, #timerSidebar, #weatherSidebar')) {
             return; // UI 요소 위에서는 드래그 시작 안 함
         }
+        
+        // 터치 이벤트인 경우 시작 시간 기록
+        if (event.touches) {
+            this.touchStartTime = Date.now();
+        }
+        
         event.preventDefault();
 
         const { drawWidth } = this.getBgImageDrawInfo();
         if (drawWidth <= window.innerWidth) {
             return; // 패닝할 영역이 없으면 시작 안 함
         }
-
-        this.isDragging = true;
-        document.body.style.cursor = 'grabbing';
         
         const T = event.touches ? event.touches[0] : event;
         this.dragStart.x = T.clientX - this.panOffset.x;
+        
+        // 마우스 이벤트는 즉시 드래그 모드
+        if (!event.touches) {
+            this.isDragging = true;
+            document.body.style.cursor = 'grabbing';
+        }
     }
 
     onDragMove(event) {
+        const T = event.touches ? event.touches[0] : event;
+        const currentX = T.clientX;
+        
+        // 터치 이벤트이고 아직 드래그가 시작되지 않은 경우
+        if (event.touches && !this.isDragging) {
+            const moveDistance = Math.abs(currentX - (this.dragStart.x + this.panOffset.x));
+            // 10px 이상 움직였을 때만 드래그 모드 시작 (탭과 구분)
+            if (moveDistance > 10) {
+                this.isDragging = true;
+                console.log('터치 드래그 시작');
+            }
+            return;
+        }
+        
         if (!this.isDragging) return;
         event.preventDefault();
 
-        const T = event.touches ? event.touches[0] : event;
-        const currentX = T.clientX;
         let newPanX = currentX - this.dragStart.x;
 
         // 패닝 범위 제한
@@ -1618,9 +1722,19 @@ class FireApp {
         }
     }
 
-    onDragEnd() {
-        if (!this.isDragging) return;
-        this.isDragging = false;
+    onDragEnd(event) {
+        // 터치 종료 시 드래그 상태 초기화
+        if (event && event.touches !== undefined) {
+            // 터치 이벤트인 경우 짧은 지연 후 초기화 (클릭 처리 시간 확보)
+            setTimeout(() => {
+                this.isDragging = false;
+                console.log('터치 드래그 종료');
+            }, 50);
+        } else {
+            // 마우스 이벤트인 경우 즉시 초기화
+            this.isDragging = false;
+        }
+        
         document.body.style.cursor = 'default';
     }
 }
