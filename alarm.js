@@ -882,18 +882,14 @@
       renderAlarms();
     }
   
-    // 시간 동기화 기능: 1초마다 missed alarm 점검
-    setInterval(() => {
+    // setTimeout 기반 1초 폴링 동기화
+    (function syncAlarms() {
       const now = Date.now();
       alarms.forEach(alarm => {
         if (alarm.active && alarm.nextTriggerTime && now >= alarm.nextTriggerTime) {
-          // 알람 콜백 수동 실행
           createAlarmCallback(alarm)();
-          // 반복이 아닌 알람은 동기화 정보 초기화
-          if (!alarm.repeat) {
-            alarm.nextTriggerTime = null;
-          }
         }
       });
-    }, 1000);
+      setTimeout(syncAlarms, 1000);
+    })();
   })(); 
