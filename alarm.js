@@ -12,6 +12,9 @@
   // 현재 실행 중인 알람 추적 (중복 실행 방지)
   let currentExecutingAlarmId = null;
   
+  // 최근 실행된 알람 추적 (중복 방지용)
+  const recentlyExecutedAlarms = new Map(); // { alarmId: timestamp }
+  
   // 페이지 활성화/비활성화 상태 추적 변수
   let isPageVisible = !document.hidden;
   let pendingAlarmPopup = null;
@@ -442,9 +445,17 @@
     return () => {
       console.log(`알람 콜백 실행 - ID: ${alarm.id}, 시간: ${alarm.hour}:${alarm.minute}, 정각: ${alarm.isHourly}`);
       
-      // 중복 실행 방지: 이미 실행 중인 알람이 있으면 중단
+      // ⭐ 강력한 중복 실행 방지
       if (currentExecutingAlarmId) {
         console.warn(`이미 실행 중인 알람이 있습니다: ${currentExecutingAlarmId}. 중복 실행을 방지합니다.`);
+        return;
+      }
+      
+      // 최근 30초 내에 동일한 알람이 실행되었는지 체크
+      const now = Date.now();
+      const lastExecutedTime = recentlyExecutedAlarms.get(alarm.id);
+      if (lastExecutedTime && (now - lastExecutedTime) < 30000) {
+        console.warn(`알람 ${alarm.id}가 최근 ${Math.round((now - lastExecutedTime)/1000)}초 전에 실행되었습니다. 중복 실행을 방지합니다.`);
         return;
       }
       
@@ -454,8 +465,9 @@
         return;
       }
       
-      // 현재 실행 중인 알람으로 표시
+      // 현재 실행 중인 알람으로 표시 & 실행 시간 기록
       currentExecutingAlarmId = alarm.id;
+      recentlyExecutedAlarms.set(alarm.id, now);
       console.log(`알람 실행 시작 - ID: ${alarm.id}`);
       
       // 중복 트리거 방지: 기존 예약과 nextTriggerTime 초기화
@@ -482,15 +494,13 @@
         nextTarget.setDate(nextTarget.getDate() + 1);
         const diffNext = nextTarget.getTime() - Date.now();
         
-        // 동기화용 다음 트리거 시간 저장 (동기화에서 이미 업데이트했다면 건너뛰기)
-        if (!alarm.nextTriggerTime || alarm.nextTriggerTime < Date.now()) {
-          alarm.nextTriggerTime = nextTarget.getTime();
-          console.log(`반복 알람 재스케줄링 - ID: ${alarm.id}, 다음 실행: ${nextTarget.toLocaleString()}`);
-        } else {
-          console.log(`반복 알람 이미 재스케줄링됨 - ID: ${alarm.id}, 다음 실행: ${new Date(alarm.nextTriggerTime).toLocaleString()}`);
-        }
+        // ⭐ 핵심 수정: nextTriggerTime을 즉시 업데이트하여 동기화 중복 방지
+        alarm.nextTriggerTime = nextTarget.getTime();
+        console.log(`반복 알람 재스케줄링 - ID: ${alarm.id}, 다음 실행: ${nextTarget.toLocaleString()}`);
         
         alarm.timeoutId = setTimeout(createAlarmCallback(alarm), diffNext);
+        
+        // ⭐ 즉시 저장하여 동기화가 최신 데이터를 참조하도록 함
         saveAlarms();
       }
       
@@ -595,6 +605,12 @@
       // 숨김 상태와 관계없이 즉시 알람 팝업을 표시
       document.body.appendChild(containerDiv);
       setupAlarmPopupEvents(popupData);
+      
+      // 30초 후 실행 완료 상태로 리셋 (중복 방지 해제)
+      setTimeout(() => {
+        currentExecutingAlarmId = null;
+        console.log(`알람 ${alarm.id} 실행 완료 상태로 리셋`);
+      }, 30000);
     };
   }
 
@@ -947,9 +963,18 @@
     }
     
     // 놓친 알람들을 먼저 찾아서 배열로 수집
-    const missedAlarms = alarms.filter(alarm => 
-      alarm.active && alarm.nextTriggerTime && now >= alarm.nextTriggerTime
-    );
+    const missedAlarms = alarms.filter(alarm => {
+      if (!alarm.active || !alarm.nextTriggerTime) return false;
+      
+      // 현재 시간보다 과거이고, 최소 10초 이상 지난 알림만 "놓친 알림"으로 인식
+      // (방금 실행된 알림의 중복 실행 방지)
+      const timeDiff = now - alarm.nextTriggerTime;
+      if (timeDiff < 10000) { // 10초 미만은 제외
+        return false;
+      }
+      
+      return now >= alarm.nextTriggerTime;
+    });
     
     // 놓친 알람이 있으면 첫 번째 하나만 처리 (중복 방지)
     if (missedAlarms.length > 0) {
