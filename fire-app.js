@@ -4,6 +4,14 @@
 
 class FireApp {
     constructor() {
+        // 중복 생성 방지 로그 추가
+        if (window.fireApp) {
+            console.warn('FireApp이 이미 존재합니다! 중복 생성을 방지합니다.');
+            return window.fireApp;
+        }
+        
+        console.log('FireApp 인스턴스 생성 시작');
+        
         this.scene = null;
         this.camera = null;
         this.renderer = null;
@@ -1633,6 +1641,8 @@ if (document.readyState === 'loading') {
     });
 } else {
     // 이미 로드된 경우 즉시 실행
-    console.log('Document already loaded, starting Fire App immediately...');
-    window.fireApp = new FireApp();
+    if (!window.fireApp) {
+        console.log('Document already loaded, starting Fire App immediately...');
+        window.fireApp = new FireApp();
+    }
 } 

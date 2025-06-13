@@ -375,6 +375,8 @@
       
       // 새 리스너 추가 및 참조 저장
       popupData.clickHandler = () => {
+        console.log(`알람 팝업 닫기 - ID: ${alarm.id}`);
+        
         if (alarm.sound) {
           alarmAudioEl.pause();
           alarmAudioEl.currentTime = 0;
@@ -383,6 +385,7 @@
         
         try {
           document.body.removeChild(containerDiv);
+          console.log(`알람 팝업 제거 완료 - ID: ${alarm.id}`);
         } catch (e) {
           console.log('알람 컨테이너가 이미 제거됨');
         }
@@ -416,14 +419,27 @@
   // 알람 콜백 생성 함수 (클로저로 알람 정보 유지)
   function createAlarmCallback(alarm) {
     return () => {
+      console.log(`알람 콜백 실행 - ID: ${alarm.id}, 시간: ${alarm.hour}:${alarm.minute}, 정각: ${alarm.isHourly}`);
+      
       // 알람이 비활성화 상태면 실행하지 않음
-      if (!alarm.active) return;
+      if (!alarm.active) {
+        console.log(`알람 ${alarm.id}가 비활성화 상태입니다.`);
+        return;
+      }
       
       // 중복 트리거 방지: 기존 예약과 nextTriggerTime 초기화
       if (alarm.timeoutId) {
         clearTimeout(alarm.timeoutId);
         alarm.timeoutId = null;
+        console.log(`알람 ${alarm.id}의 기존 타이머를 정리했습니다.`);
       }
+      
+      // 이미 알람 팝업이 표시되어 있다면 중복 실행 방지
+      if (document.querySelector('[data-alarm-popup]')) {
+        console.warn(`알람 팝업이 이미 표시되어 있습니다. 중복 실행을 방지합니다.`);
+        return;
+      }
+      
       if (!alarm.repeat) {
         alarm.nextTriggerTime = null;
       }
@@ -465,6 +481,7 @@
       
       // 알람 창을 표시하는 커스텀 함수 만들기
       const containerDiv = document.createElement('div');
+      containerDiv.setAttribute('data-alarm-popup', alarm.id); // 고유 식별자 추가
       containerDiv.style.cssText = `
         position: fixed;
         top: 0;
