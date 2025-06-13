@@ -419,10 +419,14 @@
       
       stopAlarmBtn.addEventListener('click', popupData.clickHandler);
       
-      // 중요: 이벤트 위임 방식으로 버튼 클릭 대체 핸들러 추가
-      // 경우에 따라 버튼 이벤트가 작동하지 않을 때를 대비
+      // ⭐ 이벤트 버블링 방지: 버튼 클릭 시 컨테이너 클릭 차단
+      stopAlarmBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // 이벤트 버블링 차단
+      });
+      
+      // 컨테이너 클릭은 버튼 외부 클릭만 처리
       const containerClickHandler = (e) => {
-        if (e.target === stopAlarmBtn || stopAlarmBtn.contains(e.target)) {
+        if (e.target === containerDiv) { // 컨테이너 자체 클릭만
           console.log(`컨테이너 클릭으로 알람 닫기 - ID: ${alarm.id}`);
           popupData.clickHandler();
         }
@@ -502,6 +506,7 @@
         
         // ⭐ 즉시 저장하여 동기화가 최신 데이터를 참조하도록 함
         saveAlarms();
+        console.log(`알람 ${alarm.id} 데이터 즉시 저장 완료`);
       }
       
       // 오디오 컨텍스트 초기화 확인
@@ -987,7 +992,7 @@
         return;
       }
       
-      // nextTriggerTime을 즉시 초기화 (중복 실행 방지)
+      // ⭐ 핵심 수정: nextTriggerTime을 즉시 미래로 업데이트 (중복 실행 완전 차단)
       if (alarm.repeat) {
         // 반복 알람: 다음 날 같은 시간으로 업데이트
         const nextTarget = new Date();
@@ -995,16 +1000,18 @@
         nextTarget.setDate(nextTarget.getDate() + 1);
         alarm.nextTriggerTime = nextTarget.getTime();
         console.log(`반복 알람 동기화 재스케줄링 - ID: ${alarm.id}, 다음 실행: ${nextTarget.toLocaleString()}`);
+        
+        // ⭐ 즉시 저장하여 다른 동기화 호출이 최신 데이터를 참조하도록 함
+        saveAlarms();
+        console.log(`동기화에서 알람 ${alarm.id} 데이터 즉시 저장 완료`);
       } else {
         // 일회성 알람: 트리거 시간 초기화
         alarm.nextTriggerTime = null;
+        saveAlarms();
       }
       
       // 알람 콜백 실행
       createAlarmCallback(alarm)();
-      
-      // 저장
-      saveAlarms();
     }
   }, 1000);
 })(); 
