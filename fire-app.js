@@ -805,8 +805,8 @@ class FireApp {
                 const book1 = this.hoverableItems.find(item => item.name === 'book_1');
                 const book2 = this.hoverableItems.find(item => item.name === 'book_2');
 
-                // 터치 이벤트인 경우 tolerance를 1.5배 확장
-                const touchMultiplier = event.isTouchEvent ? 1.5 : 1.0;
+                // 터치 이벤트인 경우 tolerance를 1.01배 확장
+                const touchMultiplier = event.isTouchEvent ? 1.01 : 1.0;
 
                 if (book1) {
                     const targetX = drawX + this.panOffset.x + book1.x * scaleX;
