@@ -881,15 +881,4 @@
       saveAlarms();
       renderAlarms();
     }
-  
-    // setTimeout 기반 1초 폴링 동기화
-    (function syncAlarms() {
-      const now = Date.now();
-      alarms.forEach(alarm => {
-        if (alarm.active && alarm.nextTriggerTime && now >= alarm.nextTriggerTime) {
-          createAlarmCallback(alarm)();
-        }
-      });
-      setTimeout(syncAlarms, 1000);
-    })();
   })(); 
