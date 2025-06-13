@@ -1,6 +1,13 @@
 // alarm.js
 // 좌측 알람 버튼 및 사이드바 생성, 알람 설정 로직
 (function() {
+  // 중복 로드 방지
+  if (window.alarmSystemLoaded) {
+    console.warn('알람 시스템이 이미 로드되었습니다. 중복 로드를 방지합니다.');
+    return;
+  }
+  window.alarmSystemLoaded = true;
+  console.log('알람 시스템 로드 시작');
   // 페이지 활성화/비활성화 상태 추적 변수
   let isPageVisible = !document.hidden;
   let pendingAlarmPopup = null;
@@ -401,18 +408,22 @@
       
       // 중요: 이벤트 위임 방식으로 버튼 클릭 대체 핸들러 추가
       // 경우에 따라 버튼 이벤트가 작동하지 않을 때를 대비
-      containerDiv.addEventListener('click', (e) => {
+      const containerClickHandler = (e) => {
         if (e.target === stopAlarmBtn || stopAlarmBtn.contains(e.target)) {
+          console.log(`컨테이너 클릭으로 알람 닫기 - ID: ${alarm.id}`);
           popupData.clickHandler();
         }
-      });
+      };
+      containerDiv.addEventListener('click', containerClickHandler, { once: true });
       
       // 키보드 이벤트도 추가 (Enter 또는 Space 키로 확인 가능)
-      containerDiv.addEventListener('keydown', (e) => {
+      const keyHandler = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
+          console.log(`키보드로 알람 닫기 - ID: ${alarm.id}`);
           popupData.clickHandler();
         }
-      });
+      };
+      containerDiv.addEventListener('keydown', keyHandler, { once: true });
     }
   }
 
@@ -452,7 +463,14 @@
         const diffNext = nextTarget.getTime() - Date.now();
         // 동기화용 다음 트리거 시간 저장
         alarm.nextTriggerTime = nextTarget.getTime();
+        
+        // 기존 타이머가 있다면 정리
+        if (alarm.timeoutId) {
+          clearTimeout(alarm.timeoutId);
+        }
+        
         alarm.timeoutId = setTimeout(createAlarmCallback(alarm), diffNext);
+        console.log(`반복 알람 재스케줄링 - ID: ${alarm.id}, 다음 실행: ${nextTarget.toLocaleString()}`);
         saveAlarms();
       }
       
@@ -904,6 +922,14 @@
     const now = Date.now();
     alarms.forEach(alarm => {
       if (alarm.active && alarm.nextTriggerTime && now >= alarm.nextTriggerTime) {
+        console.log(`동기화에서 놓친 알람 발견 - ID: ${alarm.id}, 시간: ${alarm.hour}:${alarm.minute}`);
+        
+        // 이미 알람 팝업이 표시되어 있다면 중복 실행 방지
+        if (document.querySelector('[data-alarm-popup]')) {
+          console.warn(`동기화: 알람 팝업이 이미 표시되어 있습니다. 중복 실행을 방지합니다.`);
+          return;
+        }
+        
         // 알람 콜백 수동 실행
         createAlarmCallback(alarm)();
         // 반복이 아닌 알람은 동기화 정보 초기화
