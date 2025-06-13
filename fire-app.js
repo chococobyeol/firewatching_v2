@@ -1739,17 +1739,11 @@ class FireApp {
     }
 }
 
-// DOM이 로드된 후 애플리케이션 시작
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, starting Fire App...');
-    window.fireApp = new FireApp();
-});
-
-// 페이지가 완전히 로드된 후에도 실행 (DOMContentLoaded가 실행되지 않은 경우를 대비)
+// DOM이 로드된 후 애플리케이션 시작 (중복 방지)
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         if (!window.fireApp) {
-            console.log('Starting Fire App from readyState check...');
+            console.log('DOM loaded, starting Fire App...');
             window.fireApp = new FireApp();
         }
     });
