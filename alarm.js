@@ -419,12 +419,6 @@
         // 알람이 비활성화 상태면 실행하지 않음
         if (!alarm.active) return;
         
-        // 중복 팝업 방지: 이미 같은 알람의 팝업이 있으면 실행하지 않음
-        const existingPopup = document.querySelector(`[data-alarm-id="${alarm.id}"]`);
-        if (existingPopup) {
-          return;
-        }
-        
         // 중복 트리거 방지: 기존 예약과 nextTriggerTime 초기화
         if (alarm.timeoutId) {
           clearTimeout(alarm.timeoutId);
@@ -471,7 +465,6 @@
         
         // 알람 창을 표시하는 커스텀 함수 만들기
         const containerDiv = document.createElement('div');
-        containerDiv.setAttribute('data-alarm-id', alarm.id); // 알람 ID 속성 추가
         containerDiv.style.cssText = `
           position: fixed;
           top: 0;
@@ -903,4 +896,4 @@
         }
       });
     }, 1000);
-  })();
+  })(); 
