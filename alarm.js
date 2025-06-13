@@ -259,7 +259,7 @@
 
   // 알람 로컬 스토리지 저장 함수
   function saveAlarms() {
-    // 타이머 ID는 저장하지 않음 (복원 시 새로 설정)
+    // ⭐ nextTriggerTime도 저장하여 동기화 문제 해결
     const alarmsToSave = alarms.map(alarm => ({
       id: alarm.id,
       hour: alarm.hour,
@@ -268,7 +268,8 @@
       repeat: alarm.repeat,
       sound: alarm.sound,
       active: alarm.active,
-      isHourly: alarm.isHourly
+      isHourly: alarm.isHourly,
+      nextTriggerTime: alarm.nextTriggerTime // ⭐ 핵심 추가!
     }));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(alarmsToSave));
     updateAlarmCount();
@@ -293,19 +294,25 @@
         
         // 타이머 설정 (활성화된 알람만)
         let timeoutId = null;
-        let nextTriggerTime = null;
+        let nextTriggerTime = alarm.nextTriggerTime; // ⭐ 저장된 값 우선 사용
+        
         if (alarm.active) {
-          const now = new Date();
-          const target = new Date();
-          target.setHours(alarm.hour, alarm.minute, 0, 0);
+          // nextTriggerTime이 없거나 과거 시간이면 새로 계산
+          if (!nextTriggerTime || nextTriggerTime <= Date.now()) {
+            const now = new Date();
+            const target = new Date();
+            target.setHours(alarm.hour, alarm.minute, 0, 0);
+            
+            // 이미 지난 시간이면 다음 날로 설정
+            if (target <= now) target.setDate(target.getDate() + 1);
+            nextTriggerTime = target.getTime();
+            console.log(`알람 ${alarm.id} nextTriggerTime 새로 계산: ${new Date(nextTriggerTime).toLocaleString()}`);
+          }
           
-          // 이미 지난 시간이면 다음 날로 설정
-          if (target <= now) target.setDate(target.getDate() + 1);
-          const diff = target.getTime() - now.getTime();
-          
-          // 동기화용 다음 트리거 시간 저장
-          nextTriggerTime = target.getTime();
-          timeoutId = setTimeout(createAlarmCallback(alarm), diff);
+          const diff = nextTriggerTime - Date.now();
+          if (diff > 0) {
+            timeoutId = setTimeout(createAlarmCallback(alarm), diff);
+          }
         }
         
         return {
