@@ -1332,7 +1332,7 @@ class FireApp {
                     <img class="yomi-img" src="" style="max-width:80%; height:auto; margin:0 12px;" />
                     <button class="yomi-next">▶</button>
                 </div>
-                <div class="yomi-info" style="text-align:center; margin-top:8px;">
+                <div class="yomi-info" style="text-align:center; margin-top:8px; margin-bottom:20px;">
                     <div class="yomi-title" style="font-weight:bold; font-size:1.2em;"></div>
                     <div class="yomi-date" style="color:#888; margin-top:4px;"></div>
                     <div class="yomi-desc" style="margin-top:4px;"></div>
@@ -1376,6 +1376,13 @@ class FireApp {
             return extractDate(b) - extractDate(a);
         });
 
+        // 이미지 사전 로드
+        list.forEach(file => {
+            const url = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${DRIVE_API_KEY}`;
+            const imgPre = new Image();
+            imgPre.src = url;
+        });
+
         // 인덱스 및 요소 초기화
         let idx = 0;
         const imgEl  = overlay.querySelector('.yomi-img');
@@ -1392,13 +1399,12 @@ class FireApp {
             // API media URL로 이미지 로드, 실패 시 로컬 폴백 및 에러 메시지 표시
             const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${DRIVE_API_KEY}`;
             imgEl.onerror = () => {
-                // 이미지 로드 실패 시 플레이스홀더 이미지와 메시지로 전환
-                overlay.innerHTML = `
-                  <div style="padding:20px; text-align:center;">
-                    <img src="images/yominote.png" alt="placeholder" style="max-width:80%; height:auto; margin-bottom:12px;" />
-                    <div>이미지를 불러올 수 없어요...</div>
-                  </div>
-                `;
+                // 이미지 로드 실패 시 플레이스홀더 이미지로 교체 및 설명 메시지 표시
+                imgEl.src = 'images/yominote.png';
+                infoTitleEl.style.display = 'none';
+                infoDateEl.style.display  = 'none';
+                infoDescEl.textContent     = '이미지를 불러올 수 없어요...';
+                infoDescEl.style.display   = '';
             };
             imgEl.src = apiUrl;
             // 파일명으로 제목/날짜/설명 파싱
@@ -1436,8 +1442,53 @@ class FireApp {
             prevEl.disabled = (idx === 0);
             nextEl.disabled = (idx === list.length - 1);
         };
-        prevEl.addEventListener('click', () => { if (idx > 0) idx--, update(); });
-        nextEl.addEventListener('click', () => { if (idx < list.length - 1) idx++, update(); });
+
+        // 페이드 이펙트용 요소 및 트랜지션 설정
+        const contentEl = overlay.querySelector('.ad-modal-content');
+        const infoEl    = overlay.querySelector('.yomi-info');
+        contentEl.style.transition = 'opacity 0.3s ease';
+        infoEl.style.transition    = 'opacity 0.3s ease';
+        contentEl.style.opacity    = '1';
+        infoEl.style.opacity       = '1';
+
+        prevEl.addEventListener('click', () => {
+            if (idx > 0) {
+                contentEl.style.opacity = '0';
+                infoEl.style.opacity    = '0';
+                const onFadeOut = () => {
+                    contentEl.removeEventListener('transitionend', onFadeOut);
+                    idx--;
+                    // 이미지 로드 완료 후 페이드 인
+                    const onImgLoad = () => {
+                        imgEl.removeEventListener('load', onImgLoad);
+                        contentEl.style.opacity = '1';
+                        infoEl.style.opacity    = '1';
+                    };
+                    imgEl.addEventListener('load', onImgLoad);
+                    update();
+                };
+                contentEl.addEventListener('transitionend', onFadeOut);
+            }
+        });
+        nextEl.addEventListener('click', () => {
+            if (idx < list.length - 1) {
+                contentEl.style.opacity = '0';
+                infoEl.style.opacity    = '0';
+                const onFadeOutNext = () => {
+                    contentEl.removeEventListener('transitionend', onFadeOutNext);
+                    idx++;
+                    // 이미지 로드 완료 후 페이드 인
+                    const onImgLoadNext = () => {
+                        imgEl.removeEventListener('load', onImgLoadNext);
+                        contentEl.style.opacity = '1';
+                        infoEl.style.opacity    = '1';
+                    };
+                    imgEl.addEventListener('load', onImgLoadNext);
+                    update();
+                };
+                contentEl.addEventListener('transitionend', onFadeOutNext);
+            }
+        });
         update();
 
         // 모달 표시
