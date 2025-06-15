@@ -10,17 +10,29 @@ if (!DRIVE_API_KEY || !DRIVE_FOLDER_ID) {
 
 // Drive REST API로 폴더 내 파일 목록을 가져오는 함수
 async function fetchYomiList() {
-  const endpoint = new URL('https://www.googleapis.com/drive/v3/files');
-  // folderId를 parents에 포함시키는 쿼리
-  const query = `'${DRIVE_FOLDER_ID}' in parents`;
-  endpoint.searchParams.set('q', query);
-  endpoint.searchParams.set('orderBy', 'createdTime desc');
-  endpoint.searchParams.set('fields', 'files(id,name,createdTime)');
-  endpoint.searchParams.set('key', DRIVE_API_KEY);
-  const res = await fetch(endpoint);
-  if (!res.ok) throw new Error(`목록 로드 실패: ${res.status}`);
-  const json = await res.json();
-  return json.files || [];
+  // 서버에 배포된 이미지 목록 JSON 파일 요청
+  try {
+    const res = await fetch('https://todaysyomi.onrender.com/images/list.json');
+    if (res.ok) {
+      const files = await res.json(); // ['제목_yyyymmdd_설명.png', ...]
+      return files.map(name => ({ name }));
+    }
+    console.warn('서버 이미지 목록 로드 실패(status):', res.status);
+  } catch (e) {
+    console.error('서버 이미지 목록 로드 에러:', e);
+  }
+  // Drive API fallback (필요 시)
+  // const endpoint = new URL('https://www.googleapis.com/drive/v3/files');
+  // const query = `'${DRIVE_FOLDER_ID}' in parents`;
+  // endpoint.searchParams.set('q', query);
+  // endpoint.searchParams.set('orderBy', 'createdTime desc');
+  // endpoint.searchParams.set('fields', 'files(id,name,createdTime)');
+  // endpoint.searchParams.set('key', DRIVE_API_KEY);
+  // const res = await fetch(endpoint);
+  // if (!res.ok) throw new Error(`목록 로드 실패: ${res.status}`);
+  // const json = await res.json();
+  // return json.files || [];
+  return [];
 }
 
 class FireApp {
@@ -1378,9 +1390,11 @@ class FireApp {
 
         // 이미지 사전 로드
         list.forEach(file => {
-            const url = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${DRIVE_API_KEY}`;
+            // 서버에서 이미지 로드 (프리로드 시도)
+            const imgUrl = `https://todaysyomi.onrender.com/images/${file.name}`;
+            console.log('Yomi 이미지 프리로드 시도:', imgUrl);
             const imgPre = new Image();
-            imgPre.src = url;
+            imgPre.src = imgUrl;
         });
 
         // 인덱스 및 요소 초기화
@@ -1395,10 +1409,11 @@ class FireApp {
         // 이미지 업데이트 함수
         const update = () => {
             const file = list[idx];
-            const fileId = file.id;
-            // API media URL로 이미지 로드, 실패 시 로컬 폴백 및 에러 메시지 표시
-            const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${DRIVE_API_KEY}`;
+            // 서버에서 이미지 로드 시도
+            const imgUrl = `https://todaysyomi.onrender.com/images/${file.name}`;
+            console.log('Yomi 이미지 로드 시도:', imgUrl);
             imgEl.onerror = () => {
+                console.error('Yomi 이미지 로드 실패:', imgUrl);
                 // 이미지 로드 실패 시 플레이스홀더 이미지로 교체 및 설명 메시지 표시
                 imgEl.src = 'images/yominote.png';
                 infoTitleEl.style.display = 'none';
@@ -1406,7 +1421,7 @@ class FireApp {
                 infoDescEl.textContent     = '이미지를 불러올 수 없어요...';
                 infoDescEl.style.display   = '';
             };
-            imgEl.src = apiUrl;
+            imgEl.src = imgUrl;
             // 파일명으로 제목/날짜/설명 파싱
             const name = file.name;
             const base = name.replace(/\.[^/.]+$/, '');
