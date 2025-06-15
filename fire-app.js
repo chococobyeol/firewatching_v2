@@ -2,37 +2,24 @@
  * Fire App - THREE.js 기반 불 효과 시뮬레이션 메인 애플리케이션
  */
 
-// Drive API 설정 (env-config.js의 window.ENV 사용)
-const { DRIVE_API_KEY, DRIVE_FOLDER_ID } = window.ENV || {};
-if (!DRIVE_API_KEY || !DRIVE_FOLDER_ID) {
-    console.error('Environment variables DRIVE_API_KEY 또는 DRIVE_FOLDER_ID가 설정되지 않았습니다');
-}
-
-// Drive REST API로 폴더 내 파일 목록을 가져오는 함수
+// 이미지 목록을 remote index.html에서 파싱해 가져오는 함수
 async function fetchYomiList() {
-  // 서버에 배포된 이미지 목록 JSON 파일 요청
+  // remote index.html에서 이미지 파일 목록 파싱
+  const url = 'https://todaysyomi.onrender.com/index.html';
   try {
-    const res = await fetch('https://todaysyomi.onrender.com/images/list.json');
-    if (res.ok) {
-      const files = await res.json(); // ['제목_yyyymmdd_설명.png', ...]
-      return files.map(name => ({ name }));
-    }
-    console.warn('서버 이미지 목록 로드 실패(status):', res.status);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`목록 로드 실패: ${res.status}`);
+    const html = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const items = Array.from(doc.querySelectorAll('ul li'))
+      .map(li => li.textContent.trim())
+      .filter(Boolean);
+    return items.map(name => ({ name }));
   } catch (e) {
-    console.error('서버 이미지 목록 로드 에러:', e);
+    console.error('이미지 목록 로드 및 파싱 실패:', e);
+    return [];
   }
-  // Drive API fallback (필요 시)
-  // const endpoint = new URL('https://www.googleapis.com/drive/v3/files');
-  // const query = `'${DRIVE_FOLDER_ID}' in parents`;
-  // endpoint.searchParams.set('q', query);
-  // endpoint.searchParams.set('orderBy', 'createdTime desc');
-  // endpoint.searchParams.set('fields', 'files(id,name,createdTime)');
-  // endpoint.searchParams.set('key', DRIVE_API_KEY);
-  // const res = await fetch(endpoint);
-  // if (!res.ok) throw new Error(`목록 로드 실패: ${res.status}`);
-  // const json = await res.json();
-  // return json.files || [];
-  return [];
 }
 
 class FireApp {
