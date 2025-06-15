@@ -2,6 +2,27 @@
  * Fire App - THREE.js 기반 불 효과 시뮬레이션 메인 애플리케이션
  */
 
+// Drive API 설정 (env-config.js의 window.ENV 사용)
+const { DRIVE_API_KEY, DRIVE_FOLDER_ID } = window.ENV || {};
+if (!DRIVE_API_KEY || !DRIVE_FOLDER_ID) {
+    console.error('Environment variables DRIVE_API_KEY 또는 DRIVE_FOLDER_ID가 설정되지 않았습니다');
+}
+
+// Drive REST API로 폴더 내 파일 목록을 가져오는 함수
+async function fetchYomiList() {
+  const endpoint = new URL('https://www.googleapis.com/drive/v3/files');
+  // folderId를 parents에 포함시키는 쿼리
+  const query = `'${DRIVE_FOLDER_ID}' in parents`;
+  endpoint.searchParams.set('q', query);
+  endpoint.searchParams.set('orderBy', 'createdTime desc');
+  endpoint.searchParams.set('fields', 'files(id,name,createdTime)');
+  endpoint.searchParams.set('key', DRIVE_API_KEY);
+  const res = await fetch(endpoint);
+  if (!res.ok) throw new Error(`목록 로드 실패: ${res.status}`);
+  const json = await res.json();
+  return json.files || [];
+}
+
 class FireApp {
     constructor() {
         // 중복 생성 방지 로그 추가
@@ -1282,10 +1303,12 @@ class FireApp {
     }
 
     // '오늘의 요미' 모달 표시
-    showYomiModal() {
+    async showYomiModal() {
+        // 기존 모달 제거
         const existingModal = document.querySelector('.ad-modal-overlay');
         if (existingModal) existingModal.remove();
 
+        // 모달 골격 생성
         const overlay = document.createElement('div');
         overlay.className = 'ad-modal-overlay';
         overlay.innerHTML = `
@@ -1294,30 +1317,96 @@ class FireApp {
                     <h3 class="ad-modal-title">오늘의 요미</h3>
                     <button class="ad-modal-close">×</button>
                 </div>
-                <div class="ad-modal-content">
-                    <!-- 내용 없음 -->
+                <div class="ad-modal-content" style="text-align:center; display:flex; align-items:center; justify-content:center;">
+                    <button class="yomi-prev">◀</button>
+                    <img class="yomi-img" src="" style="max-width:80%; height:auto; margin:0 12px;" />
+                    <button class="yomi-next">▶</button>
+                </div>
+                <div class="yomi-info" style="text-align:center; margin-top:8px;">
+                    <div class="yomi-title" style="font-weight:bold; font-size:1.2em;"></div>
+                    <div class="yomi-date" style="color:#888; margin-top:4px;"></div>
+                    <div class="yomi-desc" style="margin-top:4px;"></div>
                 </div>
             </div>
         `;
         document.body.appendChild(overlay);
 
+        // 닫기 이벤트
         const closeBtn = overlay.querySelector('.ad-modal-close');
-        const closeModal = () => {
-            overlay.classList.remove('show');
-            overlay.addEventListener('transitionend', () => overlay.remove());
-        };
+        const closeModal = () => overlay.remove();
         closeBtn.addEventListener('click', closeModal);
-        overlay.addEventListener('click', e => {
-            if (e.target === overlay) closeModal();
-        });
-        const handleEscape = e => {
-            if (e.key === 'Escape') {
-                closeModal();
-                document.removeEventListener('keydown', handleEscape);
-            }
-        };
-        document.addEventListener('keydown', handleEscape);
+        overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
+        // Drive API로 목록 가져오기
+        let list;
+        try {
+            list = await fetchYomiList();
+        } catch (e) {
+            console.error('요미 목록 로드 실패', e);
+            overlay.remove();
+            return;
+        }
+        if (!list.length) {
+            console.warn('이미지 없음');
+            overlay.remove();
+            return;
+        }
+
+        // 인덱스 및 요소 초기화
+        let idx = 0;
+        const imgEl  = overlay.querySelector('.yomi-img');
+        const prevEl = overlay.querySelector('.yomi-prev');
+        const nextEl = overlay.querySelector('.yomi-next');
+        const infoTitleEl = overlay.querySelector('.yomi-title');
+        const infoDateEl  = overlay.querySelector('.yomi-date');
+        const infoDescEl  = overlay.querySelector('.yomi-desc');
+
+        // 이미지 업데이트 함수
+        const update = () => {
+            const file = list[idx];
+            const fileId = file.id;
+            imgEl.src = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${DRIVE_API_KEY}`;
+            // 파일명으로 제목/날짜/설명 파싱
+            const name = file.name;
+            const base = name.replace(/\.[^/.]+$/, '');
+            const parts = base.split('_');
+            let title = '', dateRaw = '', desc = '';
+            // 날짜 토큰(YYYYMMDD 및 선택적 접미사)을 parts에서 찾음
+            const dateTokenIndex = parts.findIndex(part => /^\d{8}(?:-.+)?$/.test(part));
+            if (dateTokenIndex !== -1) {
+                dateRaw = parts[dateTokenIndex];
+                // 날짜 토큰 이전은 제목으로
+                title = parts.slice(0, dateTokenIndex).join('_');
+                // 날짜 토큰 이후는 설명으로
+                desc = parts.slice(dateTokenIndex + 1).join('_');
+            } else {
+                // 날짜 토큰이 없으면 전체 base를 제목으로 사용
+                title = base;
+            }
+            // 날짜 표시 형식 YYYY-MM-DD 및 선택적 접미사
+            let dateDisplay = '';
+            if (dateRaw && dateRaw.length >= 8) {
+                const y = dateRaw.slice(0,4), m = dateRaw.slice(4,6), d = dateRaw.slice(6,8);
+                dateDisplay = `${y}-${m}-${d}`;
+                const suf = dateRaw.slice(8);
+                if (suf) dateDisplay += `···${suf}`;
+            }
+            // 엘리먼트에 반영
+            infoTitleEl.textContent = title;
+            infoTitleEl.style.display = title ? '' : 'none';
+            infoDateEl.textContent  = dateDisplay;
+            infoDateEl.style.display  = dateDisplay ? '' : 'none';
+            infoDescEl.textContent   = desc;
+            infoDescEl.style.display   = desc ? '' : 'none';
+            prevEl.disabled = (idx === 0);
+            nextEl.disabled = (idx === list.length - 1);
+        };
+        prevEl.addEventListener('click', () => { if (idx > 0) idx--, update(); });
+        nextEl.addEventListener('click', () => { if (idx < list.length - 1) idx++, update(); });
+        update();
+
+        // 모달 표시
         setTimeout(() => overlay.classList.add('show'), 10);
     }
 
