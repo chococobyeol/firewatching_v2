@@ -64,15 +64,17 @@ class FireApp {
         this.hoverableItems = [
             { name: 'book_1', x: 450, y: 730, tolerance: 20 },
             { name: 'book_2', x: 487, y: 737, tolerance: 20 },
+            { name: 'book_3', x: 1097, y: 703, tolerance: 20 },
             { name: 'adv_1',  x: 954, y: 846, tolerance: 30 }
         ];
         this.currentHoveredItem = null;
         
         // 클릭 제한 기능
         this.clickLimits = {
-            book_1: { count: 0, lastReset: Date.now(), threshold: 8, timeWindow: 60000 }, // 1분에 8번
+            book_1: { count: 0, lastReset: Date.now(), threshold: 8, timeWindow: 60000 },
             book_2: { count: 0, lastReset: Date.now(), threshold: 8, timeWindow: 60000 },
-            adv_1: { count: 0, lastReset: Date.now(), threshold: 5, timeWindow: 60000 }  // 1분에 5번
+            book_3: { count: 0, lastReset: Date.now(), threshold: 5, timeWindow: 60000 },
+            adv_1: { count: 0, lastReset: Date.now(), threshold: 5, timeWindow: 60000 }
         };
         
         // Panning state
@@ -99,7 +101,7 @@ class FireApp {
         this.createLighting();
         this.loadFireTexture();
         this.loadBackgroundImage(); // 배경 이미지 로드
-        this.imageLayer = new ImageLayer(['adv_1', 'chairs', 'book_1', 'book_2'], 4);
+        this.imageLayer = new ImageLayer(['adv_1', 'chairs', 'book_1', 'book_2', 'book_3'], 4);
         this.setupEventListeners();
         this.animate();
     }
@@ -804,6 +806,7 @@ class FireApp {
                 const scaleY = drawHeight / naturalHeight;
                 const book1 = this.hoverableItems.find(item => item.name === 'book_1');
                 const book2 = this.hoverableItems.find(item => item.name === 'book_2');
+                const book3 = this.hoverableItems.find(item => item.name === 'book_3');
 
                 // 터치 이벤트인 경우 tolerance를 1.01배 확장
                 const touchMultiplier = event.isTouchEvent ? 1.01 : 1.0;
@@ -847,6 +850,29 @@ class FireApp {
                         Math.abs(event.clientY - targetY) < tolerance) {
                         if (this.checkClickLimit('book_2')) {
                             this.showRandomFortune(event.clientX, event.clientY);
+                        } else {
+                            this.showClickLimitWarning(event.clientX, event.clientY);
+                        }
+                        return;
+                    }
+                }
+
+                if (book3) {
+                    const targetX = drawX + this.panOffset.x + book3.x * scaleX;
+                    const targetY = drawY + this.panOffset.y + book3.y * scaleY;
+                    const tolerance = book3.tolerance * touchMultiplier;
+
+                    console.log('book3 터치 체크:', { 
+                        targetX, targetY, tolerance, 
+                        clickX: event.clientX, clickY: event.clientY,
+                        distanceX: Math.abs(event.clientX - targetX),
+                        distanceY: Math.abs(event.clientY - targetY)
+                    });
+
+                    if (Math.abs(event.clientX - targetX) < tolerance &&
+                        Math.abs(event.clientY - targetY) < tolerance) {
+                        if (this.checkClickLimit('book_3')) {
+                            this.showYomiConfirmation(event.clientX, event.clientY);
                         } else {
                             this.showClickLimitWarning(event.clientX, event.clientY);
                         }
@@ -1203,6 +1229,96 @@ class FireApp {
         setTimeout(() => {
             overlay.classList.add('show');
         }, 10);
+    }
+
+    // 책 3 '오늘의 요미' 확인 팝업 표시 - 보기/그만두기 버튼 포함
+    showYomiConfirmation(x, y) {
+        const existingPopup = document.querySelector('.ad-confirm-popup');
+        if (existingPopup) existingPopup.remove();
+
+        const popup = document.createElement('div');
+        popup.className = 'ad-confirm-popup';
+        popup.innerHTML = `
+            <div class="ad-confirm-title" style="text-align:center;">
+                <img src="images/yominote.png" style="width:128px;height:128px;display:block;margin:0 auto;" alt="요미 아이콘" />
+                <div style="margin-top:8px;">오늘의 요미...</div>
+            </div>
+            <div class="ad-confirm-buttons">
+                <button class="ad-confirm-btn view-btn">보기</button>
+                <button class="ad-confirm-btn cancel-btn">그만두기</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+
+        const popupWidth = popup.offsetWidth || 280;
+        const popupHeight = popup.offsetHeight || 100;
+        let leftPos = x - popupWidth / 2;
+        let topPos = y - popupHeight - 20;
+        if (leftPos < 10) leftPos = 10;
+        if (leftPos + popupWidth > window.innerWidth - 10) leftPos = window.innerWidth - popupWidth - 10;
+        if (topPos < 10) topPos = y + 20;
+        popup.style.left = `${leftPos}px`;
+        popup.style.top = `${topPos}px`;
+
+        const viewBtn = popup.querySelector('.view-btn');
+        const cancelBtn = popup.querySelector('.cancel-btn');
+
+        viewBtn.addEventListener('click', () => {
+            popup.remove();
+            this.showYomiModal();
+        });
+        cancelBtn.addEventListener('click', () => {
+            popup.classList.remove('show');
+            popup.addEventListener('transitionend', () => popup.remove());
+        });
+
+        setTimeout(() => popup.classList.add('show'), 10);
+        setTimeout(() => {
+            if (document.body.contains(popup)) {
+                popup.classList.remove('show');
+                popup.addEventListener('transitionend', () => popup.remove());
+            }
+        }, 5000);
+    }
+
+    // '오늘의 요미' 모달 표시
+    showYomiModal() {
+        const existingModal = document.querySelector('.ad-modal-overlay');
+        if (existingModal) existingModal.remove();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'ad-modal-overlay';
+        overlay.innerHTML = `
+            <div class="ad-modal">
+                <div class="ad-modal-header">
+                    <h3 class="ad-modal-title">오늘의 요미</h3>
+                    <button class="ad-modal-close">×</button>
+                </div>
+                <div class="ad-modal-content">
+                    <!-- 내용 없음 -->
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        const closeBtn = overlay.querySelector('.ad-modal-close');
+        const closeModal = () => {
+            overlay.classList.remove('show');
+            overlay.addEventListener('transitionend', () => overlay.remove());
+        };
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) closeModal();
+        });
+        const handleEscape = e => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        setTimeout(() => overlay.classList.add('show'), 10);
     }
 
     // 불 점화 애니메이션
