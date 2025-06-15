@@ -1365,6 +1365,17 @@ class FireApp {
             return;
         }
 
+        // 파일명의 날짜 순으로 정렬 (최신 파일이 먼저 오도록)
+        list.sort((a, b) => {
+            const extractDate = file => {
+                const base = file.name.replace(/\.[^/.]+$/, '');
+                const parts = base.split('_');
+                const token = parts.find(part => /^\d{8}/.test(part));
+                return token ? parseInt(token.slice(0,8), 10) : 0;
+            };
+            return extractDate(b) - extractDate(a);
+        });
+
         // 인덱스 및 요소 초기화
         let idx = 0;
         const imgEl  = overlay.querySelector('.yomi-img');
