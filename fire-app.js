@@ -1250,6 +1250,16 @@ class FireApp {
         setTimeout(() => {
             overlay.classList.add('show');
         }, 10);
+
+        // 에러 메시지 표시를 위한 요소 생성
+        const errorEl = document.createElement('div');
+        errorEl.className = 'yomi-error';
+        errorEl.textContent = '이미지를 불러올 수 없어요...';
+        errorEl.style.textAlign = 'center';
+        errorEl.style.color = '#888';
+        errorEl.style.margin = '20px 0';
+        errorEl.style.display = 'none';
+        overlay.querySelector('.ad-modal').appendChild(errorEl);
     }
 
     // 책 3 '오늘의 요미' 확인 팝업 표시 - 보기/그만두기 버튼 포함
@@ -1344,12 +1354,14 @@ class FireApp {
             list = await fetchYomiList();
         } catch (e) {
             console.error('요미 목록 로드 실패', e);
-            overlay.remove();
+            // 에러 메시지 전용 내용 표시
+            overlay.innerHTML = '<div style="padding:20px; text-align:center;">이미지를 불러올 수 없어요...</div>';
             return;
         }
         if (!list.length) {
             console.warn('이미지 없음');
-            overlay.remove();
+            // 에러 메시지 전용 내용 표시
+            overlay.innerHTML = '<div style="padding:20px; text-align:center;">이미지를 불러올 수 없어요...</div>';
             return;
         }
 
@@ -1366,7 +1378,18 @@ class FireApp {
         const update = () => {
             const file = list[idx];
             const fileId = file.id;
-            imgEl.src = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${DRIVE_API_KEY}`;
+            // API media URL로 이미지 로드, 실패 시 로컬 폴백 및 에러 메시지 표시
+            const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${DRIVE_API_KEY}`;
+            imgEl.onerror = () => {
+                // 이미지 로드 실패 시 플레이스홀더 이미지와 메시지로 전환
+                overlay.innerHTML = `
+                  <div style="padding:20px; text-align:center;">
+                    <img src="images/yominote.png" alt="placeholder" style="max-width:80%; height:auto; margin-bottom:12px;" />
+                    <div>이미지를 불러올 수 없어요...</div>
+                  </div>
+                `;
+            };
+            imgEl.src = apiUrl;
             // 파일명으로 제목/날짜/설명 파싱
             const name = file.name;
             const base = name.replace(/\.[^/.]+$/, '');
