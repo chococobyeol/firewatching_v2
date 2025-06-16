@@ -935,4 +935,40 @@ input[type="range"]::-moz-range-thumb {
     .ad-item-image {
         max-height: 200px;
     }
+}
+
+/* 스타일 수정: 오늘의 요미 모달 좌우 화살표 버튼 - SVG 벡터 아이콘 */
+.ad-modal-content .yomi-prev,
+.ad-modal-content .yomi-next {
+    background: none !important;
+    border: none !important;
+    color: #fff;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+.ad-modal-content .yomi-prev svg,
+.ad-modal-content .yomi-next svg {
+    transition: stroke 0.2s ease;
+}
+
+.ad-modal-content .yomi-prev:hover,
+.ad-modal-content .yomi-next:hover {
+    color: #ff6600;
+}
+
+.ad-modal-content .yomi-prev:disabled,
+.ad-modal-content .yomi-next:disabled {
+    color: rgba(255,255,255,0.3);
+    cursor: default;
+}
+
+.ad-modal-content .yomi-prev:disabled svg,
+.ad-modal-content .yomi-next:disabled svg {
+    stroke: rgba(255,255,255,0.3);
 } 

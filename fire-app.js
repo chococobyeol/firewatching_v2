@@ -1327,9 +1327,17 @@ class FireApp {
                     <button class="ad-modal-close">×</button>
                 </div>
                 <div class="ad-modal-content" style="text-align:center; display:flex; align-items:center; justify-content:center;">
-                    <button class="yomi-prev">◀</button>
-                    <img class="yomi-img" src="" style="max-width:80%; height:auto; margin:0 12px;" />
-                    <button class="yomi-next">▶</button>
+                    <button class="yomi-prev">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <img class="yomi-img" src="" style="max-width:70%; height:auto; margin:0 8px; flex-shrink: 1;" />
+                    <button class="yomi-next">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                 </div>
                 <div class="yomi-info" style="text-align:center; margin-top:8px; margin-bottom:20px;">
                     <div class="yomi-title" style="font-weight:bold; font-size:1.2em;"></div>
