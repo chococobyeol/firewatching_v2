@@ -1326,7 +1326,7 @@ class FireApp {
                     <h3 class="ad-modal-title">오늘의 요미</h3>
                     <button class="ad-modal-close">×</button>
                 </div>
-                <div class="ad-modal-content" style="text-align:center; display:flex; align-items:center; justify-content:center;">
+                <div class="ad-modal-content" style="text-align:center; display:flex; align-items:center; justify-content:space-between;">
                     <button class="yomi-prev">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
