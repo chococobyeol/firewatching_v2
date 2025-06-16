@@ -1431,8 +1431,11 @@ class FireApp {
             if (dateRaw && dateRaw.length >= 8) {
                 const y = dateRaw.slice(0,4), m = dateRaw.slice(4,6), d = dateRaw.slice(6,8);
                 dateDisplay = `${y}-${m}-${d}`;
-                const suf = dateRaw.slice(8);
-                if (suf) dateDisplay += `···${suf}`;
+                const rawSuffix = dateRaw.slice(8);
+                if (rawSuffix) {
+                    const suf = rawSuffix.startsWith('-') ? rawSuffix.slice(1) : rawSuffix;
+                    dateDisplay += `···${suf}`;
+                }
             }
             // 엘리먼트에 반영
             infoTitleEl.textContent = title;
