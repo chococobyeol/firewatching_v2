@@ -935,6 +935,18 @@ input[type="range"]::-moz-range-thumb {
     .ad-item-image {
         max-height: 200px;
     }
+    
+    /* 오늘의 요미 모달 모바일 대응 */
+    .ad-modal-content .yomi-prev,
+    .ad-modal-content .yomi-next {
+        padding: 4px;
+    }
+    
+    .ad-modal-content .yomi-prev svg,
+    .ad-modal-content .yomi-next svg {
+        width: 20px;
+        height: 20px;
+    }
 }
 
 /* 스타일 수정: 오늘의 요미 모달 좌우 화살표 버튼 - SVG 벡터 아이콘 */

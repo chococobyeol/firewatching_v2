@@ -1332,7 +1332,7 @@ class FireApp {
                             <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
-                    <img class="yomi-img" src="" style="max-width:70%; height:auto; margin:0 8px; flex-shrink: 1;" />
+                    <img class="yomi-img" src="" style="max-width:65%; height:auto; margin:0 6px; flex-shrink: 1;" />
                     <button class="yomi-next">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
